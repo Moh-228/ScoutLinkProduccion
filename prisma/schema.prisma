@@ -1,0 +1,304 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  student
+  coach
+  admin
+}
+
+enum Sport {
+  basketball
+  soccer
+  flag_football
+  volleyball
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum EventType {
+  training
+  tournament
+  recruitment
+}
+
+enum EventStatus {
+  open
+  closed
+}
+
+enum ApplicationStatus {
+  postulado
+  preseleccionado
+  aceptado
+  rechazado
+}
+
+enum School {
+  ESIME
+  ESIQIE
+  ESFM
+  ESIA
+  ESIT
+  ENCB
+  ESCOM
+  UPIITA
+  UPIBI
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum ExperienceLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+model User {
+  id                  String   @id @default(uuid()) @db.Uuid
+  email               String   @unique
+  passwordHash        String
+  role                UserRole
+  isActive            Boolean  @default(true)
+  onboardingCompleted Boolean  @default(false)
+
+  studentProfile StudentProfile?
+  coachProfile   CoachProfile?
+
+  coachVerifications    CoachVerification[] @relation("CoachVerifications")
+  reviewedVerifications CoachVerification[] @relation("AdminReviews")
+
+  generalCard      StudentGeneralCard?
+  specializedCards StudentSpecializedCard[]
+
+  events        Event[]            @relation("CoachEvents")
+  applications  EventApplication[]
+  favorites     Favorite[]
+  notifications Notification[]
+
+  passwordResetTokens PasswordResetToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model StudentProfile {
+  userId        String   @id @db.Uuid
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName      String
+  birthDate     DateTime? @db.Date
+  school        School?
+  semester      Int?
+  gender        Gender?
+  favoriteSport Sport?
+  socialLink    String?
+  photoUrl      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("student_profiles")
+}
+
+model CoachProfile {
+  userId       String   @id @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName    String
+  academicUnit   School?
+  phone          String?
+  bio            String?
+  photoUrl       String?
+  sports         Sport[]
+  certifications String?
+  experience     String?
+  yearsExperience Int?
+  categories     Json?
+  achievements   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("coach_profiles")
+}
+
+model CoachVerification {
+  id        String             @id @default(uuid()) @db.Uuid
+  coachId   String             @db.Uuid
+  coach     User               @relation("CoachVerifications", fields: [coachId], references: [id], onDelete: Cascade)
+
+  sport     Sport
+  status    VerificationStatus @default(pending)
+
+  documentUrl     String?
+  rejectionReason String?
+
+  reviewedBy String? @db.Uuid
+  reviewer   User?   @relation("AdminReviews", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  reviewedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([coachId, sport])
+  @@map("coach_verifications")
+}
+
+model StudentGeneralCard {
+  id        String @id @default(uuid()) @db.Uuid
+  studentId String @unique @db.Uuid
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  heightCm Int?
+  weightKg Int?
+
+  phone       String?
+  publicEmail String?
+
+  experienceLevel ExperienceLevel?
+  availability    Json?
+  medicalInfo     Json?
+  documents       Json?
+
+  isPublic Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("student_general_cards")
+}
+
+model StudentSpecializedCard {
+  id        String @id @default(uuid()) @db.Uuid
+  studentId String @db.Uuid
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  sport Sport
+  data  Json  @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, sport])
+  @@map("student_specialized_cards")
+}
+
+model Event {
+  id      String    @id @default(uuid()) @db.Uuid
+  coachId String    @db.Uuid
+  coach   User      @relation("CoachEvents", fields: [coachId], references: [id], onDelete: Cascade)
+
+  type  EventType
+  sport Sport
+
+  title            String
+  shortDescription String?
+  longDescription  String?
+
+  locationText String?
+  mapsUrl      String?
+
+  startAt DateTime?
+  endAt   DateTime?
+
+  registrationDeadline DateTime?
+  capacity             Int?
+
+  status     EventStatus @default(open)
+  visibility String      @default("public")
+
+  requirements Json @default("{}")
+
+  applicationsCount Int @default(0)
+
+  applications EventApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("events")
+}
+
+model EventApplication {
+  id        String @id @default(uuid()) @db.Uuid
+  eventId   String @db.Uuid
+  studentId String @db.Uuid
+
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  status         ApplicationStatus @default(postulado)
+  affinityPercent Int              @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, studentId])
+  @@index([eventId, affinityPercent])
+  @@map("event_applications")
+}
+
+model Favorite {
+  id         String @id @default(uuid()) @db.Uuid
+  userId     String @db.Uuid
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  targetType String
+  targetId   String @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@map("favorites")
+}
+
+model Notification {
+  id      String @id @default(uuid()) @db.Uuid
+  userId  String @db.Uuid
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    String
+  payload Json   @default("{}")
+  readAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
