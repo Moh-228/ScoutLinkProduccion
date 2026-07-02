@@ -13,7 +13,7 @@ const SPORT_OPTIONS = [
   { label: "Fútbol", value: "soccer" },
   { label: "Básquetbol", value: "basketball" },
   { label: "Voleibol", value: "volleyball" },
-  { label: "Flag Football (Tocho)", value: "flag_football" },
+  { label: "Tocho Bandera", value: "flag_football" },
 ];
 
 const TA_CLASS =
@@ -155,11 +155,11 @@ function SoccerForm() {
 
 const BK_POS = [
   { label: "Posición", value: "" },
-  { label: "1 – Base (PG)", value: "1" },
-  { label: "2 – Escolta (SG)", value: "2" },
-  { label: "3 – Alero (SF)", value: "3" },
-  { label: "4 – Ala-Pivot (PF)", value: "4" },
-  { label: "5 – Pivot (C)", value: "5" },
+  { label: "Base (PG-1)", value: "1" },
+  { label: "Escolta (SG-2)", value: "2" },
+  { label: "Alero (SF-3)", value: "3" },
+  { label: "Ala-Pivot (PF-4)", value: "4" },
+  { label: "Pivot (C-5)", value: "5" },
 ];
 
 const HAND_OPTIONS = [

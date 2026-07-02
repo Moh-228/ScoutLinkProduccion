@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/Badge";
 import { prisma } from "@/lib/prisma";
 
+
 const HOW_IT_WORKS = [
   {
     title: "1. Crea tu perfil",

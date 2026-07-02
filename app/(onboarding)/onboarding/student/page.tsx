@@ -12,12 +12,12 @@ const SPORT_OPTIONS = [
   { label: "Selecciona un deporte (opcional)", value: "" },
   { label: "Básquetbol", value: "basketball" },
   { label: "Fútbol", value: "soccer" },
-  { label: "Flag Football", value: "flag_football" },
+  { label: "Tocho Bandera", value: "flag_football" },
   { label: "Voleibol", value: "volleyball" },
 ];
 
 const SCHOOL_OPTIONS = [
-  { label: "Selecciona tu unidad académica (opcional)", value: "" },
+  { label: "Selecciona tu unidad académica", value: "" },
   { label: "ESIME", value: "ESIME" },
   { label: "ESIQIE", value: "ESIQIE" },
   { label: "ESFM", value: "ESFM" },
