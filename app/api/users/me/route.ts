@@ -19,8 +19,38 @@ export async function GET() {
 			role: true,
 			isActive: true,
 			createdAt: true,
-			studentProfile: { select: { fullName: true, school: true, favoriteSport: true } },
-			coachProfile: { select: { displayName: true, academicUnit: true } },
+			studentProfile: {
+				select: {
+					fullName: true,
+					birthDate: true,
+					school: true,
+					semester: true,
+					gender: true,
+					favoriteSport: true,
+					socialLink: true,
+				},
+			},
+			coachProfile: {
+				select: {
+					displayName: true,
+					academicUnit: true,
+					phone: true,
+					bio: true,
+					sports: true,
+				},
+			},
+			generalCard: {
+				select: {
+					heightCm: true,
+					weightKg: true,
+					phone: true,
+					publicEmail: true,
+					experienceLevel: true,
+					isPublic: true,
+					medicalInfo: true,
+					documents: true,
+				},
+			},
 		},
 	});
 
@@ -39,6 +69,7 @@ export async function GET() {
 			role: user.role,
 			createdAt: user.createdAt,
 			profile: user.studentProfile ?? user.coachProfile,
+			generalCard: user.generalCard ?? null,
 		},
 	});
 }

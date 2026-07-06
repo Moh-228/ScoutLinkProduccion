@@ -14,6 +14,7 @@ export default async function AdminFichasPage() {
         publicEmail: true,
         experienceLevel: true,
         isPublic: true,
+        documents: true,
         student: { select: { id: true, email: true, studentProfile: { select: { fullName: true } } } },
       },
     }),

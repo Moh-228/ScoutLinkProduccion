@@ -31,6 +31,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (role === "student" && !/\d{4}@alumno\.ipn\.mx$/.test(email)) {
+      setError("El correo debe terminar con exactamente 4 dígitos antes de @alumno.ipn.mx (ej. nombre1234@alumno.ipn.mx).");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;

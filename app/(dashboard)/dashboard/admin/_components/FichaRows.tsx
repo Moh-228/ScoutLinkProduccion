@@ -98,6 +98,7 @@ export type GeneralCard = {
   publicEmail: string | null;
   experienceLevel: string | null;
   isPublic: boolean;
+  documents: unknown;
   student: Student;
 };
 
@@ -135,6 +136,7 @@ export type CoachProfile = {
 export function GeneralCardRow({ card }: { card: GeneralCard }) {
   const [expanded, setExpanded] = useState(false);
   const name = card.student.studentProfile?.fullName ?? card.student.email;
+  const docs = card.documents as Record<string, unknown> | null;
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
@@ -151,6 +153,23 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           <Badge variant={card.isPublic ? "success" : "neutral"} className="mt-1">
             {card.isPublic ? "Pública" : "Privada"}
           </Badge>
+          {docs && (docs.inscriptionProof || docs.medicalInsurance) && (
+            <div className="mt-2 space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/40">Documentos</p>
+              {docs.inscriptionProof ? (
+                <p className="text-xs text-white/70">
+                  <span className="text-white/40">Comprobante de inscripción:</span>{" "}
+                  {String(docs.inscriptionProof)}
+                </p>
+              ) : null}
+              {docs.medicalInsurance ? (
+                <p className="text-xs text-white/70">
+                  <span className="text-white/40">Comprobante de servicio médico:</span>{" "}
+                  {String(docs.medicalInsurance)}
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link href={`/dashboard/fichas/${card.id}`}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
@@ -28,30 +28,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function TextArea({
-  name,
-  label,
-  placeholder,
-  rows = 2,
-}: {
-  name: string;
-  label: string;
-  placeholder?: string;
-  rows?: number;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
-      <span>{label}</span>
-      <textarea
-        name={name}
-        rows={rows}
-        placeholder={placeholder}
-        className={TA_CLASS}
-      />
-    </label>
-  );
-}
-
 async function completeOnboarding() {
   await fetch("/api/onboarding/complete", { method: "POST" });
 }
@@ -61,29 +37,79 @@ export default function StudentCardPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [fields, setFields] = useState({
+    heightCm: "",
+    weightKg: "",
+    phone: "",
+    publicEmail: "",
+    experienceLevel: "",
+    isPublic: false,
+    previousInjuries: "",
+    currentInjury: "",
+    surgeries: "",
+    asthma: false,
+    inscriptionProof: "",
+    medicalInsurance: "",
+  });
+
+  useEffect(() => {
+    fetch("/api/users/me")
+      .then((r) => r.json())
+      .then((result) => {
+        if (result.ok && result.data?.generalCard) {
+          const c = result.data.generalCard;
+          const med = (c.medicalInfo ?? {}) as Record<string, unknown>;
+          const docs = (c.documents ?? {}) as Record<string, unknown>;
+          setFields({
+            heightCm: c.heightCm != null ? String(c.heightCm) : "",
+            weightKg: c.weightKg != null ? String(c.weightKg) : "",
+            phone: c.phone ?? "",
+            publicEmail: c.publicEmail ?? "",
+            experienceLevel: c.experienceLevel ?? "",
+            isPublic: c.isPublic ?? false,
+            previousInjuries: (med.previousInjuries as string) ?? "",
+            currentInjury: (med.currentInjury as string) ?? "",
+            surgeries: (med.surgeries as string) ?? "",
+            asthma: (med.asthma as boolean) ?? false,
+            inscriptionProof: (docs.inscriptionProof as string) ?? "",
+            medicalInsurance: (docs.medicalInsurance as string) ?? "",
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  function setStr(field: keyof typeof fields) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setFields((v) => ({ ...v, [field]: e.target.value }));
+  }
+
+  function setBool(field: keyof typeof fields) {
+    return (e: React.ChangeEvent<HTMLInputElement>) =>
+      setFields((v) => ({ ...v, [field]: e.target.checked }));
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
 
-    const fd = new FormData(event.currentTarget);
-
     const body = {
-      heightCm: String(fd.get("heightCm") ?? ""),
-      weightKg: String(fd.get("weightKg") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      publicEmail: String(fd.get("publicEmail") ?? ""),
-      experienceLevel: String(fd.get("experienceLevel") ?? "") || undefined,
-      isPublic: fd.get("isPublic") === "on",
+      heightCm: fields.heightCm,
+      weightKg: fields.weightKg,
+      phone: fields.phone,
+      publicEmail: fields.publicEmail,
+      experienceLevel: fields.experienceLevel || undefined,
+      isPublic: fields.isPublic,
       medicalInfo: {
-        previousInjuries: String(fd.get("previousInjuries") ?? ""),
-        currentInjury: String(fd.get("currentInjury") ?? ""),
-        surgeries: String(fd.get("surgeries") ?? ""),
-        asthma: fd.get("asthma") === "on",
+        previousInjuries: fields.previousInjuries,
+        currentInjury: fields.currentInjury,
+        surgeries: fields.surgeries,
+        asthma: fields.asthma,
       },
       documents: {
-        inscriptionProof: String(fd.get("inscriptionProof") ?? ""),
-        medicalInsurance: String(fd.get("medicalInsurance") ?? ""),
+        inscriptionProof: fields.inscriptionProof,
+        medicalInsurance: fields.medicalInsurance,
       },
     };
 
@@ -139,6 +165,8 @@ export default function StudentCardPage() {
               max={270}
               label="Estatura (cm)"
               placeholder="175"
+              value={fields.heightCm}
+              onChange={setStr("heightCm")}
             />
             <Input
               id="ob-weight"
@@ -148,6 +176,8 @@ export default function StudentCardPage() {
               max={400}
               label="Peso (kg)"
               placeholder="70"
+              value={fields.weightKg}
+              onChange={setStr("weightKg")}
             />
           </div>
           <Input
@@ -157,6 +187,8 @@ export default function StudentCardPage() {
             label="Teléfono de contacto"
             placeholder="55 1234 5678"
             maxLength={10}
+            value={fields.phone}
+            onChange={setStr("phone")}
           />
           <Input
             id="ob-pub-email"
@@ -164,38 +196,60 @@ export default function StudentCardPage() {
             type="email"
             label="Correo público (opcional)"
             placeholder="tu@correo.com"
+            value={fields.publicEmail}
+            onChange={setStr("publicEmail")}
           />
           <Select
             id="ob-level"
             name="experienceLevel"
             label="Nivel de experiencia"
             options={LEVEL_OPTIONS}
+            value={fields.experienceLevel}
+            onChange={setStr("experienceLevel")}
           />
 
           {/* Salud */}
           <SectionTitle>Salud / Condición física</SectionTitle>
-          <TextArea
-            name="previousInjuries"
-            label="Lesiones previas"
-            placeholder="Describe lesiones anteriores relevantes..."
-          />
-          <TextArea
-            name="currentInjury"
-            label="Lesión actual"
-            placeholder="Describe si tienes alguna lesion activa..."
-          />
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+            <span>Lesiones previas</span>
+            <textarea
+              name="previousInjuries"
+              rows={2}
+              placeholder="Describe lesiones anteriores relevantes..."
+              className={TA_CLASS}
+              value={fields.previousInjuries}
+              onChange={setStr("previousInjuries")}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+            <span>Lesión actual</span>
+            <textarea
+              name="currentInjury"
+              rows={2}
+              placeholder="Describe si tienes alguna lesion activa..."
+              className={TA_CLASS}
+              value={fields.currentInjury}
+              onChange={setStr("currentInjury")}
+            />
+          </label>
           <Input
             id="ob-surgeries"
             name="surgeries"
             label="Cirugías"
             placeholder="Tipo de cirugia y ano..."
+            value={fields.surgeries}
+            onChange={setStr("surgeries")}
           />
-
           <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-white">
-            <input type="checkbox" name="asthma" className="h-4 w-4 rounded border-slate-300" />
+            <input
+              type="checkbox"
+              name="asthma"
+              className="h-4 w-4 rounded border-slate-300"
+              checked={fields.asthma}
+              onChange={setBool("asthma")}
+            />
             Padece asma
           </label>
-
 
           {/* Documentación */}
           <SectionTitle>Documentación</SectionTitle>
@@ -204,12 +258,16 @@ export default function StudentCardPage() {
             name="inscriptionProof"
             label="Comprobante de inscripcion en URL"
             placeholder="https://drive.google.com/file/..."
+            value={fields.inscriptionProof}
+            onChange={setStr("inscriptionProof")}
           />
           <Input
             id="ob-insurance"
             name="medicalInsurance"
             label="Seguro medico en URL"
             placeholder="https://drive.google.com/file/..."
+            value={fields.medicalInsurance}
+            onChange={setStr("medicalInsurance")}
           />
 
           {/* Visibilidad */}
@@ -219,6 +277,8 @@ export default function StudentCardPage() {
               type="checkbox"
               name="isPublic"
               className="h-4 w-4 rounded border-slate-300"
+              checked={fields.isPublic}
+              onChange={setBool("isPublic")}
             />
             Hacer mi ficha visible para entrenadores
           </label>

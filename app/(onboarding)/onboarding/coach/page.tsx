@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
@@ -16,7 +16,7 @@ const SPORTS = [
 ];
 
 const SCHOOL_OPTIONS = [
-  { label: "Selecciona tu unidad académica (opcional)", value: "" },
+  { label: "Selecciona tu unidad académica *", value: "" },
   { label: "ESIME", value: "ESIME" },
   { label: "ESIQIE", value: "ESIQIE" },
   { label: "ESFM", value: "ESFM" },
@@ -33,6 +33,37 @@ export default function CoachOnboardingPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
+  const [values, setValues] = useState({
+    displayName: "",
+    academicUnit: "",
+    phone: "",
+    bio: "",
+  });
+
+  useEffect(() => {
+    fetch("/api/users/me")
+      .then((r) => r.json())
+      .then((result) => {
+        if (result.ok && result.data?.profile) {
+          const p = result.data.profile;
+          setValues({
+            displayName: p.displayName ?? "",
+            academicUnit: p.academicUnit ?? "",
+            phone: p.phone ?? "",
+            bio: p.bio ?? "",
+          });
+          if (Array.isArray(p.sports) && p.sports.length > 0) {
+            setSelectedSports(p.sports);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  function set(field: keyof typeof values) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setValues((v) => ({ ...v, [field]: e.target.value }));
+  }
 
   function toggleSport(value: string) {
     setSelectedSports((prev) =>
@@ -49,14 +80,18 @@ export default function CoachOnboardingPage() {
       return;
     }
 
+    if (!values.academicUnit) {
+      setError("La unidad académica es obligatoria.");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    const fd = new FormData(event.currentTarget);
     const body = {
-      displayName: String(fd.get("displayName") ?? "").trim(),
-      academicUnit: String(fd.get("academicUnit") ?? "") || undefined,
-      phone: String(fd.get("phone") ?? ""),
-      bio: String(fd.get("bio") ?? ""),
+      displayName: values.displayName.trim(),
+      academicUnit: values.academicUnit || undefined,
+      phone: values.phone,
+      bio: values.bio,
       sports: selectedSports,
     };
 
@@ -96,14 +131,34 @@ export default function CoachOnboardingPage() {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Input id="ob-c-name" name="displayName" label="Nombre para mostrar" placeholder="Prof. Juan Garcia" required />
+          <Input
+            id="ob-c-name"
+            name="displayName"
+            label="Nombre para mostrar"
+            placeholder="Prof. Juan Garcia"
+            required
+            value={values.displayName}
+            onChange={set("displayName")}
+          />
           <Select
             id="ob-c-unit"
             name="academicUnit"
-            label="Unidad académica"
+            label="Unidad académica *"
             options={SCHOOL_OPTIONS}
+            value={values.academicUnit}
+            onChange={set("academicUnit")}
+            required
           />
-          <Input id="ob-c-phone" name="phone" type="tel" label="Teléfono de contacto" placeholder="55 1234 5678" maxLength={10} />
+          <Input
+            id="ob-c-phone"
+            name="phone"
+            type="tel"
+            label="Teléfono de contacto"
+            placeholder="55 1234 5678"
+            maxLength={10}
+            value={values.phone}
+            onChange={set("phone")}
+          />
           <div>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
               <span>Biografía / presentación</span>
@@ -112,6 +167,8 @@ export default function CoachOnboardingPage() {
                 rows={3}
                 placeholder="Describe tu experiencia y enfoque como entrenador..."
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-cyan-600"
+                value={values.bio}
+                onChange={set("bio")}
               />
             </label>
           </div>

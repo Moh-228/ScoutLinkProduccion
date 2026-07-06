@@ -19,12 +19,20 @@ export const registerSchema = z
 			.trim(),
 	})
 	.superRefine((data, ctx) => {
-		if (data.role === "student" && !data.email.endsWith("@alumno.ipn.mx")) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Los alumnos deben usar su correo institucional @alumno.ipn.mx.",
-				path: ["email"],
-			});
+		if (data.role === "student") {
+			if (!data.email.endsWith("@alumno.ipn.mx")) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "Los alumnos deben usar su correo institucional @alumno.ipn.mx.",
+					path: ["email"],
+				});
+			} else if (!/\d{4}@alumno\.ipn\.mx$/.test(data.email)) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "El correo debe terminar con exactamente 4 dígitos antes de @alumno.ipn.mx (ej. nombre1234@alumno.ipn.mx).",
+					path: ["email"],
+				});
+			}
 		}
 	});
 
@@ -54,7 +62,7 @@ const genderEnum = z.enum(["male", "female", "other"]);
 export const studentProfileSchema = z.object({
 	fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres.").max(120).trim(),
 	birthDate: z.string().optional(),
-	school: schoolEnum.optional(),
+	school: schoolEnum,
 	semester: z.coerce.number().int().min(1).max(12).optional().or(z.literal("")),
 	gender: genderEnum.optional(),
 	favoriteSport: sportEnum.optional(),
@@ -91,7 +99,7 @@ export const studentSpecializedCardSchema = z.object({
 
 export const coachProfileSchema = z.object({
 	displayName: z.string().min(2, "El nombre debe tener al menos 2 caracteres.").max(120).trim(),
-	academicUnit: schoolEnum.optional(),
+	academicUnit: schoolEnum,
 	phone: z.string().regex(/^\d{10}$/, "El teléfono debe tener exactamente 10 dígitos.").optional().or(z.literal("")),
 	bio: z.string().max(1000).optional(),
 	sports: z

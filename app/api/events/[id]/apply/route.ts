@@ -1,5 +1,6 @@
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { computeAffinity, type AffinityEventRequirements } from "@/lib/affinity";
 
 type RouteProps = { params: Promise<{ id: string }> };
 
@@ -16,7 +17,7 @@ export async function POST(_request: Request, { params }: RouteProps) {
 
 	const event = await prisma.event.findUnique({
 		where: { id: eventId },
-		select: { id: true, status: true, capacity: true, applicationsCount: true, title: true, type: true, sport: true },
+		select: { id: true, status: true, capacity: true, applicationsCount: true, title: true, type: true, sport: true, requirements: true },
 	});
 
 	if (!event) {
@@ -64,9 +65,35 @@ export async function POST(_request: Request, { params }: RouteProps) {
 		);
 	}
 
+	// ── Compute affinity before creating the application ─────────────────────
+	let affinityPercent = 0;
+	if (event.type === "recruitment") {
+		const [studentUser, specializedCard] = await Promise.all([
+			prisma.user.findUnique({
+				where: { id: session.userId },
+				select: {
+					studentProfile: { select: { gender: true } },
+					generalCard: { select: { experienceLevel: true } },
+				},
+			}),
+			prisma.studentSpecializedCard.findFirst({
+				where: { studentId: session.userId, sport: event.sport as never },
+				select: { data: true },
+			}),
+		]);
+
+		affinityPercent = computeAffinity({
+			sport: event.sport,
+			requirements: (event.requirements ?? {}) as AffinityEventRequirements,
+			studentProfile: studentUser?.studentProfile ?? null,
+			generalCard: studentUser?.generalCard ?? null,
+			specializedData: (specializedCard?.data ?? null) as Record<string, unknown> | null,
+		});
+	}
+
 	const [application] = await prisma.$transaction([
 		prisma.eventApplication.create({
-			data: { eventId, studentId: session.userId },
+			data: { eventId, studentId: session.userId, affinityPercent },
 		}),
 		prisma.event.update({
 			where: { id: eventId },

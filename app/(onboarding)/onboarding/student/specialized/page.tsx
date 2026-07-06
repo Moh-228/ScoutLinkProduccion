@@ -102,6 +102,13 @@ const FOOT_OPTIONS = [
   { label: "Ambas", value: "ambas" },
 ];
 
+const LEVEL_OPTIONS = [
+  { label: "Nivel de experiencia", value: "" },
+  { label: "Principiante", value: "beginner" },
+  { label: "Intermedio", value: "intermediate" },
+  { label: "Experimentado", value: "experienced" },
+];
+
 function SoccerForm() {
   return (
     <>
@@ -144,6 +151,7 @@ function SoccerForm() {
         placeholder="Nombre, ciudad, entrenador (uno por línea)..."
         rows={3}
       />
+      <Select id="sp-soc-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} />
       <Input id="sp-cats" name="categories" label="Categorias / ligas" placeholder="Sub-20, liga municipal..." />
       <TextArea name="achievements" label="Logros" placeholder="Títulos, reconocimientos..." />
       <TextArea name="scouting" label="Visorías" placeholder="Dónde y cuándo fuiste visto por cazatalentos..." />
@@ -166,14 +174,10 @@ const HAND_OPTIONS = [
   { label: "Mano dominante", value: "" },
   { label: "Derecha", value: "der" },
   { label: "Izquierda", value: "izq" },
+  { label: "Ambas", value: "ambas" },
 ];
 
-const BK_LEVEL = [
-  { label: "Nivel", value: "" },
-  { label: "Recreativo", value: "recreational" },
-  { label: "Competitivo", value: "competitive" },
-  { label: "Selección", value: "selection" },
-];
+
 
 function BasketballForm() {
   return (
@@ -183,15 +187,7 @@ function BasketballForm() {
         <Select id="sp-bk-prim" name="primaryPosition" label="Posición principal" options={BK_POS} />
         <Select id="sp-bk-sec" name="secondaryPosition" label="Posición secundaria" options={BK_POS} />
       </div>
-      <div className="flex items-end gap-4">
-        <div className="flex-1">
-          <Select id="sp-bk-hand" name="dominantHand" label="Mano dominante" options={HAND_OPTIONS} />
-        </div>
-        <label className="flex cursor-pointer items-center gap-2 pb-2 text-sm text-white/90">
-          <input type="checkbox" name="bothHands" className="h-4 w-4 rounded border-slate-300" />
-          Ambas manos
-        </label>
-      </div>
+      <Select id="sp-bk-hand" name="dominantHand" label="Mano dominante" options={HAND_OPTIONS} />
       <div className="space-y-2">
         <p className="text-sm font-medium text-white">Estilo de juego</p>
         <CB name="styleCreator" label="Creador de juego" />
@@ -209,7 +205,7 @@ function BasketballForm() {
 
       <SectionTitle>Experiencia</SectionTitle>
       <Input id="sp-bk-years" name="yearsExp" type="number" min={0} max={30} label="Años de experiencia" placeholder="3" />
-      <Select id="sp-bk-level" name="level" label="Nivel" options={BK_LEVEL} />
+      <Select id="sp-bk-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} />
       <TextArea name="teamsLeagues" label="Equipos / ligas" placeholder="Equipo, liga, temporada (uno por línea)..." />
       <TextArea name="achievements" label="Logros" placeholder="Títulos, reconocimientos..." />
 
@@ -226,7 +222,7 @@ function BasketballForm() {
         <CB name="offScreens" label="Uso de bloqueos" />
         <CB name="offSpacing" label="Espaciado (spacing)" />
       </div>
-      <Input id="sp-ft-pct" name="ftPct" label="% tiro libre (aprox.)" placeholder="75" />
+      <CB name="ftPct" label="Tiro libre > 60%" />
     </>
   );
 }
@@ -242,12 +238,7 @@ const VB_POS = [
   { label: "Opuesto/a", value: "opposite" },
 ];
 
-const VB_LEVEL = [
-  { label: "Nivel", value: "" },
-  { label: "Recreativo", value: "recreational" },
-  { label: "Competitivo", value: "competitive" },
-  { label: "Selección", value: "selection" },
-];
+
 
 const HAND_OPTS = [
   { label: "Mano dom.", value: "" },
@@ -278,7 +269,7 @@ function VolleyballForm() {
 
       <SectionTitle>Experiencia</SectionTitle>
       <Input id="sp-vb-years" name="yearsExp" type="number" min={0} max={30} label="Años de experiencia" placeholder="3" />
-      <Select id="sp-vb-level" name="level" label="Nivel" options={VB_LEVEL} />
+      <Select id="sp-vb-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} />
       <TextArea name="teamsLeagues" label="Equipos" placeholder="Equipo, temporada (uno por línea)..." />
       <TextArea name="achievements" label="Torneos y logros" placeholder="Campeonatos, reconocimientos..." />
 
@@ -334,6 +325,7 @@ function FlagFootballForm() {
     <>
       <SectionTitle>Perfil técnico</SectionTitle>
       <Select id="sp-ff-role" name="primaryRole" label="Rol principal" options={FF_ROLE} />
+      <Select id="sp-ff-sec-role" name="secondaryRole" label="Rol secundario (opcional)" options={[{ label: "Ninguno", value: "" }, ...FF_ROLE.slice(1)]} />
       <Select id="sp-ff-hand" name="throwingHand" label="Mano dominante (si lanza)" options={THROW_HAND} />
       <div className="space-y-2">
         <p className="text-sm font-medium text-white">Estilo de juego</p>
@@ -346,6 +338,7 @@ function FlagFootballForm() {
       <SectionTitle>Formato y experiencia</SectionTitle>
       <Select id="sp-ff-format" name="format" label="Modalidad principal" options={FF_FORMAT} />
       <Input id="sp-ff-years" name="yearsExp" type="number" min={0} max={30} label="Años de experiencia" placeholder="3" />
+      <Select id="sp-ff-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} />
       <TextArea name="teamsLeagues" label="Ligas y equipos" placeholder="Liga, equipo, temporada (uno por línea)..." />
       <TextArea name="achievements" label="Logros y nivel" placeholder="Campeonatos, MVP, selección..." />
       <Input id="sp-ff-tackle" name="tackleExp" label="Exp. en tackle u otros deportes" placeholder="Americano, rugby, etc." />
@@ -406,6 +399,7 @@ function collectSportData(sport: string, fd: FormData): Record<string, unknown> 
       roleLeader: bool("roleLeader"),
       roleSetPiece: bool("roleSetPiece"),
       yearsExp: str("yearsExp"),
+      level: str("level"),
       currentClubName: str("currentClubName"),
       currentClubCity: str("currentClubCity"),
       currentClubCoach: str("currentClubCoach"),
@@ -426,7 +420,6 @@ function collectSportData(sport: string, fd: FormData): Record<string, unknown> 
       primaryPosition: str("primaryPosition"),
       secondaryPosition: str("secondaryPosition"),
       dominantHand: str("dominantHand"),
-      bothHands: bool("bothHands"),
       styleCreator: bool("styleCreator"),
       styleShooter: bool("styleShooter"),
       styleDefender: bool("styleDefender"),
@@ -442,7 +435,7 @@ function collectSportData(sport: string, fd: FormData): Record<string, unknown> 
       offBothHandsDribble: bool("offBothHandsDribble"),
       offFinishBothHands: bool("offFinishBothHands"),
       offFinishContact: bool("offFinishContact"),
-      ftPct: str("ftPct"),
+      ftPct: bool("ftPct"),
       offMidRange: bool("offMidRange"),
       offTripleCatchShoot: bool("offTripleCatchShoot"),
       offTripleDribble: bool("offTripleDribble"),
@@ -496,6 +489,7 @@ function collectSportData(sport: string, fd: FormData): Record<string, unknown> 
   if (sport === "flag_football") {
     return {
       primaryRole: str("primaryRole"),
+      secondaryRole: str("secondaryRole"),
       throwingHand: str("throwingHand"),
       styleSpeed: bool("styleSpeed"),
       styleRoutes: bool("styleRoutes"),
@@ -503,6 +497,7 @@ function collectSportData(sport: string, fd: FormData): Record<string, unknown> 
       styleVision: bool("styleVision"),
       format: str("format"),
       yearsExp: str("yearsExp"),
+      level: str("level"),
       teamsLeagues: str("teamsLeagues"),
       achievements: str("achievements"),
       tackleExp: str("tackleExp"),

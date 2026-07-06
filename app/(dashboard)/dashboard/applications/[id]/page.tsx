@@ -132,8 +132,36 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						label="Deporte"
 						value={SPORT_LABELS[application.event.sport] ?? application.event.sport}
 					/>
-					{application.affinityPercent > 0 && (
-						<Row label="Afinidad" value={`${application.affinityPercent}%`} />
+					{application.event.type === "recruitment" && (
+						<div className="pt-2">
+							<p className="mb-1.5 text-xs font-medium text-white/50">Compatibilidad</p>
+							<div className="flex items-center gap-3">
+								<div className="relative h-12 w-12 flex-shrink-0">
+									<svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90">
+										<circle cx="18" cy="18" r="15.9" fill="none" stroke="#ffffff10" strokeWidth="3.2" />
+										<circle
+											cx="18" cy="18" r="15.9" fill="none"
+											stroke={application.affinityPercent >= 70 ? "#34d399" : application.affinityPercent >= 40 ? "#fbbf24" : "#94a3b8"}
+											strokeWidth="3.2"
+											strokeDasharray={`${application.affinityPercent} ${100 - application.affinityPercent}`}
+											strokeLinecap="round"
+										/>
+									</svg>
+									<span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+										{application.affinityPercent}%
+									</span>
+								</div>
+								<p className="text-sm text-white/60">
+									{application.affinityPercent >= 70
+										? "Alta compatibilidad con el perfil buscado."
+										: application.affinityPercent >= 40
+										? "Compatibilidad moderada."
+										: application.affinityPercent > 0
+										? "Compatibilidad baja con el perfil buscado."
+										: "Sin datos suficientes para calcular."}
+								</p>
+							</div>
+						</div>
 					)}
 				</CardContent>
 			</Card>

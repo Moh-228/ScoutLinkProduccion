@@ -5,6 +5,7 @@ import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AffinitySortToggle } from "./_components/AffinitySortToggle";
 
 const statusMap = {
   postulado: { label: "Postulado", variant: "info" as const },
@@ -18,9 +19,26 @@ function fmt(d: Date | null | undefined) {
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" }).format(new Date(d));
 }
 
-export default async function ApplicationsPage() {
+function AffinityBadge({ pct }: { pct: number }) {
+  const color =
+    pct >= 70 ? "text-emerald-400 border-emerald-400/30 bg-emerald-500/10"
+    : pct >= 40 ? "text-amber-400 border-amber-400/30 bg-amber-500/10"
+    : "text-slate-400 border-white/10 bg-white/5";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${color}`}>
+      {pct}% afinidad
+    </span>
+  );
+}
+
+type Props = { searchParams: Promise<{ sort?: string }> };
+
+export default async function ApplicationsPage({ searchParams }: Props) {
   const session = await verifySession();
   if (!session) redirect("/auth/login");
+
+  const { sort } = await searchParams;
+  const sortByAffinity = sort === "affinity";
 
   // Students see their own applications; coaches see applications to their events
   if (session.role === "student") {
@@ -72,16 +90,23 @@ export default async function ApplicationsPage() {
         include: {
           student: { select: { studentProfile: { select: { fullName: true } } } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: sortByAffinity
+          ? { affinityPercent: "desc" }
+          : { createdAt: "desc" },
       },
     },
   });
 
+  const hasRecruitmentEvents = events.some((e) => e.type === "recruitment");
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-white">Postulaciones a mis eventos</h1>
-        <p className="text-white/60">Gestiona los candidatos de cada evento.</p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Postulaciones a mis eventos</h1>
+          <p className="text-white/60">Gestiona los candidatos de cada evento.</p>
+        </div>
+        {hasRecruitmentEvents && <AffinitySortToggle active={sortByAffinity} />}
       </header>
       {events.length === 0 ? (
         <p className="text-center text-white/40 py-12">No has creado eventos aún.</p>
@@ -111,6 +136,9 @@ export default async function ApplicationsPage() {
                           {app.student.studentProfile?.fullName ?? "Estudiante"}
                         </span>
                         <div className="flex items-center gap-2">
+                          {event.type === "recruitment" && app.affinityPercent > 0 && (
+                            <AffinityBadge pct={app.affinityPercent} />
+                          )}
                           <Badge variant={statusMap[app.status].variant}>
                             {statusMap[app.status].label}
                           </Badge>
