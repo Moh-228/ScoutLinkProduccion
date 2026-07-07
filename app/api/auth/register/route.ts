@@ -1,7 +1,9 @@
+import { createHash, randomInt } from "crypto";
+
 import { Prisma } from "@prisma/client";
 import { hash } from "bcryptjs";
 
-import { createSession } from "@/lib/auth";
+import { sendVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
 
@@ -33,13 +35,27 @@ export async function POST(request: Request) {
 					? { studentProfile: { create: { fullName } } }
 					: { coachProfile: { create: { displayName: fullName } } }),
 			},
-			select: { id: true, email: true, role: true, createdAt: true },
+			select: { id: true, email: true, role: true },
 		});
 
-		await createSession({ userId: user.id, email: user.email, role: user.role, onboardingCompleted: false });
+		// Generate a 6-digit verification code
+		const code = String(randomInt(100000, 1000000));
+		const codeHash = createHash("sha256").update(code).digest("hex");
+		const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
+
+		await prisma.emailVerificationToken.create({
+			data: { userId: user.id, codeHash, expiresAt },
+		});
+
+		// Send verification email — if it fails the user can request a resend from the verify page
+		try {
+			await sendVerificationEmail(email, code);
+		} catch (emailError) {
+			console.error("[email] Failed to send verification email:", emailError);
+		}
 
 		return Response.json(
-			{ ok: true, message: "Usuario registrado correctamente.", data: { ...user, onboardingCompleted: false } },
+			{ ok: true, message: "Cuenta creada. Revisa tu correo para verificar tu cuenta.", requiresVerification: true, email, role },
 			{ status: 201 },
 		);
 	} catch (error) {

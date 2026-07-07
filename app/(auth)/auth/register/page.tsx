@@ -58,7 +58,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push(result.data.role === "student" ? "/onboarding/student" : "/onboarding/coach");
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}&role=${result.role}`);
     } catch {
       setError("No se pudo conectar con el servidor.");
     } finally {

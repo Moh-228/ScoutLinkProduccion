@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
 		const user = await prisma.user.findUnique({
 			where: { email },
-			select: { id: true, email: true, role: true, isActive: true, passwordHash: true, onboardingCompleted: true },
+			select: { id: true, email: true, role: true, isActive: true, passwordHash: true, onboardingCompleted: true, emailVerified: true },
 		});
 
 		if (!user) {
@@ -33,6 +33,13 @@ export async function POST(request: Request) {
 		if (!user.isActive) {
 			return Response.json(
 				{ ok: false, message: "Tu cuenta ha sido desactivada." },
+				{ status: 403 },
+			);
+		}
+
+		if (!user.emailVerified && user.role !== "admin") {
+			return Response.json(
+				{ ok: false, message: "Debes verificar tu correo antes de iniciar sesión.", requiresVerification: true, email: user.email },
 				{ status: 403 },
 			);
 		}
@@ -53,9 +60,10 @@ export async function POST(request: Request) {
 			message: "Inicio de sesión exitoso.",
 			data: { id: user.id, email: user.email, role: user.role, onboardingCompleted: user.onboardingCompleted },
 		});
-	} catch {
+	} catch (err) {
+		console.error("[login] Error:", err);
 		return Response.json(
-			{ ok: false, message: "No se pudo iniciar sesión." },
+			{ ok: false, message: "No se pudo iniciar sesión.", ...(process.env.NODE_ENV !== "production" && { debug: String(err) }) },
 			{ status: 500 },
 		);
 	}

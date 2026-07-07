@@ -50,6 +50,7 @@ async function main() {
         role: "admin",
         isActive: true,
         onboardingCompleted: true,
+        emailVerified: true,
       },
       select: { id: true, email: true, role: true },
     });

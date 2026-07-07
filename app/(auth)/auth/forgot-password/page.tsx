@@ -10,14 +10,12 @@ import { Input } from "@/components/Input";
 export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
-  const [devToken, setDevToken] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setInfo("");
-    setDevToken("");
     setIsSubmitting(true);
 
     const fd = new FormData(event.currentTarget);
@@ -37,9 +35,6 @@ export default function ForgotPasswordPage() {
       }
 
       setInfo(result.message);
-      if (result.devToken) {
-        setDevToken(result.devToken);
-      }
     } catch {
       setError("No se pudo conectar con el servidor.");
     } finally {
@@ -88,19 +83,6 @@ export default function ForgotPasswordPage() {
               <p className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100" role="status">
                 {info}
               </p>
-            ) : null}
-
-            {devToken ? (
-              <div className="rounded-lg border border-yellow-400/40 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
-                <p className="mb-1 font-semibold">[DEV] Token de recuperación:</p>
-                <p className="break-all font-mono">{devToken}</p>
-                <Link
-                  href={`/auth/reset-password?token=${devToken}`}
-                  className="mt-2 inline-block font-semibold text-yellow-300 underline"
-                >
-                  Ir a restablecer contraseña →
-                </Link>
-              </div>
             ) : null}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>

@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "crypto";
 
+import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validations";
 
@@ -34,17 +35,11 @@ export async function POST(request: Request) {
 			data: { userId: user.id, tokenHash, expiresAt },
 		});
 
-		// TODO: Send reset email in production
-		// resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-password?token=${token}`
-		if (process.env.NODE_ENV !== "production") {
-			console.log(`[DEV] Password reset token for ${email}: ${token}`);
-		}
+		await sendPasswordResetEmail(email, token);
 
 		return Response.json({
 			ok: true,
 			message: "Si el correo existe, recibirás instrucciones para restablecer tu contraseña.",
-			// DEV ONLY — remove when email provider is configured
-			...(process.env.NODE_ENV !== "production" ? { devToken: token } : {}),
 		});
 	} catch {
 		return Response.json({ ok: false, message: "No se pudo procesar la solicitud." }, { status: 500 });

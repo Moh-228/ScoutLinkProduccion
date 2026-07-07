@@ -37,6 +37,10 @@ function LoginForm() {
       const result = await response.json();
 
       if (!response.ok || !result.ok) {
+        if (result.requiresVerification) {
+          router.push(`/auth/verify-email?email=${encodeURIComponent(result.email)}`);
+          return;
+        }
         setError(result.message ?? "No se pudo iniciar sesión.");
         return;
       }
