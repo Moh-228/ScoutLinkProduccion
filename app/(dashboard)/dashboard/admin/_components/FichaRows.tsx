@@ -153,7 +153,7 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           <Badge variant={card.isPublic ? "success" : "neutral"} className="mt-1">
             {card.isPublic ? "Pública" : "Privada"}
           </Badge>
-          {docs && (docs.inscriptionProof || docs.medicalInsurance) && (
+          {docs && !!(docs.inscriptionProof || docs.medicalInsurance) && (
             <div className="mt-2 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40">Documentos</p>
               {docs.inscriptionProof ? (
