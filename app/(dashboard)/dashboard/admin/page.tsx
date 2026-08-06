@@ -2,13 +2,25 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { VerificationsList } from "./_components/VerificationsList";
 
-export default async function AdminPage() {
+type Props = { searchParams: Promise<{ q?: string }> };
+
+export default async function AdminPage({ searchParams }: Props) {
+  const { q } = await searchParams;
+
   const [userCount, activeEvents, closedEvents, pendingVerifCount, verifications] = await Promise.all([
     prisma.user.count(),
     prisma.event.count({ where: { status: "open" } }),
     prisma.event.count({ where: { status: "closed" } }),
     prisma.coachVerification.count({ where: { status: "pending" } }),
     prisma.coachVerification.findMany({
+      where: q
+        ? {
+            OR: [
+              { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
+              { coach: { email: { contains: q, mode: "insensitive" } } },
+            ],
+          }
+        : {},
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
@@ -31,8 +43,8 @@ export default async function AdminPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">Panel de Administrador</h1>
-        <p className="text-slate-400">Métricas, verificaciones y moderación.</p>
+        <h1 className="text-xl font-bold text-brand-primary">Panel de Administrador</h1>
+        <p className="text-brand-primary/70">Métricas, verificaciones y moderación.</p>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -46,7 +58,7 @@ export default async function AdminPage() {
         ))}
       </section>
 
-      <Card>
+      <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Solicitudes de verificación de entrenadores</CardTitle>
           <CardDescription>Aprueba o rechaza la verificación de coaches por deporte.</CardDescription>

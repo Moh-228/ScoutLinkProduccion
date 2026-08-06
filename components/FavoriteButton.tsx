@@ -39,10 +39,10 @@ export function FavoriteButton({ targetType, targetId, isFavorited: initialFavor
 			disabled={isLoading}
 			title={isFavorited ? "Quitar de favoritos" : "Guardar en favoritos"}
 			className={[
-				"flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+				"flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction disabled:cursor-not-allowed disabled:opacity-60",
 				isFavorited
-					? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
-					: "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white",
+					? "bg-yellow-400/20 text-yellow-500 hover:bg-yellow-400/30"
+					: "bg-brand-background text-brand-muted hover:bg-brand-secondary/10 hover:text-brand-primary",
 			].join(" ")}
 		>
 			<svg

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Select } from "@/components/Select";
@@ -71,7 +71,7 @@ export default function RegisterPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
         >
           <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -82,7 +82,7 @@ export default function RegisterPage() {
       <Card>
         <CardHeader>
           <CardTitle>Crear cuenta</CardTitle>
-          <p className="text-sm text-white">Registra tu perfil para comenzar a explorar oportunidades.</p>
+          <CardDescription>Registra tu perfil para comenzar a explorar oportunidades.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -108,12 +108,12 @@ export default function RegisterPage() {
                 required
               />
               {role === "student" ? (
-                <p className="text-xs text-cyan-400/80">Los alumnos deben usar su correo institucional @alumno.ipn.mx.</p>
+                <p className="text-xs text-brand-primary/70">Los alumnos deben usar su correo institucional @alumno.ipn.mx.</p>
               ) : null}
             </div>
             <div className="flex flex-col gap-1.5">
               <PasswordInput id="register-password" name="password" label="Contraseña" placeholder="Min. 8 caracteres" required />
-              <p className="text-xs text-white/40">Debe incluir al menos una mayúscula y un símbolo (ej. !, @, #).</p>
+              <p className="text-xs text-brand-primary/50">Debe incluir al menos una mayúscula y un símbolo (ej. !, @, #).</p>
             </div>
             <PasswordInput
               id="register-confirm-password"
@@ -123,17 +123,19 @@ export default function RegisterPage() {
               required
             />
             {error ? (
-              <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
                 {error}
               </p>
             ) : null}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
-            </Button>
+            <div className="flex justify-center">
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+              </Button>
+            </div>
           </form>
-          <p className="mt-4 text-sm text-white">
+          <p className="mt-4 text-center text-sm text-brand-primary">
             ¿Ya tienes cuenta?{" "}
-            <Link href="/auth/login" className="font-semibold text-[#1883FF] hover:text-[#75C3FF]">
+            <Link href="/auth/login" className="font-semibold text-brand-secondary hover:text-brand-primary underline">
               Iniciar sesión
             </Link>
           </p>

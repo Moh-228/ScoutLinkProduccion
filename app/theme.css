@@ -1,0 +1,24 @@
+/**
+ * Centralized color design tokens.
+ * Tailwind v4 auto-generates utilities (bg-*, text-*, border-*, ring-*, fill-*)
+ * from every `--color-*` variable declared here — do not add a tailwind.config.
+ */
+@theme {
+  --color-brand-primary: #243c4c;
+  --color-brand-secondary: #5289ad;
+  --color-brand-surface: #698696;
+  --color-brand-border: #acbcbf;
+  --color-brand-background: #f4fcfb;
+  --color-brand-text: #243c4c;
+  --color-brand-muted: #698696;
+
+  --color-sport-basketball: #ea4630;
+  --color-sport-football: #146b3a;
+  --color-sport-volleyball: #f8b229;
+  --color-sport-tocho: #bb2528;
+
+  /* Interaction/selection accent only — not a brand color. Do not use for
+     backgrounds, headings, or body text; reserved for active/selected/focus
+     states (active nav item, selected toggle/checkbox, focus rings). */
+  --color-interaction: #0474c4;
+}

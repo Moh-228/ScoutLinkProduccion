@@ -18,7 +18,7 @@ export function MarkReadButton({ notificationId }: { notificationId: string }) {
 		<button
 			onClick={markRead}
 			disabled={isLoading}
-			className="text-xs font-semibold text-[#1883ff] hover:underline disabled:opacity-60"
+			className="text-xs font-semibold text-brand-secondary hover:text-brand-primary hover:underline disabled:opacity-60"
 		>
 			{isLoading ? "..." : "Marcar leída"}
 		</button>
@@ -42,7 +42,7 @@ export function MarkAllReadButton({ hasUnread }: { hasUnread: boolean }) {
 		<button
 			onClick={markAll}
 			disabled={isLoading}
-			className="text-sm font-semibold text-[#1883ff] hover:underline disabled:opacity-60"
+			className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline disabled:opacity-60"
 		>
 			{isLoading ? "..." : "Marcar todas como leídas"}
 		</button>

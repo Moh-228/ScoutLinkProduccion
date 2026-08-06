@@ -74,9 +74,9 @@ export function ApplyButton({
 			rechazado: "Rechazado",
 		};
 		return (
-			<p className="text-sm text-white/60">
+			<p className="text-sm text-brand-primary/70">
 				Ya estás postulado —{" "}
-				<span className="font-semibold text-white">
+				<span className="font-semibold text-brand-primary">
 					{STATUS_LABELS[existingApplication.status] ?? existingApplication.status}
 				</span>
 			</p>
@@ -85,12 +85,12 @@ export function ApplyButton({
 
 	if (missingSpecializedCard && !alreadyApplied) {
 		return (
-			<div className="rounded-lg border border-yellow-400/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+			<div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
 				<p className="font-semibold">Ficha deportiva especializada requerida</p>
-				<p className="mt-1 text-yellow-200/80">
+				<p className="mt-1 text-amber-800/80">
 					Los eventos de reclutamiento requieren que tengas una ficha deportiva
 					especializada del deporte correspondiente.{" "}
-					<Link href="/onboarding/student/specialized" className="font-semibold underline hover:text-white">
+					<Link href="/onboarding/student/specialized" className="font-semibold underline hover:text-brand-primary">
 						Completar ficha
 					</Link>
 				</p>
@@ -108,20 +108,20 @@ export function ApplyButton({
 				) : eventIsOpen ? (
 					<Button onClick={() => setShowModal(true)}>Postularme</Button>
 				) : null}
-				{error && <p className="text-sm text-red-400">{error}</p>}
+				{error && <p className="text-sm text-red-600">{error}</p>}
 			</div>
 
 			{/* Modal de confirmación */}
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-					<div className="mx-4 w-full max-w-md rounded-xl bg-slate-900 p-6 shadow-2xl ring-1 ring-white/10">
-						<h2 className="text-lg font-semibold text-white">Confirmar postulación</h2>
-						<p className="mt-2 text-sm text-white/70">
+					<div className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-2xl ring-1 ring-brand-border">
+						<h2 className="text-base font-semibold text-brand-primary">Confirmar postulación</h2>
+						<p className="mt-2 text-sm text-brand-primary/70">
 							¿Deseas postularte al evento{" "}
-							<span className="font-semibold text-white">&quot;{eventTitle}&quot;</span>? El
+							<span className="font-semibold text-brand-primary">&quot;{eventTitle}&quot;</span>? El
 							entrenador recibirá tu solicitud y podrá ver tu ficha.
 						</p>
-						{error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+						{error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 						<div className="mt-6 flex justify-end gap-3">
 							<Button
 								variant="secondary"

@@ -1,19 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { Badge } from "@/components/Badge";
-import { buttonClassNames } from "@/components/Button";
+import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Icon } from "@/components/Icon";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusActions } from "./_components/StatusActions";
-
-const STATUS_BADGES = {
-	postulado: { label: "Postulado", variant: "info" as const },
-	preseleccionado: { label: "Preseleccionado", variant: "warning" as const },
-	aceptado: { label: "Aceptado", variant: "success" as const },
-	rechazado: { label: "Rechazado", variant: "danger" as const },
-};
 
 const SPORT_LABELS: Record<string, string> = {
 	basketball: "Básquetbol",
@@ -44,8 +37,8 @@ function Row({ label, value }: { label: string; value?: string | number | null }
 	if (!value && value !== 0) return null;
 	return (
 		<div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
-			<span className="font-medium text-white/50">{label}</span>
-			<span className="text-white">{value}</span>
+			<span className="font-medium text-brand-primary/50">{label}</span>
+			<span className="text-brand-primary">{value}</span>
 		</div>
 	);
 }
@@ -100,29 +93,31 @@ export default async function ApplicationDetailPage({ params }: Props) {
 	const canManage = isCoach || isAdmin;
 	const profile = application.student.studentProfile;
 	const card = application.student.generalCard;
-	const badge = STATUS_BADGES[application.status];
 
 	return (
 		<div className="space-y-6">
 			<header className="flex items-center gap-3">
 				<Link
 					href="/dashboard/applications"
-					className={buttonClassNames("secondary") + " text-xs px-3 py-1"}
+					aria-label="Volver"
+					title="Volver"
+					className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
 				>
-					← Volver
+					<Icon name="arrow" size={18} />
 				</Link>
-				<h1 className="text-xl font-bold text-white">Detalle de postulación</h1>
+				<h1 className="text-lg font-bold text-brand-primary">Detalle de postulación</h1>
 			</header>
 
+			<div className="mx-auto w-full max-w-2xl space-y-6">
 			{/* Estado actual */}
 			<Card>
 				<CardHeader>
 					<div className="flex items-center justify-between gap-3">
 						<CardTitle>Postulación</CardTitle>
-						<Badge variant={badge.variant}>{badge.label}</Badge>
+						<ApplicationStatusBadge status={application.status} />
 					</div>
 				</CardHeader>
-				<CardContent className="space-y-2">
+				<CardContent className="space-y-1.5">
 					<Row label="Evento" value={application.event.title} />
 					<Row
 						label="Tipo"
@@ -134,24 +129,30 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					/>
 					{application.event.type === "recruitment" && (
 						<div className="pt-2">
-							<p className="mb-1.5 text-xs font-medium text-white/50">Compatibilidad</p>
+							<p className="mb-1.5 text-xs font-medium text-brand-primary/50">Compatibilidad</p>
 							<div className="flex items-center gap-3">
-								<div className="relative h-12 w-12 flex-shrink-0">
+								<div className="relative h-12 w-12 shrink-0">
 									<svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90">
-										<circle cx="18" cy="18" r="15.9" fill="none" stroke="#ffffff10" strokeWidth="3.2" />
+										<circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-brand-border)" strokeOpacity={0.35} strokeWidth="3.2" />
 										<circle
 											cx="18" cy="18" r="15.9" fill="none"
-											stroke={application.affinityPercent >= 70 ? "#34d399" : application.affinityPercent >= 40 ? "#fbbf24" : "#94a3b8"}
+											stroke={
+												application.affinityPercent >= 70
+													? "var(--color-sport-football)"
+													: application.affinityPercent >= 40
+														? "var(--color-sport-volleyball)"
+														: "var(--color-brand-surface)"
+											}
 											strokeWidth="3.2"
 											strokeDasharray={`${application.affinityPercent} ${100 - application.affinityPercent}`}
 											strokeLinecap="round"
 										/>
 									</svg>
-									<span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+									<span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-brand-primary">
 										{application.affinityPercent}%
 									</span>
 								</div>
-								<p className="text-sm text-white/60">
+								<p className="text-sm text-brand-primary/70">
 									{application.affinityPercent >= 70
 										? "Alta compatibilidad con el perfil buscado."
 										: application.affinityPercent >= 40
@@ -174,14 +175,14 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						{card?.isPublic && (
 							<Link
 								href={`/dashboard/fichas/${card.id}`}
-								className="text-sm font-semibold text-[#1883ff] hover:underline"
+								className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline"
 							>
-								Ver ficha completa →
+								Ver ficha completa
 							</Link>
 						)}
 					</div>
 				</CardHeader>
-				<CardContent className="space-y-2">
+				<CardContent className="space-y-1.5">
 					<Row label="Escuela" value={profile?.school ?? null} />
 					<Row label="Semestre" value={profile?.semester ?? null} />
 					<Row
@@ -211,7 +212,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						</>
 					)}
 					{!card && (
-						<p className="text-sm text-white/40">El alumno no tiene ficha registrada.</p>
+						<p className="text-sm text-brand-primary/50">El alumno no tiene ficha registrada.</p>
 					)}
 				</CardContent>
 			</Card>
@@ -228,6 +229,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					</CardContent>
 				</Card>
 			)}
+			</div>
 		</div>
 	);
 }

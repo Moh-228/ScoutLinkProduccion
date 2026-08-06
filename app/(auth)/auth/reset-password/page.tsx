@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 
 function ResetPasswordForm() {
@@ -84,12 +84,12 @@ function ResetPasswordForm() {
         placeholder="********"
         required
       />
-      <p className="text-xs text-white/40">
+      <p className="text-xs text-brand-primary/50">
         La contraseña debe tener al menos 8 caracteres, una mayúscula y un símbolo.
       </p>
 
       {error ? (
-        <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
           {error}
         </p>
       ) : null}
@@ -107,7 +107,7 @@ export default function ResetPasswordPage() {
       <div className="mb-6">
         <Link
           href="/auth/login"
-          className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
         >
           <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -118,12 +118,12 @@ export default function ResetPasswordPage() {
       <Card>
         <CardHeader>
           <CardTitle>Restablecer contraseña</CardTitle>
-          <p className="text-sm text-white/70">
+          <CardDescription>
             Elige una nueva contraseña segura para tu cuenta.
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<p className="text-sm text-white/60">Cargando...</p>}>
+          <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
             <ResetPasswordForm />
           </Suspense>
         </CardContent>

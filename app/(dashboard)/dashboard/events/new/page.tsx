@@ -34,10 +34,10 @@ export default async function NewEventPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-white">Crear evento</h1>
-        <p className="text-sm text-white/60">
+        <h1 className="text-xl font-bold text-brand-primary">Crear evento</h1>
+        <p className="text-sm text-brand-primary/70">
           Publica un torneo, entrenamiento o convocatoria de reclutamiento.
         </p>
       </header>

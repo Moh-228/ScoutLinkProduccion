@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Badge } from "@/components/Badge";
+import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
+import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AffinitySortToggle } from "./_components/AffinitySortToggle";
-
-const statusMap = {
-  postulado: { label: "Postulado", variant: "info" as const },
-  preseleccionado: { label: "Preseleccionado", variant: "warning" as const },
-  aceptado: { label: "Aceptado", variant: "success" as const },
-  rechazado: { label: "Rechazado", variant: "danger" as const },
-};
 
 function fmt(d: Date | null | undefined) {
   if (!d) return "—";
@@ -21,9 +15,9 @@ function fmt(d: Date | null | undefined) {
 
 function AffinityBadge({ pct }: { pct: number }) {
   const color =
-    pct >= 70 ? "text-emerald-400 border-emerald-400/30 bg-emerald-500/10"
-    : pct >= 40 ? "text-amber-400 border-amber-400/30 bg-amber-500/10"
-    : "text-slate-400 border-white/10 bg-white/5";
+    pct >= 70 ? "text-emerald-800 border-emerald-200 bg-emerald-100"
+    : pct >= 40 ? "text-amber-800 border-amber-200 bg-amber-100"
+    : "text-brand-primary/50 border-brand-border bg-brand-background";
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${color}`}>
       {pct}% afinidad
@@ -31,19 +25,22 @@ function AffinityBadge({ pct }: { pct: number }) {
   );
 }
 
-type Props = { searchParams: Promise<{ sort?: string }> };
+type Props = { searchParams: Promise<{ sort?: string; q?: string }> };
 
 export default async function ApplicationsPage({ searchParams }: Props) {
   const session = await verifySession();
   if (!session) redirect("/auth/login");
 
-  const { sort } = await searchParams;
+  const { sort, q } = await searchParams;
   const sortByAffinity = sort === "affinity";
 
   // Students see their own applications; coaches see applications to their events
   if (session.role === "student") {
     const applications = await prisma.eventApplication.findMany({
-      where: { studentId: session.userId },
+      where: {
+        studentId: session.userId,
+        ...(q ? { event: { title: { contains: q, mode: "insensitive" } } } : {}),
+      },
       orderBy: { createdAt: "desc" },
       include: { event: { select: { id: true, title: true, type: true, startAt: true } } },
     });
@@ -51,15 +48,15 @@ export default async function ApplicationsPage({ searchParams }: Props) {
     return (
       <div className="space-y-6">
         <header>
-          <h1 className="text-2xl font-bold text-white">Mis postulaciones</h1>
-          <p className="text-white/60">Seguimiento de estados en tus solicitudes.</p>
+          <h1 className="text-xl font-bold text-brand-primary">Mis postulaciones</h1>
+          <p className="text-brand-primary/70">Seguimiento de estados en tus solicitudes.</p>
         </header>
         {applications.length === 0 ? (
-          <p className="text-center text-white/40 py-12">No tienes postulaciones aún.</p>
+          <p className="text-center text-brand-primary/50 py-12">No tienes postulaciones aún.</p>
         ) : (
           <div className="space-y-3">
             {applications.map((app) => (
-              <Card key={app.id}>
+              <Card key={app.id} className="mx-auto w-full max-w-2xl">
                 <CardHeader>
                   <CardTitle className="text-base">
                     <Link href={`/dashboard/events/${app.event.id}`} className="hover:underline">
@@ -68,10 +65,8 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-between gap-3">
-                  <p className="text-sm text-white/60">Inicio: {fmt(app.event.startAt)}</p>
-                  <Badge variant={statusMap[app.status].variant}>
-                    {statusMap[app.status].label}
-                  </Badge>
+                  <p className="text-sm text-brand-primary/70">Inicio: {fmt(app.event.startAt)}</p>
+                  <ApplicationStatusBadge status={app.status} />
                 </CardContent>
               </Card>
             ))}
@@ -83,7 +78,21 @@ export default async function ApplicationsPage({ searchParams }: Props) {
 
   // Coach: see applicants per event
   const events = await prisma.event.findMany({
-    where: { coachId: session.userId },
+    where: {
+      coachId: session.userId,
+      ...(q
+        ? {
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              {
+                applications: {
+                  some: { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
+                },
+              },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       applications: {
@@ -103,17 +112,17 @@ export default async function ApplicationsPage({ searchParams }: Props) {
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Postulaciones a mis eventos</h1>
-          <p className="text-white/60">Gestiona los candidatos de cada evento.</p>
+          <h1 className="text-xl font-bold text-brand-primary">Postulaciones a mis eventos</h1>
+          <p className="text-brand-primary/70">Gestiona los candidatos de cada evento.</p>
         </div>
         {hasRecruitmentEvents && <AffinitySortToggle active={sortByAffinity} />}
       </header>
       {events.length === 0 ? (
-        <p className="text-center text-white/40 py-12">No has creado eventos aún.</p>
+        <p className="text-center text-brand-primary/50 py-12">No has creado eventos aún.</p>
       ) : (
         <div className="space-y-4">
           {events.map((event) => (
-            <Card key={event.id}>
+            <Card key={event.id} className="mx-auto w-full max-w-2xl">
               <CardHeader>
                 <CardTitle>
                   <Link href={`/dashboard/events/${event.id}`} className="hover:underline">
@@ -123,26 +132,24 @@ export default async function ApplicationsPage({ searchParams }: Props) {
               </CardHeader>
               <CardContent>
                 {event.applications.length === 0 ? (
-                  <p className="text-sm text-white/40">Sin postulaciones.</p>
+                  <p className="text-sm text-brand-primary/50">Sin postulaciones.</p>
                 ) : (
                   <div className="space-y-2">
                     {event.applications.map((app) => (
                       <Link
                         key={app.id}
                         href={`/dashboard/applications/${app.id}`}
-                        className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-white/5"
+                        className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background"
                       >
-                        <span className="text-white">
+                        <span className="text-brand-primary">
                           {app.student.studentProfile?.fullName ?? "Estudiante"}
                         </span>
                         <div className="flex items-center gap-2">
                           {event.type === "recruitment" && app.affinityPercent > 0 && (
                             <AffinityBadge pct={app.affinityPercent} />
                           )}
-                          <Badge variant={statusMap[app.status].variant}>
-                            {statusMap[app.status].label}
-                          </Badge>
-                          <span className="text-xs font-semibold text-[#1883ff]">Gestionar →</span>
+                          <ApplicationStatusBadge status={app.status} />
+                          <span className={buttonClassNames("secondary", "px-3 py-1 text-xs")}>Gestionar</span>
                         </div>
                       </Link>
                     ))}

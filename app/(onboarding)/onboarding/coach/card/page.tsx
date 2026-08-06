@@ -4,11 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 
 const TA_CLASS =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-cyan-600";
+  "w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40";
 
 const GENDERS = ["V", "F", "Mixto"] as const;
 type Gender = (typeof GENDERS)[number];
@@ -79,20 +79,20 @@ export default function CoachCardPage() {
   return (
     <Card>
       <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
           Paso 3 de 3 — Opcional
         </div>
         <CardTitle>Ficha de entrenador</CardTitle>
-        <p className="text-sm text-white/70">
+        <CardDescription>
           Comparte tu trayectoria y certificaciones. Puedes editarlas después desde tu perfil.
-        </p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
 
           {/* Categorías */}
           <div>
-            <p className="mb-2 text-sm font-medium text-white">Categorías que entrenas</p>
+            <p className="mb-2 text-sm font-medium text-brand-primary">Categorías que entrenas</p>
             <div className="flex gap-3">
               {GENDERS.map((gender) => (
                 <button
@@ -100,10 +100,10 @@ export default function CoachCardPage() {
                   type="button"
                   onClick={() => toggleCategory(gender)}
                   className={[
-                    "flex-1 rounded-lg border py-2 text-sm font-medium transition-colors",
+                    "flex-1 rounded-lg border py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
                     categories.includes(gender)
-                      ? "border-cyan-500 bg-cyan-500/20 text-cyan-300"
-                      : "border-white/20 bg-white/5 text-white/60 hover:border-white/40",
+                      ? "border-interaction bg-interaction/20 text-interaction"
+                      : "border-brand-border bg-brand-background text-brand-primary/70 hover:border-brand-secondary/40",
                   ].join(" ")}
                   aria-pressed={categories.includes(gender)}
                 >
@@ -125,7 +125,7 @@ export default function CoachCardPage() {
           />
 
           {/* Certificaciones */}
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
             <span>Certificaciones</span>
             <textarea
               name="certifications"
@@ -136,7 +136,7 @@ export default function CoachCardPage() {
           </label>
 
           {/* Experiencia */}
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
             <span>Experiencia</span>
             <textarea
               name="experience"
@@ -147,8 +147,8 @@ export default function CoachCardPage() {
           </label>
 
           {/* Logros */}
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
-            <span>Logros <span className="font-normal text-white/50">(opcional)</span></span>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
+            <span>Logros <span className="font-normal text-brand-primary/70">(opcional)</span></span>
             <textarea
               name="achievements"
               rows={4}
@@ -158,7 +158,7 @@ export default function CoachCardPage() {
           </label>
 
           {error ? (
-            <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
               {error}
             </p>
           ) : null}

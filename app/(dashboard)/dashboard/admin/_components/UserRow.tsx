@@ -51,11 +51,11 @@ export function UserRow({ user }: { user: User }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-background p-3">
       <div className="min-w-0">
         <p className="truncate font-semibold">{displayName}</p>
-        <p className="truncate text-sm text-slate-400">{user.email}</p>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        <p className="truncate text-sm text-brand-primary/70">{user.email}</p>
+        {error && <p className="text-xs text-red-600">{error}</p>}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={user.role === "coach" ? "info" : "neutral"}>
@@ -73,10 +73,10 @@ export function UserRow({ user }: { user: User }) {
           {loading === "toggle" ? "..." : user.isActive ? "Desactivar" : "Activar"}
         </Button>
         <Button
-          variant="ghost"
+          variant="secondary"
           disabled={!!loading || pending}
           onClick={remove}
-          className="px-3 py-1 text-xs text-red-400 hover:bg-red-500/20"
+          className="px-3 py-1 text-xs text-red-600 hover:bg-red-50"
         >
           {loading === "delete" ? "..." : "Eliminar"}
         </Button>

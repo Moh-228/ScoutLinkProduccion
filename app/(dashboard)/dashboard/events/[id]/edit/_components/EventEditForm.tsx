@@ -53,7 +53,7 @@ type Props = {
 };
 
 const TA_CLASS =
-  "w-full rounded-lg border border-[#18181b] bg-white px-3 py-2 text-black shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-[#18181b] text-sm";
+  "w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40 text-sm";
 
 const SPORT_OPTIONS: SelectOption[] = [
   { label: "Básquetbol", value: "basketball" },
@@ -145,8 +145,8 @@ const HAND_OPTIONS: SelectOption[] = [
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border-t border-white/10 pt-5">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/50">
+    <div className="border-t border-brand-border/50 pt-5">
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
         {children}
       </h3>
     </div>
@@ -173,7 +173,7 @@ function TextArea({
   placeholder?: string;
 }) {
   return (
-    <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-white">
+    <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
       <span>{label}</span>
       <textarea
         id={id}
@@ -201,7 +201,7 @@ function DaysToggle({
   }
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-white">{label}</p>
+      <p className="text-sm font-medium text-brand-primary">{label}</p>
       <div className="flex flex-wrap gap-2">
         {WEEK_DAYS.map((d) => (
           <button
@@ -209,10 +209,10 @@ function DaysToggle({
             type="button"
             onClick={() => toggle(d.value)}
             className={[
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
               selected.includes(d.value)
-                ? "bg-[#1883ff] text-white"
-                : "bg-white/10 text-white/70 hover:bg-white/20",
+                ? "bg-interaction text-white"
+                : "bg-brand-background text-brand-primary/70 hover:bg-brand-border/30",
             ].join(" ")}
           >
             {d.label}
@@ -512,12 +512,12 @@ export function EventEditForm({ eventId, initial }: Props) {
             value={form.notes}
             onChange={(v) => set("notes", v)}
           />
-          <label className="flex cursor-pointer items-center gap-3 text-sm text-white/90">
+          <label className="flex cursor-pointer items-center gap-3 text-sm text-brand-primary/70">
             <input
               type="checkbox"
               checked={form.autoClose}
               onChange={(e) => set("autoClose", e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300"
+              className="h-4 w-4 rounded border-brand-border accent-interaction"
             />
             Cerrar registro automáticamente al alcanzar el cupo
           </label>
@@ -630,7 +630,7 @@ export function EventEditForm({ eventId, initial }: Props) {
 
       {/* ── Acciones ── */}
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
       )}
 
       <div className="flex items-center justify-between gap-3 pb-8">
@@ -639,7 +639,7 @@ export function EventEditForm({ eventId, initial }: Props) {
           type="button"
           onClick={handleDelete}
           disabled={isDeleting || isSubmitting}
-          className="rounded-lg px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+          className="rounded-lg border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isDeleting
             ? "Eliminando…"

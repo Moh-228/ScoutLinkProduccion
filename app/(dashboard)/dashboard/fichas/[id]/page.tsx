@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/Badge";
-import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { Icon } from "@/components/Icon";
 import { verifySession } from "@/lib/auth";
 import { labelField, labelValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
+import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -26,15 +27,15 @@ function Row({ label, value }: { label: string; value?: string | number | boolea
   if (value === "" || value === null || value === undefined || value === false) return null;
   return (
     <div className="grid grid-cols-[200px_1fr] gap-2 text-sm">
-      <span className="font-medium text-white/50">{label}</span>
-      <span className="text-white">{value === true ? "Sí" : String(value)}</span>
+      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="text-brand-primary">{value === true ? "Sí" : String(value)}</span>
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-white/40 border-t border-white/10 pt-4">
+    <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50 border-t border-brand-border/40 pt-4">
       {children}
     </p>
   );
@@ -87,15 +88,20 @@ export default async function FichaDetailPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-3">
-        <Link href="/dashboard/fichas" className={buttonClassNames("secondary") + " text-xs px-3 py-1"}>
-          ← Volver
+        <Link
+          href="/dashboard/fichas"
+          aria-label="Volver"
+          title="Volver"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+        >
+          <Icon name="arrow" size={18} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">{profile?.fullName ?? "Deportista"}</h1>
-          {profile?.school && <p className="text-white/60">{profile.school}</p>}
+          <h1 className="text-xl font-bold text-brand-primary">{profile?.fullName ?? "Deportista"}</h1>
+          {profile?.school && <p className="text-brand-primary/70">{profile.school}</p>}
         </div>
         {profile?.favoriteSport && (
-          <Badge variant="info" className="ml-auto">
+          <Badge variant="info" className={`ml-auto ${SPORT_BADGE_CLASS[profile.favoriteSport] ?? ""}`}>
             {SPORT_LABELS[profile.favoriteSport] ?? profile.favoriteSport}
           </Badge>
         )}
@@ -104,12 +110,13 @@ export default async function FichaDetailPage({ params }: Props) {
         )}
       </header>
 
+      <div className="mx-auto w-full max-w-2xl space-y-6">
       {/* General card */}
       <Card>
         <CardHeader>
           <CardTitle>Ficha general</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-1.5">
           {profile?.gender && <Row label="Género" value={profile.gender} />}
           {profile?.semester && <Row label="Semestre" value={profile.semester} />}
           {card.heightCm && <Row label="Estatura" value={`${card.heightCm} cm`} />}
@@ -153,7 +160,9 @@ export default async function FichaDetailPage({ params }: Props) {
               );
               return (
                 <div key={sc.id} className="space-y-2">
-                  <Badge variant="info">{SPORT_LABELS[sc.sport] ?? sc.sport}</Badge>
+                  <Badge variant="info" className={SPORT_BADGE_CLASS[sc.sport]}>
+                    {SPORT_LABELS[sc.sport] ?? sc.sport}
+                  </Badge>
                   {entries.map(([k, v]) => (
                     <Row key={k} label={labelField(k)} value={labelValue(v)} />
                   ))}
@@ -163,6 +172,7 @@ export default async function FichaDetailPage({ params }: Props) {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

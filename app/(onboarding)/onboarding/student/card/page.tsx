@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 
@@ -16,12 +16,12 @@ const LEVEL_OPTIONS = [
 ];
 
 const TA_CLASS =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-cyan-600";
+  "w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border-t border-white/10 pt-4">
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-white/50">
+    <div className="border-t border-brand-border pt-4">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-primary/70">
         {children}
       </h3>
     </div>
@@ -145,13 +145,13 @@ export default function StudentCardPage() {
   return (
     <Card>
       <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
           Paso 2 de 3 — Opcional
         </div>
         <CardTitle>Ficha deportiva general</CardTitle>
-        <p className="text-sm text-white/70">
+        <CardDescription>
           Esta información ayuda a los entrenadores a encontrarte. Puedes completarla después.
-        </p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -210,7 +210,7 @@ export default function StudentCardPage() {
 
           {/* Salud */}
           <SectionTitle>Salud / Condición física</SectionTitle>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
             <span>Lesiones previas</span>
             <textarea
               name="previousInjuries"
@@ -221,7 +221,7 @@ export default function StudentCardPage() {
               onChange={setStr("previousInjuries")}
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
             <span>Lesión actual</span>
             <textarea
               name="currentInjury"
@@ -240,11 +240,11 @@ export default function StudentCardPage() {
             value={fields.surgeries}
             onChange={setStr("surgeries")}
           />
-          <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-white">
+          <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-brand-primary">
             <input
               type="checkbox"
               name="asthma"
-              className="h-4 w-4 rounded border-slate-300"
+              className="h-4 w-4 rounded border-brand-border accent-interaction"
               checked={fields.asthma}
               onChange={setBool("asthma")}
             />
@@ -272,11 +272,11 @@ export default function StudentCardPage() {
 
           {/* Visibilidad */}
           <SectionTitle>Visibilidad</SectionTitle>
-          <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-white">
+          <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-brand-primary">
             <input
               type="checkbox"
               name="isPublic"
-              className="h-4 w-4 rounded border-slate-300"
+              className="h-4 w-4 rounded border-brand-border accent-interaction"
               checked={fields.isPublic}
               onChange={setBool("isPublic")}
             />
@@ -285,7 +285,7 @@ export default function StudentCardPage() {
 
           {error ? (
             <p
-              className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
               role="alert"
             >
               {error}

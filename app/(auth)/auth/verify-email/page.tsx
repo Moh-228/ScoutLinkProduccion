@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -108,7 +108,7 @@ function VerifyEmailContent() {
       <div className="mb-6">
         <Link
           href="/auth/register"
-          className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
         >
           <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -119,11 +119,11 @@ function VerifyEmailContent() {
       <Card>
         <CardHeader>
           <CardTitle>Verifica tu correo</CardTitle>
-          <p className="text-sm text-white/70">
+          <CardDescription>
             Enviamos un código de 6 dígitos a{" "}
-            <span className="font-semibold text-white">{email || "tu correo"}</span>.
+            <span className="font-semibold text-brand-primary">{email || "tu correo"}</span>.
             Ingrésalo a continuación para activar tu cuenta.
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -142,8 +142,8 @@ function VerifyEmailContent() {
                   onKeyDown={(e) => handleKeyDown(i, e)}
                   onPaste={handlePaste}
                   aria-label={`Dígito ${i + 1}`}
-                  className="h-14 w-12 rounded-lg border border-white/20 bg-white/5 text-center text-2xl font-bold text-white
-                    caret-transparent outline-none transition focus:border-[#1883FF] focus:ring-1 focus:ring-[#1883FF]
+                  className="h-14 w-12 rounded-lg border border-brand-border bg-white text-center text-2xl font-bold text-brand-primary
+                    caret-transparent outline-none transition focus:border-interaction focus:ring-2 focus:ring-interaction
                     disabled:opacity-50 sm:w-14"
                   disabled={isSubmitting}
                 />
@@ -151,13 +151,13 @@ function VerifyEmailContent() {
             </div>
 
             {error ? (
-              <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
                 {error}
               </p>
             ) : null}
 
             {info ? (
-              <p className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100" role="status">
+              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">
                 {info}
               </p>
             ) : null}
@@ -167,13 +167,13 @@ function VerifyEmailContent() {
             </Button>
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-1 text-sm text-white/60">
+          <div className="mt-5 flex items-center justify-center gap-1 text-sm text-brand-primary/70">
             <span>¿No recibiste el correo?</span>
             <button
               type="button"
               onClick={handleResend}
               disabled={resendCooldown > 0}
-              className="font-semibold text-[#1883FF] hover:text-[#75C3FF] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              className="rounded font-semibold text-brand-secondary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
             >
               {resendCooldown > 0 ? `Reenviar (${resendCooldown}s)` : "Reenviar código"}
             </button>

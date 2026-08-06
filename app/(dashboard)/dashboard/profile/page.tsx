@@ -4,10 +4,13 @@ import { redirect } from "next/navigation";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { Icon } from "@/components/Icon";
 import { verifySession } from "@/lib/auth";
 import { labelField, labelValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
+import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { CardVisibilityToggle } from "./_components/CardVisibilityToggle";
+import { SpecializedCardActions } from "./_components/SpecializedCardActions";
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -28,19 +31,54 @@ const EXP_LABELS: Record<string, string> = {
   advanced: "Avanzado",
 };
 
-function Row({ label, value }: { label: string; value?: string | number | null }) {
+function Row({ label, value }: { label: string; value?: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
     <div className="grid grid-cols-[160px_1fr] gap-2 text-sm">
-      <span className="font-medium text-white/50">{label}</span>
-      <span className="text-white">{value}</span>
+      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="min-w-0 wrap-break-word text-brand-primary">{value}</span>
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-white/40">{children}</p>
+    <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">{children}</p>
+  );
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
+function ageFromBirthDate(birthDate: Date | null | undefined) {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+  if (!hasHadBirthdayThisYear) age -= 1;
+  return age;
+}
+
+function IdentityField({ label, value }: { label: string; value?: React.ReactNode }) {
+  if (!value && value !== 0) return null;
+  return (
+    <div className="w-full space-y-1 text-left">
+      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">{label}</p>
+      {typeof value === "string" || typeof value === "number" ? (
+        <p className="text-sm text-brand-primary">{value}</p>
+      ) : (
+        value
+      )}
+    </div>
   );
 }
 
@@ -69,27 +107,130 @@ export default async function ProfilePage() {
   const medicalInfo = user.generalCard?.medicalInfo as Record<string, unknown> | null;
   const documents = user.generalCard?.documents as Record<string, unknown> | null;
 
+  const displayName = isStudent
+    ? user.studentProfile?.fullName
+    : isCoach
+      ? user.coachProfile?.displayName
+      : "Administrador";
+  const photoUrl = isStudent ? user.studentProfile?.photoUrl : isCoach ? user.coachProfile?.photoUrl : null;
+  const age = isStudent ? ageFromBirthDate(user.studentProfile?.birthDate) : null;
+  const bio = isCoach ? user.coachProfile?.bio : null;
+
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex w-full items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Mi perfil</h1>
-          <p className="text-white/60">{user.email}</p>
+          <h1 className="text-xl font-bold text-brand-primary">Mi perfil</h1>
+          {displayName && <p className="text-sm font-semibold text-brand-primary">{displayName}</p>}
+          <p className="text-brand-primary/70">{user.email}</p>
         </div>
-        <Link
-          href={isStudent ? "/onboarding/student" : isCoach ? "/onboarding/coach" : "#"}
-          className={buttonClassNames("secondary")}
-        >
-          Editar perfil
-        </Link>
+        {(isStudent || isCoach) && (
+          <Link
+            href={isStudent ? "/onboarding/student" : "/onboarding/coach"}
+            className={buttonClassNames("secondary", "gap-2")}
+          >
+            <Icon name="person_edit" size={16} />
+            Editar perfil
+          </Link>
+        )}
       </header>
+
+      <div className="mx-auto w-full max-w-2xl space-y-6">
+      {(isStudent || isCoach) && displayName && (
+        <Card>
+          <div className="flex items-center gap-4">
+            {photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={photoUrl}
+                alt={displayName}
+                className="h-24 w-24 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-brand-primary text-2xl font-bold text-white"
+              >
+                {initials(displayName)}
+              </span>
+            )}
+            <div>
+              <p className="text-xl font-bold text-brand-primary">{displayName}</p>
+              {age !== null && <p className="text-sm text-brand-primary/60">{age} años</p>}
+            </div>
+          </div>
+
+          <div className="w-full border-t border-brand-border/50" />
+
+          <div className="grid w-full grid-cols-2 gap-4">
+            {isStudent ? (
+              <>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Escuela</p>
+                  <p className="text-sm font-semibold text-brand-primary">{user.studentProfile?.school ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Semestre</p>
+                  <p className="text-sm font-semibold text-brand-primary">{user.studentProfile?.semester ?? "—"}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Unidad académica</p>
+                  <p className="text-sm font-semibold text-brand-primary">{user.coachProfile?.academicUnit ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Años de experiencia</p>
+                  <p className="text-sm font-semibold text-brand-primary">{user.coachProfile?.yearsExperience ?? "—"}</p>
+                </div>
+              </>
+            )}
+          </div>
+
+          <IdentityField label="Bio" value={bio} />
+
+          {isStudent && user.studentProfile?.favoriteSport && (
+            <IdentityField
+              label="Deporte favorito"
+              value={
+                <Badge variant="neutral" className={`w-fit ${SPORT_BADGE_CLASS[user.studentProfile.favoriteSport]}`}>
+                  {SPORT_LABELS[user.studentProfile.favoriteSport] ?? user.studentProfile.favoriteSport}
+                </Badge>
+              }
+            />
+          )}
+
+          {isCoach && user.coachProfile && user.coachProfile.sports.length > 0 && (
+            <IdentityField
+              label="Deportes"
+              value={
+                <div className="flex flex-wrap gap-1.5">
+                  {user.coachProfile.sports.map((s) => (
+                    <Badge key={s} variant="neutral" className={`w-fit ${SPORT_BADGE_CLASS[s] ?? ""}`}>
+                      {SPORT_LABELS[s] ?? s}
+                    </Badge>
+                  ))}
+                </div>
+              }
+            />
+          )}
+
+          {isStudent && user.studentProfile?.socialLink && (
+            <IdentityField
+              label="Red social"
+              value={<Badge variant="neutral" className="w-fit">{user.studentProfile.socialLink}</Badge>}
+            />
+          )}
+        </Card>
+      )}
 
       {isStudent && user.studentProfile && (
         <Card>
           <CardHeader>
             <CardTitle>Perfil estudiantil</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             <Row label="Nombre" value={user.studentProfile.fullName} />
             <Row label="Escuela" value={user.studentProfile.school} />
             <Row label="Semestre" value={user.studentProfile.semester} />
@@ -112,7 +253,7 @@ export default async function ProfilePage() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             {user.generalCard ? (
               <>
                 <Row label="Estatura" value={user.generalCard.heightCm ? `${user.generalCard.heightCm} cm` : undefined} />
@@ -144,7 +285,7 @@ export default async function ProfilePage() {
                 )}
               </>
             ) : (
-              <p className="text-sm text-white/40">Aún no has completado tu ficha general.</p>
+              <p className="text-sm text-brand-primary/50">Aún no has completado tu ficha general.</p>
             )}
           </CardContent>
         </Card>
@@ -156,29 +297,34 @@ export default async function ProfilePage() {
             <div className="flex items-center justify-between gap-2">
               <CardTitle>Fichas especializadas</CardTitle>
               <Link href="/onboarding/student/specialized" className={buttonClassNames("secondary") + " text-xs px-3 py-1"}>
-                {user.specializedCards.length > 0 ? "Editar / Agregar" : "Agregar"}
+                + Agregar ficha
               </Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {user.specializedCards.length === 0 ? (
-              <p className="text-sm text-white/40">Aún no tienes fichas especializadas.</p>
+              <p className="text-sm text-brand-primary/50">Aún no tienes fichas especializadas.</p>
             ) : (
               user.specializedCards.map((sc) => {
                 const data = sc.data as Record<string, unknown>;
                 return (
-                  <div key={sc.id} className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="info">{SPORT_LABELS[sc.sport] ?? sc.sport}</Badge>
+                  <div key={sc.id} className="rounded-lg border border-brand-border/50 bg-brand-background p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge variant="info" className={SPORT_BADGE_CLASS[sc.sport]}>
+                        {SPORT_LABELS[sc.sport] ?? sc.sport}
+                      </Badge>
+                      <SpecializedCardActions sport={sc.sport} />
                     </div>
-                    {Object.entries(data)
-                      .filter(([, v]) => v !== "" && v !== false && v !== null && v !== undefined)
-                      .map(([k, v]) => (
-                        <div key={k} className="grid grid-cols-[200px_1fr] gap-2 text-sm">
-                          <span className="font-medium text-white/50">{labelField(k)}</span>
-                          <span className="text-white">{labelValue(v)}</span>
-                        </div>
-                      ))}
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(data)
+                        .filter(([, v]) => v !== "" && v !== false && v !== null && v !== undefined)
+                        .map(([k, v]) => (
+                          <div key={k} className="grid grid-cols-[200px_1fr] gap-2 text-sm">
+                            <span className="font-medium text-brand-primary/50">{labelField(k)}</span>
+                            <span className="text-brand-primary">{labelValue(v)}</span>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 );
               })
@@ -192,7 +338,7 @@ export default async function ProfilePage() {
           <CardHeader>
             <CardTitle>Perfil de entrenador</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             <Row label="Nombre" value={user.coachProfile.displayName} />
             <Row label="Unidad académica" value={user.coachProfile.academicUnit} />
             <Row label="Teléfono" value={user.coachProfile.phone} />
@@ -211,17 +357,29 @@ export default async function ProfilePage() {
           <CardHeader>
             <CardTitle>Verificaciones</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             {user.coachVerifications.map((v) => (
               <Row
                 key={v.sport}
                 label={SPORT_LABELS[v.sport] ?? v.sport}
-                value={v.status === "verified" ? "✓ Verificado" : v.status === "rejected" ? "✗ Rechazado" : "⏳ Pendiente"}
+                value={
+                  v.status === "verified" ? (
+                    "✓ Verificado"
+                  ) : v.status === "rejected" ? (
+                    "✗ Rechazado"
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Icon name="hourglass" size={14} />
+                      Pendiente
+                    </span>
+                  )
+                }
               />
             ))}
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

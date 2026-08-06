@@ -139,7 +139,7 @@ const WEEK_DAYS = [
 ];
 
 const TA_CLASS =
-  "w-full rounded-lg border border-[#18181b] bg-white px-3 py-2 text-black shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-[#18181b] text-sm";
+  "w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40 text-sm";
 
 // ─── Helper UI components ─────────────────────────────────────────────────────
 
@@ -149,7 +149,7 @@ function Row({ children }: { children: React.ReactNode }) {
 
 function SubTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-2 border-t border-white/10 pt-4 text-xs font-semibold uppercase tracking-widest text-white/40">
+    <p className="mt-2 border-t border-brand-border/50 pt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
       {children}
     </p>
   );
@@ -162,7 +162,7 @@ function TextArea({
   rows?: number; placeholder?: string;
 }) {
   return (
-    <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-white">
+    <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
       <span>{label}</span>
       <textarea
         id={id} rows={rows} value={value}
@@ -183,13 +183,13 @@ function DaysToggle({
   }
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-white">{label}</p>
+      <p className="text-sm font-medium text-brand-primary">{label}</p>
       <div className="flex flex-wrap gap-2">
         {WEEK_DAYS.map((d) => (
           <button key={d.value} type="button" onClick={() => toggle(d.value)}
             className={[
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              selected.includes(d.value) ? "bg-[#1883ff] text-white" : "bg-white/10 text-white/70 hover:bg-white/20",
+              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
+              selected.includes(d.value) ? "bg-interaction text-white" : "bg-brand-background text-brand-primary/70 hover:bg-brand-border/30",
             ].join(" ")}
           >
             {d.label}
@@ -213,18 +213,18 @@ function StepIndicator({ steps, current }: { steps: StepId[]; current: number })
             <li key={step} className="flex items-center gap-1">
               <span className={[
                 "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                done ? "bg-emerald-500/30 text-emerald-300" : active ? "bg-[#1883ff] text-white" : "bg-white/10 text-white/40",
+                done ? "bg-emerald-100 text-emerald-700" : active ? "bg-interaction text-white" : "bg-brand-background text-brand-primary/50",
               ].join(" ")}>
                 {done ? "✓" : i + 1}
               </span>
               <span className={[
                 "hidden text-xs sm:inline",
-                active ? "font-semibold text-white" : "text-white/40",
+                active ? "font-semibold text-brand-primary" : "text-brand-primary/50",
               ].join(" ")}>
                 {STEP_LABELS[step]}
               </span>
               {i < steps.length - 1 && (
-                <svg aria-hidden="true" className="mx-1 h-3 w-3 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="mx-1 h-3 w-3 text-brand-primary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               )}
@@ -248,10 +248,10 @@ function SportCharacteristicsPanel({
   const fields = SPORT_CHARACTERISTICS[sport] ?? [];
 
   if (!sport) {
-    return <p className="py-4 text-sm text-white/40">Selecciona un deporte en el primer paso para ver las características disponibles.</p>;
+    return <p className="py-4 text-sm text-brand-primary/50">Selecciona un deporte en el primer paso para ver las características disponibles.</p>;
   }
   if (fields.length === 0) {
-    return <p className="py-4 text-sm text-white/40">No hay características definidas para este deporte.</p>;
+    return <p className="py-4 text-sm text-brand-primary/50">No hay características definidas para este deporte.</p>;
   }
 
   function toggleSkill(key: string, skill: string) {
@@ -261,7 +261,7 @@ function SportCharacteristicsPanel({
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-white/60">
+      <p className="text-sm text-brand-primary/70">
         Selecciona las características que buscas. Estas se compararán con las fichas especializadas de los postulantes para calcular la afinidad de perfil.
       </p>
       {fields.map((field) => {
@@ -296,22 +296,22 @@ function SportCharacteristicsPanel({
         const selected = (characteristics[field.key] as string[] | undefined) ?? [];
         return (
           <div key={field.key} className="space-y-2">
-            <p className="text-sm font-medium text-white">{field.label}</p>
+            <p className="text-sm font-medium text-brand-primary">{field.label}</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               {field.options.map((opt) => (
-                <label key={opt.value} className="flex cursor-pointer items-center gap-2 text-sm text-white/80 hover:text-white">
+                <label key={opt.value} className="flex cursor-pointer items-center gap-2 text-sm text-brand-primary/70 hover:text-brand-primary">
                   <input
                     type="checkbox"
                     checked={selected.includes(opt.value)}
                     onChange={() => toggleSkill(field.key, opt.value)}
-                    className="h-4 w-4 rounded border-slate-400 accent-[#1883ff]"
+                    className="h-4 w-4 rounded border-brand-border accent-interaction"
                   />
                   {opt.label}
                 </label>
               ))}
             </div>
             {selected.length > 0 && (
-              <p className="text-xs text-[#1883ff]/70">
+              <p className="text-xs text-interaction">
                 {selected.length} seleccionada{selected.length !== 1 ? "s" : ""}
               </p>
             )}
@@ -505,7 +505,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
               required
             />
             <Row>
-              <Input id="organizer" label="Organizador" value={organizerName} readOnly className="bg-slate-100 cursor-not-allowed" />
+              <Input id="organizer" label="Organizador" value={organizerName} readOnly className="bg-brand-background cursor-not-allowed" />
               <Input id="academicUnit" label="Unidad académica" value={form.academicUnit} onChange={(e) => set("academicUnit", e.target.value)} placeholder="Ej: ESIME Zacatenco" />
             </Row>
             <Select id="visibility" label="Visibilidad" options={VISIBILITY_OPTIONS} value={form.visibility} onChange={(e) => set("visibility", e.target.value)} />
@@ -601,12 +601,12 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
             </Row>
             <Input id="cost" label="Costo (opcional)" value={form.cost} onChange={(e) => set("cost", e.target.value)} placeholder="Ej: Gratis, $150 MXN…" />
             <TextArea id="notes" label="Notas / políticas" value={form.notes} onChange={(v) => set("notes", v)} placeholder="Reglas de pago, políticas de cancelación…" />
-            <label className="flex cursor-pointer items-center gap-3 text-sm text-white/90">
+            <label className="flex cursor-pointer items-center gap-3 text-sm text-brand-primary/70">
               <input
                 type="checkbox"
                 checked={form.autoClose}
                 onChange={(e) => set("autoClose", e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-[#1883ff]"
+                className="h-4 w-4 rounded border-brand-border accent-interaction"
               />
               Cerrar registro automáticamente al alcanzar el cupo
             </label>
@@ -636,7 +636,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
         <CardHeader>
           <CardTitle>{STEP_LABELS[currentStepId]}</CardTitle>
           {currentStepId === "sport_characteristics" && form.sport && (
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-brand-primary/50">
               {SPORT_OPTIONS.find((o) => o.value === form.sport)?.label ?? form.sport}
             </p>
           )}
@@ -647,7 +647,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
       </Card>
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
       )}
 
       <div className="flex justify-between gap-3 pb-8">
@@ -657,7 +657,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
           onClick={isFirstStep ? () => router.push("/dashboard/events") : handleBack}
           disabled={isSubmitting}
         >
-          {isFirstStep ? "Cancelar" : "← Atrás"}
+          {isFirstStep ? "Cancelar" : "Atrás"}
         </Button>
         {isLastStep ? (
           <Button onClick={handleSubmit} disabled={isSubmitting || !form.sport || !form.title}>
@@ -665,7 +665,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
           </Button>
         ) : (
           <Button type="button" onClick={handleNext} disabled={isSubmitting}>
-            Siguiente →
+            Siguiente
           </Button>
         )}
       </div>

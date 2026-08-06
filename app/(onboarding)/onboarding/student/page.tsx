@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 
@@ -114,13 +114,13 @@ export default function StudentOnboardingPage() {
   return (
     <Card>
       <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
           Paso 1 de 3
         </div>
         <CardTitle>Completa tu perfil</CardTitle>
-        <p className="text-sm text-white/70">
+        <CardDescription>
           Estos datos son obligatorios para usar la plataforma.
-        </p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -162,13 +162,13 @@ export default function StudentOnboardingPage() {
             onChange={set("semester")}
           />
           <div>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
               <span>Género</span>
               <select
                 name="gender"
                 value={values.gender}
                 onChange={set("gender")}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition-colors focus:border-cyan-600"
+                className="w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors focus:border-interaction focus:ring-2 focus:ring-interaction/40"
               >
                 <option value="">Prefiero no decir</option>
                 <option value="male">Masculino</option>
@@ -196,14 +196,25 @@ export default function StudentOnboardingPage() {
           />
 
           {error ? (
-            <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
               {error}
             </p>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Guardando..." : "Continuar"}
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => router.push("/dashboard/profile")}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Guardando..." : "Continuar"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

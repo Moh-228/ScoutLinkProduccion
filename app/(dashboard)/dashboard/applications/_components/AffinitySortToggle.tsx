@@ -22,10 +22,10 @@ export function AffinitySortToggle({ active }: { active: boolean }) {
     <button
       onClick={toggle}
       className={[
-        "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
+        "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
         active
-          ? "border-cyan-500 bg-cyan-500/20 text-cyan-300"
-          : "border-white/20 bg-white/5 text-white/60 hover:border-white/40 hover:text-white",
+          ? "border-interaction bg-interaction/10 text-interaction"
+          : "border-brand-border bg-white text-brand-primary/70 hover:border-brand-primary/40 hover:text-brand-primary",
       ].join(" ")}
     >
       <svg

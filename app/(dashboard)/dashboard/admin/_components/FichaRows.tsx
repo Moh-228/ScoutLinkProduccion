@@ -6,6 +6,8 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
+import { Icon, type IconName } from "@/components/Icon";
+import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 
 // ─── Shared action button ─────────────────────────────────────────────────────
 
@@ -16,6 +18,7 @@ function ActionButton({
   label,
   confirmText,
   variant = "danger",
+  icon,
 }: {
   url: string;
   method?: string;
@@ -23,6 +26,8 @@ function ActionButton({
   label: string;
   confirmText?: string;
   variant?: "danger" | "secondary";
+  /** When set, renders as a compact icon-only button instead of a text label. */
+  icon?: IconName;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -43,17 +48,39 @@ function ActionButton({
     startTransition(() => router.refresh());
   }
 
+  if (icon) {
+    const iconCls =
+      variant === "danger"
+        ? "border-brand-border bg-white text-red-600 hover:bg-red-50"
+        : "border-brand-border bg-white text-brand-primary/70 hover:bg-brand-background";
+    return (
+      <div>
+        <button
+          type="button"
+          title={label}
+          aria-label={label}
+          disabled={loading || pending}
+          onClick={handleAction}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction disabled:cursor-not-allowed disabled:opacity-60 ${iconCls}`}
+        >
+          <Icon name={icon} size={16} />
+        </button>
+        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      </div>
+    );
+  }
+
   const cls =
     variant === "danger"
-      ? "px-3 py-1 text-xs text-red-400 hover:bg-red-500/20"
-      : "px-3 py-1 text-xs text-white/60 hover:bg-white/10";
+      ? "px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+      : "px-3 py-1 text-xs text-brand-primary/70 hover:bg-brand-background";
 
   return (
     <div>
-      <Button variant="ghost" disabled={loading || pending} onClick={handleAction} className={cls}>
+      <Button variant="secondary" disabled={loading || pending} onClick={handleAction} className={cls}>
         {loading ? "..." : label}
       </Button>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -139,11 +166,11 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
   const docs = card.documents as Record<string, unknown> | null;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+    <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-semibold">{name}</p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-brand-primary/70">
             {card.heightCm ? `${card.heightCm} cm` : "—"} ·{" "}
             {card.weightKg ? `${card.weightKg} kg` : "—"}
             {card.experienceLevel
@@ -155,16 +182,16 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           </Badge>
           {docs && !!(docs.inscriptionProof || docs.medicalInsurance) && (
             <div className="mt-2 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/40">Documentos</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Documentos</p>
               {docs.inscriptionProof ? (
-                <p className="text-xs text-white/70">
-                  <span className="text-white/40">Comprobante de inscripción:</span>{" "}
+                <p className="text-xs text-brand-primary/70">
+                  <span className="text-brand-primary/50">Comprobante de inscripción:</span>{" "}
                   {String(docs.inscriptionProof)}
                 </p>
               ) : null}
               {docs.medicalInsurance ? (
-                <p className="text-xs text-white/70">
-                  <span className="text-white/40">Comprobante de servicio médico:</span>{" "}
+                <p className="text-xs text-brand-primary/70">
+                  <span className="text-brand-primary/50">Comprobante de servicio médico:</span>{" "}
                   {String(docs.medicalInsurance)}
                 </p>
               ) : null}
@@ -175,16 +202,19 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           <Link href={`/dashboard/fichas/${card.id}`}>
             <Button variant="secondary" className="px-3 py-1 text-xs">Ver detalle</Button>
           </Link>
-          <Button
-            variant="ghost"
-            className="px-3 py-1 text-xs text-white/60 hover:bg-white/10"
+          <button
+            type="button"
+            title={expanded ? "Ocultar" : "Editar"}
+            aria-label={expanded ? "Ocultar" : "Editar"}
             onClick={() => setExpanded((v) => !v)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
           >
-            {expanded ? "Ocultar" : "Editar"}
-          </Button>
+            <Icon name={expanded ? "close" : "edit"} size={16} />
+          </button>
           <ActionButton
             url={`/api/admin/fichas/student-general/${card.id}`}
             label="Eliminar"
+            icon="delete"
             confirmText={`¿Eliminar la ficha general de ${name}? Esta acción es irreversible.`}
           />
         </div>
@@ -226,15 +256,15 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
   }
 
   const inputCls =
-    "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder:text-white/30 outline-none";
+    "w-full rounded-lg border border-brand-border bg-white px-3 py-1.5 text-sm text-brand-primary placeholder:text-brand-primary/50 outline-none focus:border-interaction focus:ring-2 focus:ring-interaction/40";
 
   return (
-    <div className="mt-2 rounded-lg border border-white/10 bg-black/20 p-3 space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+    <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
         Editar ficha general
       </p>
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-xs text-white/60">
+        <label className="flex flex-col gap-1 text-xs text-brand-primary/70">
           Estatura (cm)
           <input
             className={inputCls}
@@ -243,7 +273,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
             placeholder="175"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-white/60">
+        <label className="flex flex-col gap-1 text-xs text-brand-primary/70">
           Peso (kg)
           <input
             className={inputCls}
@@ -252,7 +282,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
             placeholder="70"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-white/60">
+        <label className="flex flex-col gap-1 text-xs text-brand-primary/70">
           Teléfono
           <input
             className={inputCls}
@@ -262,7 +292,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
             maxLength={10}
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-white/60">
+        <label className="flex flex-col gap-1 text-xs text-brand-primary/70">
           Correo público
           <input
             className={inputCls}
@@ -272,7 +302,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
             placeholder="contacto@correo.com"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-white/60">
+        <label className="flex flex-col gap-1 text-xs text-brand-primary/70">
           Nivel de experiencia
           <select
             className={inputCls}
@@ -285,17 +315,18 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
             <option value="advanced">Avanzado</option>
           </select>
         </label>
-        <label className="flex items-center gap-2 text-xs text-white/60 pt-4">
+        <label className="flex items-center gap-2 text-xs text-brand-primary/70 pt-4">
           <input
             type="checkbox"
             checked={values.isPublic}
             onChange={(e) => setValues((v) => ({ ...v, isPublic: e.target.checked }))}
+            className="h-4 w-4 rounded border-brand-border accent-interaction"
           />
           Ficha pública
         </label>
       </div>
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      {success && <p className="text-xs text-emerald-400">Guardado correctamente.</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      {success && <p className="text-xs text-emerald-700">Guardado correctamente.</p>}
       <Button onClick={handleSave} disabled={saving} className="text-xs px-3 py-1">
         {saving ? "Guardando..." : "Guardar cambios"}
       </Button>
@@ -312,18 +343,18 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
       : [];
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+    <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-semibold">{name}</p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-brand-primary/70">
             Deporte: {sportLabels[card.sport] ?? card.sport}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
-            className="px-3 py-1 text-xs text-white/60 hover:bg-white/10"
+            variant="secondary"
+            className="px-3 py-1 text-xs"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? "Ocultar" : "Ver datos"}
@@ -331,24 +362,25 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
           <ActionButton
             url={`/api/admin/fichas/student-specialized/${card.id}`}
             label="Eliminar"
+            icon="delete"
             confirmText={`¿Eliminar la ficha especializada de ${name}? Esta acción es irreversible.`}
           />
         </div>
       </div>
 
       {expanded && (
-        <div className="mt-2 rounded-lg border border-white/10 bg-black/20 p-3 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+        <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
             Datos especializados — {sportLabels[card.sport] ?? card.sport}
           </p>
           {dataEntries.length === 0 ? (
-            <p className="text-xs text-white/40">Sin datos registrados.</p>
+            <p className="text-xs text-brand-primary/50">Sin datos registrados.</p>
           ) : (
             <div className="grid grid-cols-2 gap-x-6 gap-y-1">
               {dataEntries.map(([k, v]) => (
                 <div key={k} className="flex justify-between text-xs">
-                  <span className="text-white/50 capitalize">{k.replace(/_/g, " ")}</span>
-                  <span className="text-white font-medium">{String(v ?? "—")}</span>
+                  <span className="text-brand-primary/50 capitalize">{k.replace(/_/g, " ")}</span>
+                  <span className="text-brand-primary font-medium">{String(v ?? "—")}</span>
                 </div>
               ))}
             </div>
@@ -364,25 +396,31 @@ export function EventRow({ event }: { event: EventCard }) {
   const isOpen = event.status === "open";
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-background p-3">
       <div>
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <Badge variant="info">{eventTypeLabels[event.type] ?? event.type}</Badge>
+          <Badge variant="neutral" className={SPORT_BADGE_CLASS[event.sport]}>
+            {sportLabels[event.sport] ?? event.sport}
+          </Badge>
+          <Badge variant={isOpen ? "success" : "neutral"}>
+            {isOpen ? "Abierto" : "Cerrado"}
+          </Badge>
+        </div>
         <p className="font-semibold">{event.title}</p>
-        <p className="text-sm text-slate-400">
-          {eventTypeLabels[event.type] ?? event.type} · {sportLabels[event.sport] ?? event.sport}
-        </p>
-        <p className="text-sm text-slate-400">Coach: {coachName}</p>
+        <p className="text-sm text-brand-primary/70">Coach: {coachName}</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={isOpen ? "success" : "neutral"}>
-          {isOpen ? "Abierto" : "Cerrado"}
-        </Badge>
         <Link href={`/dashboard/events/${event.id}`}>
           <Button variant="secondary" className="px-3 py-1 text-xs">Ver</Button>
         </Link>
-        <Link href={`/dashboard/events/${event.id}/edit`}>
-          <Button variant="ghost" className="px-3 py-1 text-xs text-white/60 hover:bg-white/10">
-            Editar
-          </Button>
+        <Link
+          href={`/dashboard/events/${event.id}/edit`}
+          title="Editar"
+          aria-label="Editar"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+        >
+          <Icon name="edit" size={16} />
         </Link>
         {isOpen && (
           <ActionButton
@@ -397,6 +435,7 @@ export function EventRow({ event }: { event: EventCard }) {
         <ActionButton
           url={`/api/admin/fichas/events/${event.id}`}
           label="Eliminar"
+          icon="delete"
           confirmText={`¿Eliminar "${event.title}"? Esta acción es irreversible.`}
         />
       </div>
@@ -408,13 +447,13 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+    <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-semibold">{coach.displayName}</p>
-          <p className="text-sm text-slate-400">{coach.user.email}</p>
+          <p className="text-sm text-brand-primary/70">{coach.user.email}</p>
           {coach.academicUnit && (
-            <p className="text-sm text-slate-400">{coach.academicUnit}</p>
+            <p className="text-sm text-brand-primary/70">{coach.academicUnit}</p>
           )}
           <div className="mt-1 flex flex-wrap gap-1">
             {coach.user.coachVerifications.map((v) => (
@@ -434,8 +473,8 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
           </div>
         </div>
         <Button
-          variant="ghost"
-          className="px-3 py-1 text-xs text-white/60 hover:bg-white/10"
+          variant="secondary"
+          className="px-3 py-1 text-xs"
           onClick={() => setExpanded((v) => !v)}
         >
           {expanded ? "Ocultar" : "Ver detalle"}
@@ -443,22 +482,22 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
       </div>
 
       {expanded && (
-        <div className="mt-2 rounded-lg border border-white/10 bg-black/20 p-3 space-y-2 text-sm">
+        <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-2 text-sm">
           {coach.phone && (
             <p>
-              <span className="text-white/50">Teléfono:</span> {coach.phone}
+              <span className="text-brand-primary/50">Teléfono:</span> {coach.phone}
             </p>
           )}
           {coach.sports.length > 0 && (
             <p>
-              <span className="text-white/50">Deportes:</span>{" "}
+              <span className="text-brand-primary/50">Deportes:</span>{" "}
               {coach.sports.map((s) => sportLabels[s] ?? s).join(", ")}
             </p>
           )}
           {coach.bio && (
             <div>
-              <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Biografía</p>
-              <p className="text-white/80 whitespace-pre-line">{coach.bio}</p>
+              <p className="text-brand-primary/50 text-xs uppercase tracking-widest mb-1">Biografía</p>
+              <p className="text-brand-primary/70 whitespace-pre-line">{coach.bio}</p>
             </div>
           )}
         </div>

@@ -12,7 +12,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const [visible, setVisible] = useState(false);
 
     return (
-      <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-white">
+      <label htmlFor={id} className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
         {label ? <span>{label}</span> : null}
         <div className="relative">
           <input
@@ -20,7 +20,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             ref={ref}
             type={visible ? "text" : "password"}
             className={[
-              "w-full rounded-lg border border-[#18181b] bg-white px-3 py-2 pr-10 text-black shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-[#18181b]",
+              "w-full rounded-lg border border-brand-border bg-white px-3 py-2 pr-10 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40",
               className,
             ]
               .filter(Boolean)
@@ -31,7 +31,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             type="button"
             aria-label={visible ? "Ocultar contraseña" : "Mantén presionado para ver contraseña"}
             title="Mantén presionado para ver"
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 select-none cursor-pointer"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-brand-muted hover:text-brand-primary select-none cursor-pointer"
             onPointerDown={(e) => {
               e.preventDefault();
               setVisible(true);

@@ -36,15 +36,15 @@ export function CardVisibilityToggle({ initialIsPublic }: { initialIsPublic: boo
 	return (
 		<div className="flex items-center justify-between gap-3">
 			<div>
-				<p className="text-sm font-medium text-white">
+				<p className="text-sm font-medium text-brand-primary">
 					{isPublic ? "Ficha visible al público" : "Ficha oculta"}
 				</p>
-				<p className="text-xs text-white/50">
+				<p className="text-xs text-brand-primary/50">
 					{isPublic
 						? "Entrenadores pueden encontrarte en el directorio."
 						: "Solo tú puedes ver tu ficha."}
 				</p>
-				{error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+				{error && <p className="text-xs text-red-600 mt-1">{error}</p>}
 			</div>
 			<button
 				onClick={toggle}
@@ -52,8 +52,8 @@ export function CardVisibilityToggle({ initialIsPublic }: { initialIsPublic: boo
 				role="switch"
 				aria-checked={isPublic}
 				className={[
-					"relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
-					isPublic ? "bg-[#1883ff]" : "bg-white/20",
+					"relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+					isPublic ? "bg-interaction" : "bg-brand-border",
 				].join(" ")}
 			>
 				<span

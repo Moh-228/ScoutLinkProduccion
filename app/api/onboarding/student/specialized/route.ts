@@ -36,3 +36,24 @@ export async function POST(request: Request) {
 		return Response.json({ ok: false, message: "No se pudo guardar la ficha." }, { status: 500 });
 	}
 }
+
+export async function DELETE(request: Request) {
+	const session = await verifySession();
+
+	if (!session || session.role !== "student") {
+		return Response.json({ ok: false, message: "No autorizado." }, { status: 401 });
+	}
+
+	const { searchParams } = new URL(request.url);
+	const parsedSport = studentSpecializedCardSchema.shape.sport.safeParse(searchParams.get("sport"));
+
+	if (!parsedSport.success) {
+		return Response.json({ ok: false, message: "Deporte inválido." }, { status: 400 });
+	}
+
+	await prisma.studentSpecializedCard.deleteMany({
+		where: { studentId: session.userId, sport: parsedSport.data },
+	});
+
+	return Response.json({ ok: true });
+}

@@ -46,29 +46,29 @@ export function VerificationsList({ verifications }: { verifications: Verificati
   }
 
   if (verifications.length === 0) {
-    return <p className="text-sm text-slate-400">No hay solicitudes pendientes.</p>;
+    return <p className="text-sm text-brand-primary/70">No hay solicitudes pendientes.</p>;
   }
 
   return (
     <div className="space-y-3">
-      {error && <p className="rounded bg-red-500/20 px-3 py-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       {verifications.map((v) => (
-        <div key={v.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+        <div key={v.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-background p-3">
           <div>
             <p className="font-semibold">{v.coach.coachProfile?.displayName ?? v.coach.email}</p>
-            <p className="text-sm text-slate-400">Deporte: {sportLabels[v.sport] ?? v.sport}</p>
+            <p className="text-sm text-brand-primary/70">Deporte: {sportLabels[v.sport] ?? v.sport}</p>
             {v.documentUrl && (
               <a
                 href={v.documentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-cyan-400 underline hover:text-cyan-300"
+                className="text-xs text-brand-secondary underline hover:text-brand-primary"
               >
                 Ver documento certificado
               </a>
             )}
             {v.rejectionReason && (
-              <p className="text-xs text-red-400">Motivo rechazo: {v.rejectionReason}</p>
+              <p className="text-xs text-red-600">Motivo rechazo: {v.rejectionReason}</p>
             )}
           </div>
           <div className="flex items-center gap-2">

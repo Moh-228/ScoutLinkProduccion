@@ -1,10 +1,24 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { matchSports } from "@/lib/ficha-search";
 import { GeneralCardRow, SpecializedCardRow, EventRow, CoachProfileRow } from "../_components/FichaRows";
 
-export default async function AdminFichasPage() {
+type Props = { searchParams: Promise<{ q?: string }> };
+
+export default async function AdminFichasPage({ searchParams }: Props) {
+  const { q } = await searchParams;
+  const matchedSports = q ? matchSports(q) : [];
+
   const [generalCards, specializedCards, events, coachProfiles] = await Promise.all([
     prisma.studentGeneralCard.findMany({
+      where: q
+        ? {
+            OR: [
+              { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
+              { student: { email: { contains: q, mode: "insensitive" } } },
+            ],
+          }
+        : {},
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -19,6 +33,14 @@ export default async function AdminFichasPage() {
       },
     }),
     prisma.studentSpecializedCard.findMany({
+      where: q
+        ? {
+            OR: [
+              { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
+              ...(matchedSports.length > 0 ? [{ sport: { in: matchedSports } }] : []),
+            ],
+          }
+        : {},
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -28,6 +50,14 @@ export default async function AdminFichasPage() {
       },
     }),
     prisma.event.findMany({
+      where: q
+        ? {
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
+            ],
+          }
+        : {},
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -62,60 +92,60 @@ export default async function AdminFichasPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">Gestión de Fichas</h1>
-        <p className="text-slate-400">Administra fichas de deportistas, entrenadores y eventos.</p>
+        <h1 className="text-xl font-bold text-brand-primary">Gestión de Fichas</h1>
+        <p className="text-brand-primary/70">Administra fichas de deportistas, entrenadores y eventos.</p>
       </header>
 
-      <Card>
+      <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Eventos ({events.length})</CardTitle>
           <CardDescription>Todos los eventos creados por coaches. Puedes editar, desactivar o eliminar.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {events.length === 0 ? (
-            <p className="text-sm text-slate-400">Sin eventos registrados.</p>
+            <p className="text-sm text-brand-primary/70">Sin eventos registrados.</p>
           ) : (
             events.map((e) => <EventRow key={e.id} event={e} />)
           )}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Perfiles de entrenadores ({coachProfiles.length})</CardTitle>
           <CardDescription>Datos de coaches registrados y sus verificaciones por deporte.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {coachProfiles.length === 0 ? (
-            <p className="text-sm text-slate-400">Sin coaches registrados.</p>
+            <p className="text-sm text-brand-primary/70">Sin coaches registrados.</p>
           ) : (
             coachProfiles.map((c) => <CoachProfileRow key={c.userId} coach={c} />)
           )}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Fichas generales de deportistas ({generalCards.length})</CardTitle>
           <CardDescription>Ficha pública/privada de cada deportista.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {generalCards.length === 0 ? (
-            <p className="text-sm text-slate-400">Sin fichas generales.</p>
+            <p className="text-sm text-brand-primary/70">Sin fichas generales.</p>
           ) : (
             generalCards.map((c) => <GeneralCardRow key={c.id} card={c} />)
           )}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Fichas especializadas de deportistas ({specializedCards.length})</CardTitle>
           <CardDescription>Fichas por deporte de cada deportista.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {specializedCards.length === 0 ? (
-            <p className="text-sm text-slate-400">Sin fichas especializadas.</p>
+            <p className="text-sm text-brand-primary/70">Sin fichas especializadas.</p>
           ) : (
             specializedCards.map((c) => <SpecializedCardRow key={c.id} card={c} />)
           )}

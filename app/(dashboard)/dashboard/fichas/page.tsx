@@ -1,9 +1,12 @@
 import Link from "next/link";
+import type { Sport } from "@prisma/client";
 import { Badge } from "@/components/Badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardDescription, CardTitle } from "@/components/Card";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { verifySession } from "@/lib/auth";
+import { studentMatchesSportOrPosition } from "@/lib/ficha-search";
 import { prisma } from "@/lib/prisma";
+import { SPORT_BADGE_CLASS, SPORT_SOFT_BUTTON_CLASS } from "@/lib/sport-colors";
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -18,11 +21,26 @@ const EXP_LABELS: Record<string, string> = {
   advanced: "Avanzado",
 };
 
-type Props = { searchParams: Promise<{ sport?: string }> };
+const EXP_BADGE_VARIANT: Record<string, "neutral" | "info" | "warning"> = {
+  beginner: "neutral",
+  intermediate: "info",
+  advanced: "warning",
+};
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
+type Props = { searchParams: Promise<{ sport?: string; q?: string }> };
 
 export default async function FichasPage({ searchParams }: Props) {
   const session = await verifySession();
-  const { sport } = await searchParams;
+  const { sport, q } = await searchParams;
 
   const cards = await prisma.studentGeneralCard.findMany({
     where: {
@@ -39,10 +57,25 @@ export default async function FichasPage({ searchParams }: Props) {
           studentProfile: {
             select: { fullName: true, school: true, gender: true, favoriteSport: true },
           },
+          // Only needed to match `q` against sport/position — not fetched
+          // when there's nothing to search.
+          ...(q ? { specializedCards: { select: { sport: true, data: true } } } : {}),
         },
       },
     },
   });
+
+  // Search box intentionally searches sport + playing position, not the
+  // athlete's name (see Topbar placeholder for this page).
+  const visibleCards = q
+    ? cards.filter((card) =>
+        studentMatchesSportOrPosition(
+          q,
+          card.student.studentProfile?.favoriteSport,
+          (card.student as { specializedCards?: { sport: Sport; data: unknown }[] }).specializedCards ?? [],
+        ),
+      )
+    : cards;
 
   // Build a set of favorited ficha IDs for the current user
   const favoritedIds = new Set<string>();
@@ -57,82 +90,89 @@ export default async function FichasPage({ searchParams }: Props) {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-white">Fichas de deportistas</h1>
-        <p className="text-white/60">Directorio de fichas públicas con filtros.</p>
+        <h1 className="text-xl font-bold text-brand-primary">Fichas de deportistas</h1>
+        <p className="text-brand-primary/70">Directorio de fichas públicas con filtros.</p>
       </header>
 
-      <Card>
-        <CardContent className="mt-0 pt-4">
-          <form method="GET" className="grid gap-3 md:grid-cols-2">
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
-              <span>Deporte</span>
-              <select name="sport" defaultValue={sport ?? "all"} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none">
-                <option value="all">Todos</option>
-                <option value="basketball">Básquetbol</option>
-                <option value="soccer">Fútbol</option>
-                <option value="flag_football">Flag Football</option>
-                <option value="volleyball">Voleibol</option>
-              </select>
-            </label>
-            <div className="flex items-end">
-              <button type="submit" className="w-full rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20">
-                Filtrar
-              </button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {cards.length === 0 ? (
-        <p className="text-center text-white/40 py-12">No hay fichas públicas disponibles.</p>
+      {visibleCards.length === 0 ? (
+        <p className="text-center text-brand-primary/50 py-12">No hay fichas públicas disponibles.</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {cards.map((card) => {
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {visibleCards.map((card) => {
             const profile = card.student.studentProfile;
             const favSport = profile?.favoriteSport;
+            const fullName = profile?.fullName ?? "Jugador";
             return (
-              <Card key={card.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-2">
-                    <CardTitle>{profile?.fullName ?? "Jugador"}</CardTitle>
-                    {favSport && (
-                      <Badge variant="info">{SPORT_LABELS[favSport] ?? favSport}</Badge>
-                    )}
-                  </div>
-                  <CardDescription>{profile?.school ?? "—"}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-1 text-sm text-white/70">
-                  {profile?.gender && <p>Género: {profile.gender}</p>}
-                  {card.experienceLevel && (
-                    <p>Nivel: {EXP_LABELS[card.experienceLevel] ?? card.experienceLevel}</p>
+              <Card key={card.id} className="gap-4">
+                <div className="flex items-start justify-between gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white"
+                  >
+                    {initials(fullName)}
+                  </span>
+                  {session && (
+                    <FavoriteButton
+                      targetType="ficha"
+                      targetId={card.id}
+                      isFavorited={favoritedIds.has(card.id)}
+                    />
                   )}
-                  {(card.heightCm || card.weightKg) && (
-                    <p>
-                      {card.heightCm ? `${card.heightCm} cm` : ""}
-                      {card.heightCm && card.weightKg ? " · " : ""}
-                      {card.weightKg ? `${card.weightKg} kg` : ""}
-                    </p>
+                </div>
+
+                {favSport && (
+                  <Badge variant="neutral" className={`w-fit ${SPORT_BADGE_CLASS[favSport]}`}>
+                    {SPORT_LABELS[favSport] ?? favSport}
+                  </Badge>
+                )}
+
+                <div>
+                  <CardTitle className="text-base">{fullName}</CardTitle>
+                  <CardDescription>{profile?.school ?? "—"}</CardDescription>
+                </div>
+
+                <div className="space-y-1.5 text-sm">
+                  {card.heightCm && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-brand-primary/50">Estatura</span>
+                      <span className="font-semibold text-brand-primary">{card.heightCm} cm</span>
+                    </div>
+                  )}
+                  {card.weightKg && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-brand-primary/50">Peso</span>
+                      <span className="font-semibold text-brand-primary">{card.weightKg} kg</span>
+                    </div>
+                  )}
+                  {profile?.gender && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-brand-primary/50">Género</span>
+                      <span className="font-semibold text-brand-primary">{profile.gender}</span>
+                    </div>
                   )}
                   {/* Only coaches/admins see full contact info */}
                   {(session?.role === "coach" || session?.role === "admin") && card.phone && (
-                    <p>Tel: {card.phone}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-brand-primary/50">Tel</span>
+                      <span className="font-semibold text-brand-primary">{card.phone}</span>
+                    </div>
                   )}
-                  <div className="pt-2 flex items-center gap-2">
-                    <Link
-                      href={`/dashboard/fichas/${card.id}`}
-                      className="inline-block rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold text-white hover:bg-white/20"
-                    >
-                      Ver detalles →
-                    </Link>
-                    {session && (
-                      <FavoriteButton
-                        targetType="ficha"
-                        targetId={card.id}
-                        isFavorited={favoritedIds.has(card.id)}
-                      />
-                    )}
-                  </div>
-                </CardContent>
+                  {card.experienceLevel && (
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-brand-primary/50">Nivel</span>
+                      <Badge variant={EXP_BADGE_VARIANT[card.experienceLevel] ?? "neutral"}>
+                        {EXP_LABELS[card.experienceLevel] ?? card.experienceLevel}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  href={`/dashboard/fichas/${card.id}`}
+                  className={`inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction ${favSport ? SPORT_SOFT_BUTTON_CLASS[favSport] : "border border-brand-border bg-brand-background text-brand-primary hover:bg-brand-border/20"}`}
+                >
+                  Ver perfil
+                </Link>
               </Card>
             );
           })}

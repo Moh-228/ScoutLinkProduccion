@@ -8,6 +8,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { SPORT_CHARACTERISTICS } from "@/lib/sport-characteristics";
+import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { ApplyButton } from "./_components/ApplyButton";
 
 type EventDetailPageProps = {
@@ -69,8 +70,8 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
     <div className="grid grid-cols-[160px_1fr] gap-2 text-sm">
-      <span className="font-medium text-white/50">{label}</span>
-      <span className="text-white">{value}</span>
+      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="text-brand-primary">{value}</span>
     </div>
   );
 }
@@ -130,38 +131,42 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
             <Badge variant="info">{TYPE_LABELS[event.type] ?? event.type}</Badge>
-            <Badge variant="neutral">{SPORT_LABELS[event.sport] ?? event.sport}</Badge>
+            <Badge variant="neutral" className={SPORT_BADGE_CLASS[event.sport]}>
+              {SPORT_LABELS[event.sport] ?? event.sport}
+            </Badge>
             <Badge
               variant={event.status === "open" ? "success" : "danger"}
             >
               {event.status === "open" ? "Abierto" : "Cerrado"}
             </Badge>
           </div>
-          <h1 className="text-2xl font-bold text-white">{event.title}</h1>
-          <p className="mt-1 text-sm text-white/60">
+          <h1 className="text-xl font-bold text-brand-primary">{event.title}</h1>
+          <p className="mt-1 text-sm text-brand-primary/70">
             {organizerName}
             {event.coach.coachProfile?.academicUnit
               ? ` · ${event.coach.coachProfile.academicUnit}`
               : ""}
           </p>
         </div>
-        {(isOwner || isAdmin) && (
-          <Link href={`/dashboard/events/${event.id}/edit`}>
-            <Button variant="secondary">Editar</Button>
-          </Link>
-        )}
-        {session && (
-          <FavoriteButton
-            targetType="event"
-            targetId={event.id}
-            isFavorited={isEventFavorited}
-          />
-        )}
+        <div className="flex items-center gap-2">
+          {(isOwner || isAdmin) && (
+            <Link href={`/dashboard/events/${event.id}/edit`}>
+              <Button variant="secondary">Editar</Button>
+            </Link>
+          )}
+          {session && (
+            <FavoriteButton
+              targetType="event"
+              targetId={event.id}
+              isFavorited={isEventFavorited}
+            />
+          )}
+        </div>
       </header>
 
       {/* ── Información general ── */}
@@ -169,7 +174,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         <CardHeader>
           <CardTitle>Información general</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-1.5">
           <InfoRow label="Tipo" value={TYPE_LABELS[event.type] ?? event.type} />
           <InfoRow label="Deporte" value={SPORT_LABELS[event.sport] ?? event.sport} />
           <InfoRow label="Visibilidad" value={VISIBILITY_LABELS[event.visibility] ?? event.visibility} />
@@ -183,7 +188,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <CardHeader>
             <CardTitle>Fecha, hora y lugar</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             <InfoRow label="Inicio" value={fmt(event.startAt)} />
             <InfoRow label="Fin" value={fmt(event.endAt)} />
             <InfoRow label="Sede" value={event.locationText} />
@@ -195,7 +200,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={event.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#1883ff] underline"
+                    className="text-brand-secondary hover:text-brand-primary underline"
                   >
                     Ver en Google Maps
                   </a>
@@ -212,7 +217,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <CardHeader>
             <CardTitle>Horario y lugar</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             {Array.isArray(req.scheduleDays) && req.scheduleDays.length > 0 && (
               <InfoRow
                 label="Días"
@@ -221,7 +226,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     {(req.scheduleDays as string[]).map((d) => (
                       <span
                         key={d}
-                        className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white"
+                        className="rounded bg-brand-background px-2 py-0.5 text-xs font-medium text-brand-primary"
                       >
                         {DAY_LABELS[d] ?? d}
                       </span>
@@ -247,7 +252,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={event.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#1883ff] underline"
+                    className="text-brand-secondary hover:text-brand-primary underline"
                   >
                     Ver en Google Maps
                   </a>
@@ -263,7 +268,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         <CardHeader>
           <CardTitle>Registro</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-1.5">
           <InfoRow label="Cupo máximo" value={event.capacity ?? "Sin límite"} />
           {(isTournament || isRecruitment) && (
             <InfoRow label="Límite de registro" value={fmt(event.registrationDeadline)} />
@@ -275,10 +280,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           />
           {!!req.notes && (
             <div className="pt-2">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
                 Notas / políticas
               </p>
-              <p className="text-sm text-white/80 whitespace-pre-line">{String(req.notes)}</p>
+              <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.notes)}</p>
             </div>
           )}
         </CardContent>
@@ -292,10 +297,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </CardHeader>
           <CardContent className="space-y-4">
             {event.shortDescription && (
-              <p className="text-sm font-medium text-white/80">{event.shortDescription}</p>
+              <p className="text-sm font-medium text-brand-primary/70">{event.shortDescription}</p>
             )}
             {event.longDescription && (
-              <p className="text-sm text-white/70 whitespace-pre-line">{event.longDescription}</p>
+              <p className="text-sm text-brand-primary/70 whitespace-pre-line">{event.longDescription}</p>
             )}
           </CardContent>
         </Card>
@@ -307,7 +312,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <CardHeader>
             <CardTitle>Detalles del torneo</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             <InfoRow label="Formato" value={req.format ? FORMAT_LABELS[String(req.format)] ?? String(req.format) : null} />
             <InfoRow label="Categoría" value={req.category ? CATEGORY_LABELS[String(req.category)] ?? String(req.category) : null} />
             <InfoRow label="Equipos mínimos" value={req.minTeams as number} />
@@ -322,7 +327,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     {(req.gameDays as string[]).map((d) => (
                       <span
                         key={d}
-                        className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white"
+                        className="rounded bg-brand-background px-2 py-0.5 text-xs font-medium text-brand-primary"
                       >
                         {DAY_LABELS[d] ?? d}
                       </span>
@@ -340,7 +345,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={String(req.rulesLink)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#1883ff] underline"
+                    className="text-brand-secondary hover:text-brand-primary underline"
                   >
                     Ver reglamento
                   </a>
@@ -349,10 +354,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             )}
             {!!req.registrationRequirements && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
                   Requisitos de registro
                 </p>
-                <p className="text-sm text-white/80 whitespace-pre-line">
+                <p className="text-sm text-brand-primary/70 whitespace-pre-line">
                   {String(req.registrationRequirements)}
                 </p>
               </div>
@@ -367,7 +372,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <CardHeader>
             <CardTitle>Detalles del reclutamiento</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5">
             <InfoRow label="Equipo objetivo" value={req.targetTeam ? String(req.targetTeam) : null} />
             <InfoRow label="Categoría" value={req.category ? CATEGORY_LABELS[String(req.category)] ?? String(req.category) : null} />
             <InfoRow label="Nivel" value={req.level ? LEVEL_LABELS[String(req.level)] ?? String(req.level) : null} />
@@ -375,7 +380,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               typeof req.sportsCharacteristics === "object" &&
               Object.keys(req.sportsCharacteristics as object).length > 0 && (
                 <div className="pt-2 space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
                     Características buscadas
                   </p>
                   {(SPORT_CHARACTERISTICS[event.sport] ?? []).map((field) => {
@@ -401,18 +406,18 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               )}
             {!!req.whatToBring && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
                   Qué llevar
                 </p>
-                <p className="text-sm text-white/80 whitespace-pre-line">{String(req.whatToBring)}</p>
+                <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.whatToBring)}</p>
               </div>
             )}
             {!!req.evaluationFormat && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
                   Formato de evaluación
                 </p>
-                <p className="text-sm text-white/80 whitespace-pre-line">{String(req.evaluationFormat)}</p>
+                <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.evaluationFormat)}</p>
               </div>
             )}
           </CardContent>

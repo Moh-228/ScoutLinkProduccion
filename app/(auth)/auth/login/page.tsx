@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { PasswordInput } from "@/components/PasswordInput";
 
@@ -61,7 +61,7 @@ function LoginForm() {
   return (
     <>
       {wasReset ? (
-        <p className="mb-4 rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100" role="status">
+        <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">
           Contraseña actualizada. Ya puedes iniciar sesión.
         </p>
       ) : null}
@@ -69,12 +69,12 @@ function LoginForm() {
         <Input id="login-email" name="email" type="email" label="Correo electrónico" placeholder="tu@correo.com" required />
         <div className="flex flex-col gap-1.5">
           <PasswordInput id="login-password" name="password" label="Contraseña" placeholder="********" required />
-          <Link href="/auth/forgot-password" className="self-end text-xs text-white/50 hover:text-white">
+          <Link href="/auth/forgot-password" className="self-end text-xs text-brand-primary/70 hover:text-brand-primary">
             Olvidé mi contraseña
           </Link>
         </div>
         {error ? (
-          <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
             {error}
           </p>
         ) : null}
@@ -92,7 +92,7 @@ export default function LoginPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
         >
           <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -103,15 +103,15 @@ export default function LoginPage() {
       <Card>
         <CardHeader>
           <CardTitle>Iniciar sesión</CardTitle>
-          <p className="text-sm text-white">Accede a tu panel de reclutamiento deportivo.</p>
+          <CardDescription>Accede a tu panel de reclutamiento deportivo.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<p className="text-sm text-white/60">Cargando...</p>}>
+          <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
             <LoginForm />
           </Suspense>
-          <p className="mt-4 text-sm text-white">
+          <p className="mt-4 text-center text-sm text-brand-primary">
             ¿Aún no tienes cuenta?{" "}
-            <Link href="/auth/register" className="font-semibold text-[#1883FF] hover:text-[#75C3FF]">
+            <Link href="/auth/register" className="font-semibold text-brand-secondary hover:text-brand-primary underline">
               Registrarme
             </Link>
           </p>

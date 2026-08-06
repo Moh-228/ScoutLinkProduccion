@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 
@@ -121,13 +121,13 @@ export default function CoachOnboardingPage() {
   return (
     <Card>
       <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
           Paso 1 de 3
         </div>
         <CardTitle>Configura tu perfil de entrenador</CardTitle>
-        <p className="text-sm text-white/70">
+        <CardDescription>
           Completa tu información profesional para comenzar.
-        </p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -160,13 +160,13 @@ export default function CoachOnboardingPage() {
             onChange={set("phone")}
           />
           <div>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-white">
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
               <span>Biografía / presentación</span>
               <textarea
                 name="bio"
                 rows={3}
                 placeholder="Describe tu experiencia y enfoque como entrenador..."
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-cyan-600"
+                className="w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40"
                 value={values.bio}
                 onChange={set("bio")}
               />
@@ -174,17 +174,17 @@ export default function CoachOnboardingPage() {
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-white">
-              Deportes a cargo <span className="text-red-400">*</span>
+            <legend className="mb-2 text-sm font-medium text-brand-primary">
+              Deportes a cargo <span className="text-red-500">*</span>
             </legend>
             <div className="grid grid-cols-2 gap-2">
               {SPORTS.map((sport) => (
                 <label
                   key={sport.value}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors has-focus-visible:ring-2 has-focus-visible:ring-interaction has-focus-visible:ring-offset-2 ${
                     selectedSports.includes(sport.value)
-                      ? "border-cyan-500 bg-cyan-500/10 text-white"
-                      : "border-white/10 text-white/60 hover:border-white/30"
+                      ? "border-interaction bg-interaction/10 text-interaction"
+                      : "border-brand-border text-brand-primary/70 hover:border-brand-secondary/40"
                   }`}
                 >
                   <input
@@ -194,8 +194,8 @@ export default function CoachOnboardingPage() {
                     onChange={() => toggleSport(sport.value)}
                   />
                   <span
-                    className={`h-4 w-4 flex-shrink-0 rounded border ${
-                      selectedSports.includes(sport.value) ? "border-cyan-500 bg-cyan-500" : "border-white/30"
+                    className={`h-4 w-4 shrink-0 rounded border ${
+                      selectedSports.includes(sport.value) ? "border-interaction bg-interaction" : "border-brand-border"
                     }`}
                     aria-hidden="true"
                   />
@@ -206,14 +206,25 @@ export default function CoachOnboardingPage() {
           </fieldset>
 
           {error ? (
-            <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
               {error}
             </p>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Guardando..." : "Continuar"}
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => router.push("/dashboard/profile")}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Guardando..." : "Continuar"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

@@ -49,12 +49,12 @@ export function StatusActions({ eventId, appId, currentStatus }: StatusActionsPr
 	const availableActions = ACTIONS.filter((a) => a.status !== currentStatus);
 
 	if (availableActions.length === 0) {
-		return <p className="text-sm text-white/40">No hay más estados disponibles.</p>;
+		return <p className="text-sm text-brand-primary/50">No hay más estados disponibles.</p>;
 	}
 
 	return (
 		<div className="space-y-3">
-			<p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+			<p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
 				Cambiar estado
 			</p>
 			<div className="flex flex-wrap gap-2">
@@ -69,7 +69,7 @@ export function StatusActions({ eventId, appId, currentStatus }: StatusActionsPr
 					</Button>
 				))}
 			</div>
-			{error && <p className="text-sm text-red-400">{error}</p>}
+			{error && <p className="text-sm text-red-600">{error}</p>}
 		</div>
 	);
 }

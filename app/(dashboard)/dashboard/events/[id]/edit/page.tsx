@@ -69,10 +69,10 @@ export default async function EventEditPage({ params }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-white">Editar evento</h1>
-        <p className="text-sm text-white/60">{event.title}</p>
+        <h1 className="text-xl font-bold text-brand-primary">Editar evento</h1>
+        <p className="text-sm text-brand-primary/70">{event.title}</p>
       </header>
       <EventEditForm eventId={id} initial={initial} />
     </div>

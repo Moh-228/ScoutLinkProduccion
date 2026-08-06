@@ -51,6 +51,9 @@ export async function GET() {
 					documents: true,
 				},
 			},
+			specializedCards: {
+				select: { sport: true, data: true },
+			},
 		},
 	});
 
@@ -70,6 +73,7 @@ export async function GET() {
 			createdAt: user.createdAt,
 			profile: user.studentProfile ?? user.coachProfile,
 			generalCard: user.generalCard ?? null,
+			specializedCards: user.specializedCards,
 		},
 	});
 }
