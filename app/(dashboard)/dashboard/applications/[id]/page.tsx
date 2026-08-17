@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { Icon } from "@/components/Icon";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -213,6 +214,12 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					)}
 					{!card && (
 						<p className="text-sm text-brand-primary/50">El alumno no tiene ficha registrada.</p>
+					)}
+					{canManage && (
+						<div className="grid grid-cols-[180px_1fr] items-center gap-2 pt-1">
+							<span className="text-sm font-medium text-brand-primary/50">Correo institucional</span>
+							<ContactRevealButton userId={application.student.id} className="w-fit" />
+						</div>
 					)}
 				</CardContent>
 			</Card>

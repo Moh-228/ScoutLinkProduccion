@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { verifySession } from "@/lib/auth";
+import { logAdminAction } from "@/lib/audit";
+import { isNotificationEnabled } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
 type RouteProps = { params: Promise<{ id: string; appId: string }> };
@@ -11,8 +13,8 @@ const updateStatusSchema = z.object({
 
 const STATUS_MESSAGES: Record<string, string> = {
 	preseleccionado: "Fuiste preseleccionado para el evento.",
-	aceptado: "¡Felicidades! Fuiste aceptado en el evento.",
-	rechazado: "Tu postulación no fue aceptada en esta ocasión.",
+	aceptado: "¡Felicidades! Fuiste invitado al evento.",
+	rechazado: "Tu postulación fue descartada en esta ocasión.",
 };
 
 export async function PATCH(request: Request, { params }: RouteProps) {
@@ -62,24 +64,40 @@ export async function PATCH(request: Request, { params }: RouteProps) {
 
 	const { status } = parsed.data;
 
+	const notifyStudent = await isNotificationEnabled(application.studentId, "applicationStatus");
+
 	const [updated] = await prisma.$transaction([
 		prisma.eventApplication.update({
 			where: { id: appId },
 			data: { status },
 		}),
-		prisma.notification.create({
-			data: {
-				userId: application.studentId,
-				type: `application_${status}`,
-				payload: {
-					title: "Actualización de postulación",
-					message: STATUS_MESSAGES[status],
-					eventId,
-					applicationId: appId,
-				},
-			},
-		}),
+		...(notifyStudent
+			? [
+					prisma.notification.create({
+						data: {
+							userId: application.studentId,
+							type: `application_${status}`,
+							payload: {
+								title: "Actualización de postulación",
+								message: STATUS_MESSAGES[status],
+								eventId,
+								applicationId: appId,
+							},
+						},
+					}),
+				]
+			: []),
 	]);
+
+	if (session.role === "admin" && event.coachId !== session.userId) {
+		await logAdminAction({
+			adminId: session.userId,
+			action: "application_status_change",
+			targetType: "application",
+			targetId: appId,
+			metadata: { eventId, studentId: application.studentId, newStatus: status },
+		});
+	}
 
 	return Response.json({ ok: true, data: updated });
 }

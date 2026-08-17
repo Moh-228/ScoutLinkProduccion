@@ -45,6 +45,7 @@ const SEARCH_PLACEHOLDERS: Record<string, string> = {
   "/dashboard/admin": "Buscar por entrenador o correo",
   "/dashboard/admin/usuarios": "Buscar por nombre o correo",
   "/dashboard/admin/fichas": "Buscar por nombre, correo o evento",
+  "/dashboard/admin/eventos": "Buscar por título o entrenador",
 };
 
 export function Topbar({ userName }: TopbarProps) {

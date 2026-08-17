@@ -130,6 +130,14 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                   </Link>
                 </CardTitle>
               </CardHeader>
+              {event.applications.length > 0 && (
+                <div className="-mt-2 flex flex-wrap gap-3 text-xs text-brand-primary/60">
+                  <span>Postulado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "postulado").length}</strong></span>
+                  <span>Preseleccionado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "preseleccionado").length}</strong></span>
+                  <span>Invitado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "aceptado").length}</strong></span>
+                  <span>Descartado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "rechazado").length}</strong></span>
+                </div>
+              )}
               <CardContent>
                 {event.applications.length === 0 ? (
                   <p className="text-sm text-brand-primary/50">Sin postulaciones.</p>

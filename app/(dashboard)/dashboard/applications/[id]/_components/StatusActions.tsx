@@ -15,8 +15,8 @@ type StatusActionsProps = {
 
 const ACTIONS: { status: Status; label: string; variant: "primary" | "secondary" | "ghost" }[] = [
 	{ status: "preseleccionado", label: "Preseleccionar", variant: "secondary" },
-	{ status: "aceptado", label: "Aceptar", variant: "primary" },
-	{ status: "rechazado", label: "Rechazar", variant: "ghost" },
+	{ status: "aceptado", label: "Invitar", variant: "primary" },
+	{ status: "rechazado", label: "Descartar", variant: "ghost" },
 ];
 
 export function StatusActions({ eventId, appId, currentStatus }: StatusActionsProps) {

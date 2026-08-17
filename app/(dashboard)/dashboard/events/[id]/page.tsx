@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { SPORT_CHARACTERISTICS } from "@/lib/sport-characteristics";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { ApplyButton } from "./_components/ApplyButton";
+import { EventStatusToggle } from "./_components/EventStatusToggle";
+import { CommentsSection } from "./_components/CommentsSection";
 
 type EventDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -86,6 +89,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     include: {
       coach: {
         select: {
+          id: true,
           coachProfile: { select: { displayName: true, academicUnit: true } },
         },
       },
@@ -98,7 +102,36 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const isOwner = session?.userId === event.coachId;
   const isAdmin = session?.role === "admin";
   const isStudent = session?.role === "student";
+  const canManage = isOwner || isAdmin;
   const organizerName = event.coach.coachProfile?.displayName ?? "—";
+
+  let statusCounts: { postulado: number; preseleccionado: number; aceptado: number; rechazado: number } | null = null;
+  if (canManage) {
+    const grouped = await prisma.eventApplication.groupBy({
+      by: ["status"],
+      where: { eventId: id },
+      _count: { _all: true },
+    });
+    statusCounts = { postulado: 0, preseleccionado: 0, aceptado: 0, rechazado: 0 };
+    for (const g of grouped) {
+      statusCounts[g.status] = g._count._all;
+    }
+  }
+
+  const comments = await prisma.comment.findMany({
+    where: { eventId: id },
+    orderBy: { createdAt: "asc" },
+    include: {
+      author: {
+        select: {
+          role: true,
+          studentProfile: { select: { fullName: true } },
+          coachProfile: { select: { displayName: true } },
+        },
+      },
+      reports: session ? { where: { reporterId: session.userId }, select: { id: true } } : false,
+    },
+  });
 
   let existingApplication: { status: string } | null = null;
   if (isStudent && session) {
@@ -146,15 +179,21 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             </Badge>
           </div>
           <h1 className="text-xl font-bold text-brand-primary">{event.title}</h1>
-          <p className="mt-1 text-sm text-brand-primary/70">
-            {organizerName}
-            {event.coach.coachProfile?.academicUnit
-              ? ` · ${event.coach.coachProfile.academicUnit}`
-              : ""}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <p className="text-sm text-brand-primary/70">
+              {organizerName}
+              {event.coach.coachProfile?.academicUnit
+                ? ` · ${event.coach.coachProfile.academicUnit}`
+                : ""}
+            </p>
+            {session && !isOwner && (
+              <ContactRevealButton userId={event.coach.id} className="px-2 py-0.5 text-xs" />
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {(isOwner || isAdmin) && (
+          {canManage && <EventStatusToggle eventId={event.id} initialStatus={event.status} />}
+          {canManage && (
             <Link href={`/dashboard/events/${event.id}/edit`}>
               <Button variant="secondary">Editar</Button>
             </Link>
@@ -169,7 +208,32 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </div>
       </header>
 
-      {/* ── Información general ── */}
+      {/* ── Resumen de postulantes (solo organizador/admin) ── */}
+      {statusCounts && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Postulantes por estado</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
+              <p className="text-2xl font-bold text-brand-primary">{statusCounts.postulado}</p>
+              <p className="text-xs font-medium text-brand-primary/60">Postulado</p>
+            </div>
+            <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
+              <p className="text-2xl font-bold text-brand-primary">{statusCounts.preseleccionado}</p>
+              <p className="text-xs font-medium text-brand-primary/60">Preseleccionado</p>
+            </div>
+            <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
+              <p className="text-2xl font-bold text-brand-primary">{statusCounts.aceptado}</p>
+              <p className="text-xs font-medium text-brand-primary/60">Invitado</p>
+            </div>
+            <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
+              <p className="text-2xl font-bold text-brand-primary">{statusCounts.rechazado}</p>
+              <p className="text-xs font-medium text-brand-primary/60">Descartado</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>Información general</CardTitle>
@@ -436,6 +500,25 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           />
         </div>
       )}
+
+      {/* ── Comentarios ── */}
+      <CommentsSection
+        eventId={event.id}
+        currentUserId={session?.userId ?? null}
+        comments={comments.map((c) => ({
+          id: c.id,
+          content: c.content,
+          createdAt: c.createdAt.toISOString(),
+          updatedAt: c.updatedAt.toISOString(),
+          authorId: c.authorId,
+          authorName:
+            c.author.studentProfile?.fullName ??
+            c.author.coachProfile?.displayName ??
+            (c.author.role === "admin" ? "Administrador" : "Usuario"),
+          authorRole: c.author.role,
+          reportedByMe: Array.isArray(c.reports) && c.reports.length > 0,
+        }))}
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/admin";
+import { logAdminAction } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -21,10 +22,15 @@ export async function PATCH(request: Request, { params }: Props) {
 
 	const data: Record<string, unknown> = {};
 	if (typeof isActive === "boolean") data.isActive = isActive;
-	if (role === "student" || role === "coach") data.role = role;
+	if (role === "student" || role === "coach" || role === "admin") data.role = role;
 
 	if (Object.keys(data).length === 0) {
 		return Response.json({ ok: false, message: "Sin cambios válidos." }, { status: 400 });
+	}
+
+	const before = await prisma.user.findUnique({ where: { id }, select: { email: true, role: true, isActive: true } });
+	if (!before) {
+		return Response.json({ ok: false, message: "Usuario no encontrado." }, { status: 404 });
 	}
 
 	const updated = await prisma.user.update({
@@ -32,6 +38,26 @@ export async function PATCH(request: Request, { params }: Props) {
 		data,
 		select: { id: true, email: true, role: true, isActive: true },
 	});
+
+	if (typeof data.role === "string" && data.role !== before.role) {
+		await logAdminAction({
+			adminId: session.userId,
+			action: "role_change",
+			targetType: "user",
+			targetId: id,
+			metadata: { email: before.email, fromRole: before.role, toRole: data.role },
+		});
+	}
+
+	if (typeof data.isActive === "boolean" && data.isActive !== before.isActive) {
+		await logAdminAction({
+			adminId: session.userId,
+			action: "user_status_change",
+			targetType: "user",
+			targetId: id,
+			metadata: { email: before.email, isActive: data.isActive },
+		});
+	}
 
 	return Response.json({ ok: true, data: updated });
 }

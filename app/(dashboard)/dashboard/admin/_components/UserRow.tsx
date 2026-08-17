@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Select } from "@/components/Select";
 
 type User = {
   id: string;
@@ -17,11 +19,24 @@ type User = {
   coachProfile: { displayName: string } | null;
 };
 
+const ROLE_OPTIONS = [
+  { label: "Deportista", value: "student" },
+  { label: "Entrenador / Coordinador", value: "coach" },
+  { label: "Administrador", value: "admin" },
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  student: "Deportista",
+  coach: "Coach",
+  admin: "Admin",
+};
+
 export function UserRow({ user }: { user: User }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingRole, setPendingRole] = useState<string | null>(null);
 
   const displayName = user.studentProfile?.fullName ?? user.coachProfile?.displayName ?? user.email;
 
@@ -50,6 +65,22 @@ export function UserRow({ user }: { user: User }) {
     startTransition(() => router.refresh());
   }
 
+  async function confirmRoleChange() {
+    if (!pendingRole) return;
+    setLoading("role");
+    setError(null);
+    const res = await fetch(`/api/admin/users/${user.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: pendingRole }),
+    });
+    const data = await res.json() as { ok: boolean; message?: string };
+    setLoading(null);
+    if (!data.ok) { setError(data.message ?? "Error."); return; }
+    setPendingRole(null);
+    startTransition(() => router.refresh());
+  }
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-background p-3">
       <div className="min-w-0">
@@ -59,11 +90,21 @@ export function UserRow({ user }: { user: User }) {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={user.role === "coach" ? "info" : "neutral"}>
-          {user.role === "student" ? "Deportista" : "Coach"}
+          {ROLE_LABELS[user.role] ?? user.role}
         </Badge>
         <Badge variant={user.isActive ? "success" : "danger"}>
           {user.isActive ? "Activo" : "Inactivo"}
         </Badge>
+        <div className="w-44">
+          <Select
+            id={`role-${user.id}`}
+            options={ROLE_OPTIONS}
+            value={user.role}
+            disabled={!!loading || pending}
+            onChange={(e) => setPendingRole(e.target.value)}
+            className="py-1 text-xs"
+          />
+        </div>
         <Button
           variant="secondary"
           disabled={!!loading || pending}
@@ -81,6 +122,17 @@ export function UserRow({ user }: { user: User }) {
           {loading === "delete" ? "..." : "Eliminar"}
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={pendingRole !== null && pendingRole !== user.role}
+        title="Cambiar rol de usuario"
+        message={`¿Cambiar el rol de ${displayName} a "${ROLE_LABELS[pendingRole ?? ""] ?? pendingRole}"?`}
+        confirmLabel="Cambiar rol"
+        onCancel={() => setPendingRole(null)}
+        onConfirm={confirmRoleChange}
+        loading={loading === "role"}
+        error={error}
+      />
     </div>
   );
 }

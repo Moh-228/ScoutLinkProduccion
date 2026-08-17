@@ -72,6 +72,12 @@ enum ExperienceLevel {
   advanced
 }
 
+enum ReportStatus {
+  pending
+  resolved
+  dismissed
+}
+
 model User {
   id                  String   @id @default(uuid()) @db.Uuid
   email               String   @unique
@@ -80,6 +86,11 @@ model User {
   isActive            Boolean  @default(true)
   onboardingCompleted Boolean  @default(false)
   emailVerified       Boolean  @default(false)
+
+  // Contact & notification preferences
+  contactEmailVisible     Boolean @default(true)
+  notificationsEnabled    Boolean @default(true)
+  notificationPreferences Json    @default("{}")
 
   studentProfile StudentProfile?
   coachProfile   CoachProfile?
@@ -95,6 +106,11 @@ model User {
   favorites     Favorite[]
   notifications Notification[]
 
+  comments       Comment[]
+  commentReports CommentReport[] @relation("CommentReporter")
+  resolvedReports CommentReport[] @relation("ReportResolver")
+  adminAuditLogs  AdminAuditLog[] @relation("AdminAuditActor")
+
   passwordResetTokens      PasswordResetToken[]
   emailVerificationToken   EmailVerificationToken?
 
@@ -108,14 +124,15 @@ model StudentProfile {
   userId        String   @id @db.Uuid
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  fullName      String
-  birthDate     DateTime? @db.Date
-  school        School?
-  semester      Int?
-  gender        Gender?
-  favoriteSport Sport?
-  socialLink    String?
-  photoUrl      String?
+  fullName        String
+  birthDate       DateTime? @db.Date
+  school          School?
+  semester        Int?
+  gender          Gender?
+  favoriteSport   Sport?
+  interestedSports Sport[]  @default([])
+  socialLink      String?
+  photoUrl        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -235,6 +252,7 @@ model Event {
   applicationsCount Int @default(0)
 
   applications EventApplication[]
+  comments     Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -316,4 +334,62 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
 
   @@map("email_verification_tokens")
+}
+
+model Comment {
+  id      String @id @default(uuid()) @db.Uuid
+  eventId String @db.Uuid
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  authorId String @db.Uuid
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  content String
+
+  reports CommentReport[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, createdAt])
+  @@map("comments")
+}
+
+model CommentReport {
+  id        String  @id @default(uuid()) @db.Uuid
+  commentId String  @db.Uuid
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  reporterId String @db.Uuid
+  reporter   User   @relation("CommentReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  reason String
+
+  status           ReportStatus @default(pending)
+  resolutionReason String?
+  resolvedAt       DateTime?
+  resolvedById     String?      @db.Uuid
+  resolvedBy       User?        @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, reporterId])
+  @@map("comment_reports")
+}
+
+model AdminAuditLog {
+  id      String @id @default(uuid()) @db.Uuid
+  adminId String @db.Uuid
+  admin   User   @relation("AdminAuditActor", fields: [adminId], references: [id], onDelete: Cascade)
+
+  action     String
+  targetType String
+  targetId   String? @db.Uuid
+  reason     String?
+  metadata   Json    @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("admin_audit_logs")
 }

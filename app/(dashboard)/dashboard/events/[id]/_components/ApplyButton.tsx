@@ -70,8 +70,8 @@ export function ApplyButton({
 	if (alreadyApplied && !canWithdraw) {
 		const STATUS_LABELS: Record<string, string> = {
 			preseleccionado: "Preseleccionado",
-			aceptado: "Aceptado",
-			rechazado: "Rechazado",
+			aceptado: "Invitado",
+			rechazado: "Descartado",
 		};
 		return (
 			<p className="text-sm text-brand-primary/70">

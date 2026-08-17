@@ -1,4 +1,5 @@
 import { verifySession } from "@/lib/auth";
+import { createNotificationIfEnabled } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { computeAffinity, type AffinityEventRequirements } from "@/lib/affinity";
 
@@ -17,7 +18,7 @@ export async function POST(_request: Request, { params }: RouteProps) {
 
 	const event = await prisma.event.findUnique({
 		where: { id: eventId },
-		select: { id: true, status: true, capacity: true, applicationsCount: true, title: true, type: true, sport: true, requirements: true },
+		select: { id: true, coachId: true, status: true, capacity: true, applicationsCount: true, title: true, type: true, sport: true, requirements: true },
 	});
 
 	if (!event) {
@@ -99,18 +100,29 @@ export async function POST(_request: Request, { params }: RouteProps) {
 			where: { id: eventId },
 			data: { applicationsCount: { increment: 1 } },
 		}),
-		prisma.notification.create({
-			data: {
-				userId: session.userId,
-				type: "application_sent",
-				payload: {
-					title: "Postulación enviada",
-					message: `Tu postulación al evento "${event.title}" fue registrada correctamente.`,
-					eventId,
-				},
-			},
-		}),
 	]);
+
+	await createNotificationIfEnabled({
+		userId: session.userId,
+		type: "application_sent",
+		prefKey: "applicationStatus",
+		payload: {
+			title: "Postulación enviada",
+			message: `Tu postulación al evento "${event.title}" fue registrada correctamente.`,
+			eventId,
+		},
+	});
+
+	await createNotificationIfEnabled({
+		userId: event.coachId,
+		type: "new_application",
+		prefKey: "applicationsOnEvents",
+		payload: {
+			title: "Nueva postulación",
+			message: `Tienes una nueva postulación en "${event.title}".`,
+			eventId,
+		},
+	});
 
 	return Response.json({ ok: true, data: application }, { status: 201 });
 }

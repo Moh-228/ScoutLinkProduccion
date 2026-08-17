@@ -23,7 +23,11 @@ export function SidebarNav({ role }: SidebarNavProps) {
       ? [
           { label: "Panel", href: "/dashboard/admin", icon: "admin_panel" },
           { label: "Usuarios", href: "/dashboard/admin/usuarios", icon: "person" },
+          { label: "Convocatorias", href: "/dashboard/admin/eventos", icon: "calendar" },
+          { label: "Reportes", href: "/dashboard/admin/reportes", icon: "error" },
           { label: "Fichas", href: "/dashboard/admin/fichas", icon: "id_card" },
+          { label: "Historial", href: "/dashboard/admin/historial", icon: "hourglass" },
+          { label: "Configuración", href: "/dashboard/settings", icon: "settings" },
         ]
       : [
           { label: "Inicio", href: "/dashboard", icon: "home" },
@@ -37,6 +41,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
             href: "/dashboard/applications",
             icon: "person_check",
           },
+          { label: "Configuración", href: "/dashboard/settings", icon: "settings" },
         ];
 
   // Resolve the single best-matching item for the current pathname: an item

@@ -6,8 +6,8 @@ export type ApplicationStatus = "postulado" | "preseleccionado" | "aceptado" | "
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; variant: BadgeVariant; icon: IconName }> = {
   postulado: { label: "Postulado", variant: "info", icon: "event_check" },
   preseleccionado: { label: "Preseleccionado", variant: "warning", icon: "hourglass_check" },
-  aceptado: { label: "Aceptado", variant: "success", icon: "person_check" },
-  rechazado: { label: "Rechazado", variant: "danger", icon: "person_cancel" },
+  aceptado: { label: "Invitado", variant: "success", icon: "person_check" },
+  rechazado: { label: "Descartado", variant: "danger", icon: "person_cancel" },
 };
 
 export function ApplicationStatusBadge({ status }: { status: ApplicationStatus }) {

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Icon } from "@/components/Icon";
 import { verifySession } from "@/lib/auth";
@@ -131,6 +132,10 @@ export default async function FichaDetailPage({ params }: Props) {
               {card.phone && <Row label="Teléfono" value={card.phone} />}
               {card.publicEmail && <Row label="Correo público" value={card.publicEmail} />}
               {profile?.socialLink && <Row label="Enlace social" value={profile.socialLink} />}
+              <div className="grid grid-cols-[200px_1fr] items-center gap-2 pt-1 text-sm">
+                <span className="font-medium text-brand-primary/50">Correo institucional</span>
+                <ContactRevealButton userId={card.student.id} className="w-fit" />
+              </div>
             </>
           )}
 

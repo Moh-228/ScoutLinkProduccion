@@ -1,4 +1,5 @@
 import { verifySession } from "@/lib/auth";
+import { createNotificationIfEnabled } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { createEventSchema } from "@/lib/validations";
 
@@ -165,6 +166,26 @@ export async function POST(request: Request) {
 				status: "open",
 			},
 		});
+
+		// Notify students interested in this sport about new recruitment calls.
+		if (type === "recruitment") {
+			const interestedStudents = await prisma.studentProfile.findMany({
+				where: { interestedSports: { has: sport } },
+				select: { userId: true },
+			});
+			for (const s of interestedStudents) {
+				await createNotificationIfEnabled({
+					userId: s.userId,
+					type: "new_recruitment",
+					prefKey: "newRecruitments",
+					payload: {
+						title: "Nueva convocatoria",
+						message: `Hay una nueva convocatoria de reclutamiento: "${event.title}".`,
+						eventId: event.id,
+					},
+				});
+			}
+		}
 
 		return Response.json({ ok: true, data: { id: event.id } }, { status: 201 });
 	} catch {

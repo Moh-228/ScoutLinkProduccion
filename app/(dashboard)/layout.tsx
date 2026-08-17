@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { SidebarNav } from "@/components/SidebarNav";
 import { Topbar } from "@/components/Topbar";
-import { verifySession } from "@/lib/auth";
+import { deleteSession, verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
@@ -26,6 +26,7 @@ export default async function DashboardLayout({
     select: {
       email: true,
       role: true,
+      isActive: true,
       onboardingCompleted: true,
       studentProfile: { select: { fullName: true } },
       coachProfile: { select: { displayName: true } },
@@ -37,6 +38,12 @@ export default async function DashboardLayout({
   });
 
   if (!user) {
+    redirect("/auth/login");
+  }
+
+  // Deactivated accounts (self-service or admin-initiated) lose dashboard access immediately.
+  if (!user.isActive) {
+    await deleteSession();
     redirect("/auth/login");
   }
 

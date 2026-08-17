@@ -186,3 +186,56 @@ export const createEventSchema = z
 			});
 		}
 	});
+
+export const updateEventStatusSchema = z.object({
+	status: z.enum(["open", "closed"]),
+});
+
+// ─── Settings: interests, privacy, notifications ─────────────────────────────
+
+export const interestedSportsSchema = z.object({
+	sports: z.array(sportEnum).max(4),
+});
+
+export const contactPrivacySchema = z.object({
+	contactEmailVisible: z.boolean(),
+});
+
+export const notificationPreferencesSchema = z.object({
+	notificationsEnabled: z.boolean(),
+	preferences: z
+		.object({
+			newRecruitments: z.boolean().optional(),
+			applicationStatus: z.boolean().optional(),
+			postActivity: z.boolean().optional(),
+			applicationsOnEvents: z.boolean().optional(),
+			eventActivity: z.boolean().optional(),
+			contactInteractions: z.boolean().optional(),
+		})
+		.partial(),
+});
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+export const createCommentSchema = z.object({
+	content: z.string().trim().min(1, "El comentario no puede estar vacío.").max(1000, "Máximo 1000 caracteres."),
+});
+
+export const reportCommentSchema = z.object({
+	reason: z.string().trim().min(3, "Indica un motivo válido.").max(300, "Máximo 300 caracteres."),
+});
+
+// ─── Admin moderation ─────────────────────────────────────────────────────────
+
+export const moderateCommentSchema = z.object({
+	reason: z.string().trim().min(3, "Indica un motivo válido.").max(300, "Máximo 300 caracteres."),
+});
+
+export const resolveReportSchema = z.object({
+	action: z.enum(["resolve", "dismiss"]),
+	reason: z.string().trim().min(3, "Indica un motivo válido.").max(300, "Máximo 300 caracteres."),
+});
+
+export const updateUserRoleSchema = z.object({
+	role: z.enum(["student", "coach", "admin"]),
+});

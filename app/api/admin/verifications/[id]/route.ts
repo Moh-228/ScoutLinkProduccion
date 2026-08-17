@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/admin";
+import { logAdminAction } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -59,6 +60,15 @@ export async function PATCH(request: Request, { params }: Props) {
 			reviewedBy: session.userId,
 			reviewedAt: new Date(),
 		},
+	});
+
+	await logAdminAction({
+		adminId: session.userId,
+		action: "verification_review",
+		targetType: "coach_verification",
+		targetId: id,
+		reason: body.action === "reject" ? (body.rejectionReason ?? null) : null,
+		metadata: { sport: verification.sport, decision: body.action },
 	});
 
 	return Response.json({ ok: true, data: updated });
