@@ -112,7 +112,7 @@ export const coachDocumentsSchema = z.object({
 		.array(
 			z.object({
 				sport: sportEnum,
-				documentUrl: z.string().url("Debe ser una URL válida."),
+				documentUrl: z.string().min(1, "Debes subir el documento certificado."),
 			}),
 		)
 		.min(1),

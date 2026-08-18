@@ -279,8 +279,36 @@ export default async function ProfilePage() {
                 {documents && (
                   <>
                     <SectionTitle>Documentación</SectionTitle>
-                    <Row label="Comprobante inscripción" value={documents.inscriptionProof as string} />
-                    <Row label="Seguro médico" value={documents.medicalInsurance as string} />
+                    <Row
+                      label="Comprobante inscripción"
+                      value={
+                        documents.inscriptionProof ? (
+                          <a
+                            href={`/api/files/document?key=${encodeURIComponent(String(documents.inscriptionProof))}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-secondary underline hover:text-brand-primary"
+                          >
+                            Ver PDF
+                          </a>
+                        ) : undefined
+                      }
+                    />
+                    <Row
+                      label="Seguro médico"
+                      value={
+                        documents.medicalInsurance ? (
+                          <a
+                            href={`/api/files/document?key=${encodeURIComponent(String(documents.medicalInsurance))}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-secondary underline hover:text-brand-primary"
+                          >
+                            Ver PDF
+                          </a>
+                        ) : undefined
+                      }
+                    />
                   </>
                 )}
               </>

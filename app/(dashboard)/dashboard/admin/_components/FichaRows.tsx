@@ -186,13 +186,27 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
               {docs.inscriptionProof ? (
                 <p className="text-xs text-brand-primary/70">
                   <span className="text-brand-primary/50">Comprobante de inscripción:</span>{" "}
-                  {String(docs.inscriptionProof)}
+                  <a
+                    href={`/api/files/document?key=${encodeURIComponent(String(docs.inscriptionProof))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-secondary underline hover:text-brand-primary"
+                  >
+                    Ver PDF
+                  </a>
                 </p>
               ) : null}
               {docs.medicalInsurance ? (
                 <p className="text-xs text-brand-primary/70">
                   <span className="text-brand-primary/50">Comprobante de servicio médico:</span>{" "}
-                  {String(docs.medicalInsurance)}
+                  <a
+                    href={`/api/files/document?key=${encodeURIComponent(String(docs.medicalInsurance))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-secondary underline hover:text-brand-primary"
+                  >
+                    Ver PDF
+                  </a>
                 </p>
               ) : null}
             </div>

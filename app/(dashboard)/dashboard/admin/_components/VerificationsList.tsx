@@ -59,7 +59,7 @@ export function VerificationsList({ verifications }: { verifications: Verificati
             <p className="text-sm text-brand-primary/70">Deporte: {sportLabels[v.sport] ?? v.sport}</p>
             {v.documentUrl && (
               <a
-                href={v.documentUrl}
+                href={`/api/files/document?key=${encodeURIComponent(v.documentUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-brand-secondary underline hover:text-brand-primary"

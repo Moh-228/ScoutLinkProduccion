@@ -6,7 +6,7 @@ import { Suspense } from "react";
 
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
-import { Input } from "@/components/Input";
+import { PdfUploadField } from "@/components/PdfUploadField";
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -20,26 +20,30 @@ function CoachDocumentsForm() {
   const searchParams = useSearchParams();
   const sports = (searchParams.get("sports") ?? "").split(",").filter(Boolean);
 
+  const [documentKeys, setDocumentKeys] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function setDocumentKey(sport: string) {
+    return (key: string) => setDocumentKeys((prev) => ({ ...prev, [sport]: key }));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setIsSubmitting(true);
 
-    const fd = new FormData(event.currentTarget);
     const documents = sports.map((sport) => ({
       sport,
-      documentUrl: String(fd.get(`doc_${sport}`) ?? "").trim(),
+      documentUrl: documentKeys[sport] ?? "",
     }));
 
     const missing = documents.find((d) => !d.documentUrl);
     if (missing) {
-      setError(`Ingresa el enlace del documento para ${SPORT_LABELS[missing.sport] ?? missing.sport}.`);
-      setIsSubmitting(false);
+      setError(`Sube el PDF del documento certificado para ${SPORT_LABELS[missing.sport] ?? missing.sport}.`);
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const res = await fetch("/api/onboarding/coach/documents", {
@@ -72,18 +76,15 @@ function CoachDocumentsForm() {
       {sports.map((sport) => (
         <div key={sport} className="rounded-lg border border-brand-border p-4">
           <p className="mb-3 text-sm font-semibold text-brand-primary">{SPORT_LABELS[sport] ?? sport}</p>
-          <Input
+          <PdfUploadField
             id={`doc-${sport}`}
-            name={`doc_${sport}`}
-            type="url"
-            label="Enlace al documento que te certifica"
-            placeholder="https://drive.google.com/..."
+            kind="coach-certification"
+            label="Documento que te certifica"
+            value={documentKeys[sport] ?? ""}
+            onChange={setDocumentKey(sport)}
             required
+            helpText="Sube el PDF que acredite tu rol como entrenador. Este documento NO será visible para los alumnos."
           />
-          <p className="mt-1.5 text-xs text-brand-primary/70">
-            Sube tu documento a Google Drive u otro servicio y pega el enlace compartible aquí.
-            Este documento NO será visible para los alumnos.
-          </p>
         </div>
       ))}
 

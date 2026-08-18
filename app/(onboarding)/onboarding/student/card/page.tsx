@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
+import { PdfUploadField } from "@/components/PdfUploadField";
 import { Select } from "@/components/Select";
 
 const LEVEL_OPTIONS = [
@@ -87,6 +88,10 @@ export default function StudentCardPage() {
   function setBool(field: keyof typeof fields) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setFields((v) => ({ ...v, [field]: e.target.checked }));
+  }
+
+  function setDoc(field: "inscriptionProof" | "medicalInsurance") {
+    return (key: string) => setFields((v) => ({ ...v, [field]: key }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -253,21 +258,21 @@ export default function StudentCardPage() {
 
           {/* Documentación */}
           <SectionTitle>Documentación</SectionTitle>
-          <Input
+          <PdfUploadField
             id="ob-inscription"
-            name="inscriptionProof"
-            label="Comprobante de inscripcion en URL"
-            placeholder="https://drive.google.com/file/..."
+            kind="inscription-proof"
+            label="Comprobante de inscripción"
             value={fields.inscriptionProof}
-            onChange={setStr("inscriptionProof")}
+            onChange={setDoc("inscriptionProof")}
+            helpText="Sube el PDF de tu comprobante de inscripción."
           />
-          <Input
+          <PdfUploadField
             id="ob-insurance"
-            name="medicalInsurance"
-            label="Seguro medico en URL"
-            placeholder="https://drive.google.com/file/..."
+            kind="medical-insurance"
+            label="Seguro médico"
             value={fields.medicalInsurance}
-            onChange={setStr("medicalInsurance")}
+            onChange={setDoc("medicalInsurance")}
+            helpText="Sube el PDF de tu comprobante de seguro médico."
           />
 
           {/* Visibilidad */}
