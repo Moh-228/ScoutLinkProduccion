@@ -11,7 +11,9 @@ export type NotificationPrefKey =
 	| "postActivity"
 	| "applicationsOnEvents"
 	| "eventActivity"
-	| "contactInteractions";
+	| "contactInteractions"
+	| "commentReplies"
+	| "moderationAlerts";
 
 /** A user receives a notification unless they turned notifications off globally or disabled this specific type. */
 export async function isNotificationEnabled(userId: string, key: NotificationPrefKey): Promise<boolean> {

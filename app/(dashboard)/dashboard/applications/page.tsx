@@ -15,12 +15,12 @@ function fmt(d: Date | null | undefined) {
 
 function AffinityBadge({ pct }: { pct: number }) {
   const color =
-    pct >= 70 ? "text-emerald-800 border-emerald-200 bg-emerald-100"
-    : pct >= 40 ? "text-amber-800 border-amber-200 bg-amber-100"
+    pct >= 70 ? "text-emerald-800 border-emerald-300 bg-emerald-100"
+    : pct >= 40 ? "text-amber-800 border-amber-300 bg-amber-100"
     : "text-brand-primary/50 border-brand-border bg-brand-background";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${color}`}>
-      {pct}% afinidad
+    <span className={`inline-flex items-center gap-1 rounded-full border-2 px-3 py-1 text-base font-extrabold ${color}`}>
+      {pct}%
     </span>
   );
 }

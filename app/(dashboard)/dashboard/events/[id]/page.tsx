@@ -517,6 +517,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             (c.author.role === "admin" ? "Administrador" : "Usuario"),
           authorRole: c.author.role,
           reportedByMe: Array.isArray(c.reports) && c.reports.length > 0,
+          parentId: c.parentId,
         }))}
       />
     </div>

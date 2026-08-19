@@ -213,6 +213,8 @@ export const notificationPreferencesSchema = z.object({
 			applicationsOnEvents: z.boolean().optional(),
 			eventActivity: z.boolean().optional(),
 			contactInteractions: z.boolean().optional(),
+			commentReplies: z.boolean().optional(),
+			moderationAlerts: z.boolean().optional(),
 		})
 		.partial(),
 });
@@ -221,6 +223,7 @@ export const notificationPreferencesSchema = z.object({
 
 export const createCommentSchema = z.object({
 	content: z.string().trim().min(1, "El comentario no puede estar vacío.").max(1000, "Máximo 1000 caracteres."),
+	parentId: z.string().uuid().optional(),
 });
 
 export const reportCommentSchema = z.object({

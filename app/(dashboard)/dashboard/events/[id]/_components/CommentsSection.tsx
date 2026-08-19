@@ -18,6 +18,7 @@ type CommentDTO = {
 	authorName: string;
 	authorRole: "student" | "coach" | "admin";
 	reportedByMe: boolean;
+	parentId: string | null;
 };
 
 const ROLE_LABELS: Record<CommentDTO["authorRole"], string> = {
@@ -86,12 +87,16 @@ function ReportDialog({
 
 function CommentItem({
 	comment,
+	replies,
 	eventId,
 	currentUserId,
+	isReply = false,
 }: {
 	comment: CommentDTO;
+	replies?: CommentDTO[];
 	eventId: string;
 	currentUserId: string | null;
+	isReply?: boolean;
 }) {
 	const router = useRouter();
 	const isOwner = currentUserId === comment.authorId;
@@ -102,6 +107,10 @@ function CommentItem({
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [reported, setReported] = useState(comment.reportedByMe);
+	const [isReplying, setIsReplying] = useState(false);
+	const [replyContent, setReplyContent] = useState("");
+	const [replyLoading, setReplyLoading] = useState(false);
+	const [replyError, setReplyError] = useState<string | null>(null);
 
 	async function saveEdit() {
 		setLoading(true);
@@ -162,8 +171,32 @@ function CommentItem({
 		}
 	}
 
+	async function submitReply() {
+		if (replyContent.trim().length === 0) return;
+		setReplyLoading(true);
+		setReplyError(null);
+		try {
+			const res = await fetch(`/api/events/${eventId}/comments`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ content: replyContent, parentId: comment.id }),
+			});
+			const json = (await res.json()) as { ok: boolean; message?: string };
+			if (!json.ok) {
+				setReplyError(json.message ?? "No se pudo publicar la respuesta.");
+				return;
+			}
+			setReplyContent("");
+			setIsReplying(false);
+			router.refresh();
+		} finally {
+			setReplyLoading(false);
+		}
+	}
+
 	return (
-		<div className="rounded-lg border border-brand-border/50 bg-brand-background p-3">
+		<>
+		<div className={`rounded-lg border border-brand-border/50 bg-brand-background p-3 ${isReply ? "ml-6" : ""}`}>
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div className="flex items-center gap-2">
 					<span className="text-sm font-semibold text-brand-primary">{comment.authorName}</span>
@@ -224,6 +257,37 @@ function CommentItem({
 							<Icon name="error" size={14} /> {reported ? "Reportado" : "Reportar"}
 						</button>
 					)}
+					{!isReply && (
+						<button
+							type="button"
+							onClick={() => setIsReplying((v) => !v)}
+							className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary/50 hover:text-brand-primary"
+						>
+							Responder
+						</button>
+					)}
+				</div>
+			)}
+
+			{isReplying && (
+				<div className="mt-2 space-y-2">
+					<textarea
+						value={replyContent}
+						onChange={(e) => setReplyContent(e.target.value)}
+						rows={2}
+						maxLength={1000}
+						placeholder="Escribe una respuesta..."
+						className="w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-sm text-brand-primary shadow-sm outline-none focus:border-interaction focus:ring-2 focus:ring-interaction/40"
+					/>
+					{replyError && <p className="text-xs text-red-600">{replyError}</p>}
+					<div className="flex gap-2">
+						<Button onClick={submitReply} disabled={replyLoading || replyContent.trim().length === 0}>
+							{replyLoading ? "Publicando..." : "Responder"}
+						</Button>
+						<Button variant="ghost" onClick={() => { setIsReplying(false); setReplyContent(""); }} disabled={replyLoading}>
+							Cancelar
+						</Button>
+					</div>
 				</div>
 			)}
 
@@ -244,6 +308,15 @@ function CommentItem({
 				error={error}
 			/>
 		</div>
+
+		{!isReply && replies && replies.length > 0 && (
+			<div className="mt-2 space-y-2">
+				{replies.map((r) => (
+					<CommentItem key={r.id} comment={r} eventId={eventId} currentUserId={currentUserId} isReply />
+				))}
+			</div>
+		)}
+		</>
 	);
 }
 
@@ -315,9 +388,17 @@ export function CommentsSection({
 					<p className="text-sm text-brand-primary/50">Aún no hay comentarios.</p>
 				) : (
 					<div className="space-y-3">
-						{comments.map((c) => (
-							<CommentItem key={c.id} comment={c} eventId={eventId} currentUserId={currentUserId} />
-						))}
+						{comments
+							.filter((c) => !c.parentId)
+							.map((c) => (
+								<CommentItem
+									key={c.id}
+									comment={c}
+									replies={comments.filter((r) => r.parentId === c.id)}
+									eventId={eventId}
+									currentUserId={currentUserId}
+								/>
+							))}
 					</div>
 				)}
 			</CardContent>

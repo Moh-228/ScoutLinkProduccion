@@ -344,6 +344,10 @@ model Comment {
   authorId String @db.Uuid
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  parentId String?   @db.Uuid
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
   content String
 
   reports CommentReport[]
@@ -352,6 +356,7 @@ model Comment {
   updatedAt DateTime @updatedAt
 
   @@index([eventId, createdAt])
+  @@index([parentId])
   @@map("comments")
 }
 

@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit";
+import { createNotificationIfEnabled } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { moderateCommentSchema } from "@/lib/validations";
 
@@ -52,6 +53,19 @@ export async function DELETE(request: Request, { params }: Props) {
 		reason: parsed.data.reason,
 		metadata: { content: comment.content, eventId: comment.eventId, eventTitle: comment.event.title, authorId: comment.authorId },
 	});
+
+	if (comment.authorId !== session.userId) {
+		await createNotificationIfEnabled({
+			userId: comment.authorId,
+			type: "comment_removed",
+			prefKey: "moderationAlerts",
+			payload: {
+				title: "Comentario eliminado por moderación",
+				message: `Tu comentario en "${comment.event.title}" fue reportado y eliminado por un administrador. Motivo: ${parsed.data.reason}`,
+				eventId: comment.eventId,
+			},
+		});
+	}
 
 	return Response.json({ ok: true, message: "Comentario eliminado." });
 }

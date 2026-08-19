@@ -37,7 +37,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
           { label: "Avisos", href: "/dashboard/notifications", icon: "notifications" },
           { label: "Perfil", href: "/dashboard/profile", icon: "person" },
           {
-            label: role === "student" ? "Postulaciones" : "Verificaciones",
+            label: "Postulaciones",
             href: "/dashboard/applications",
             icon: "person_check",
           },

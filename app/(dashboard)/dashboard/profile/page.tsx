@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Avatar } from "@/components/Avatar";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Badge } from "@/components/Badge";
@@ -11,6 +10,7 @@ import { labelField, labelValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { CardVisibilityToggle } from "./_components/CardVisibilityToggle";
+import { ProfilePhotoField } from "./_components/ProfilePhotoField";
 import { SpecializedCardActions } from "./_components/SpecializedCardActions";
 
 const SPORT_LABELS: Record<string, string> = {
@@ -131,7 +131,7 @@ export default async function ProfilePage() {
       {(isStudent || isCoach) && displayName && (
         <Card>
           <div className="flex items-center gap-4">
-            <Avatar photoKey={photoUrl} name={displayName} size={96} />
+            <ProfilePhotoField photoUrl={photoUrl ?? null} displayName={displayName} />
             <div>
               <p className="text-xl font-bold text-brand-primary">{displayName}</p>
               {age !== null && <p className="text-sm text-brand-primary/60">{age} años</p>}

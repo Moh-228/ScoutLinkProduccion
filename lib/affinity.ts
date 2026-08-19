@@ -12,6 +12,8 @@
  * Hard filter: gender vs event category. Incompatible → 0.
  */
 
+import { SPORT_CHARACTERISTICS } from "./sport-characteristics";
+
 // ─── Input types ──────────────────────────────────────────────────────────────
 
 export type AffinityStudentProfile = {
@@ -184,4 +186,144 @@ export function computeAffinity({
     scoreLevel(requirements.level, data.level, generalCard?.experienceLevel);
 
   return Math.min(100, Math.max(0, pts));
+}
+
+// ─── Detailed breakdown (for UI) ───────────────────────────────────────────────
+
+export type AffinityCriterion = {
+  key: string;
+  label: string;
+  met: boolean;
+};
+
+export type AffinityBreakdown = {
+  percent: number;
+  genderCompatible: boolean;
+  criteria: AffinityCriterion[];
+};
+
+const LEVEL_LABELS: Record<string, string> = {
+  beginner: "Principiante",
+  intermediate: "Intermedio",
+  experienced: "Experimentado",
+};
+
+const POSITION_FIELD_BY_SPORT: Record<string, { key: string; label: string }> = {
+  soccer: { key: "primaryPosition", label: "Posición" },
+  basketball: { key: "primaryPosition", label: "Posición" },
+  volleyball: { key: "position", label: "Posición" },
+  flag_football: { key: "primaryRole", label: "Rol" },
+};
+
+function resolveOptionLabel(sport: string, fieldKey: string, value: string): string {
+  const field = SPORT_CHARACTERISTICS[sport]?.find((f) => f.key === fieldKey);
+  if (field && field.type === "select") {
+    return field.options.find((o) => o.value === value)?.label ?? value;
+  }
+  return value;
+}
+
+function resolveSkillLabel(sport: string, skillKey: string): string {
+  const field = SPORT_CHARACTERISTICS[sport]?.find((f) => f.type === "skills");
+  if (field && field.type === "skills") {
+    return field.options.find((o) => o.value === skillKey)?.label ?? skillKey;
+  }
+  return skillKey;
+}
+
+/** Same inputs as computeAffinity, but returns a per-requirement met/not-met list for display. */
+export function computeAffinityBreakdown({
+  sport,
+  requirements,
+  studentProfile,
+  generalCard,
+  specializedData,
+}: {
+  sport: string;
+  requirements: AffinityEventRequirements;
+  studentProfile: AffinityStudentProfile | null;
+  generalCard: AffinityGeneralCard | null;
+  specializedData: AffinitySpecializedData | null;
+}): AffinityBreakdown {
+  const percent = computeAffinity({ sport, requirements, studentProfile, generalCard, specializedData });
+  const genderOk = genderCompatible(studentProfile?.gender, requirements.category);
+
+  if (!genderOk) {
+    return {
+      percent,
+      genderCompatible: false,
+      criteria: [{ key: "gender", label: "Categoría del evento", met: false }],
+    };
+  }
+
+  const data: AffinitySpecializedData = specializedData ?? {};
+  const sc = requirements.sportsCharacteristics;
+  const criteria: AffinityCriterion[] = [];
+
+  // Position / role
+  const posField = POSITION_FIELD_BY_SPORT[sport];
+  if (sc && posField) {
+    let reqPos: string | undefined;
+    let studentPrimary: unknown;
+    let studentSecondary: unknown;
+    let studentSubrole: unknown;
+
+    if (sport === "soccer") {
+      reqPos = sc.primaryPosition;
+      studentPrimary = data.primaryPosition;
+      studentSecondary = data.secondaryPosition;
+      studentSubrole = data.primarySubrole;
+    } else if (sport === "basketball") {
+      reqPos = sc.primaryPosition;
+      studentPrimary = data.primaryPosition;
+      studentSecondary = data.secondaryPosition;
+    } else if (sport === "volleyball") {
+      reqPos = sc.position;
+      studentPrimary = data.position;
+    } else if (sport === "flag_football") {
+      reqPos = sc.primaryRole;
+      studentPrimary = data.primaryRole;
+      studentSecondary = data.secondaryRole;
+    }
+
+    if (reqPos) {
+      const met =
+        String(studentPrimary ?? "") === reqPos ||
+        String(studentSecondary ?? "") === reqPos ||
+        String(studentSubrole ?? "").toLowerCase().includes(reqPos.toLowerCase());
+      const optLabel = resolveOptionLabel(sport, posField.key, reqPos);
+      criteria.push({ key: "position", label: `${posField.label}: ${optLabel}`, met });
+    }
+  }
+
+  // Skills — one criterion per required skill
+  const reqSkills = sc?.skills;
+  if (reqSkills && reqSkills.length > 0) {
+    for (const skillKey of reqSkills) {
+      criteria.push({
+        key: `skill:${skillKey}`,
+        label: resolveSkillLabel(sport, skillKey),
+        met: data[skillKey] === true,
+      });
+    }
+  }
+
+  // Years experience
+  if (sc?.minYearsExp !== undefined && sc.minYearsExp !== "" && sc.minYearsExp !== null) {
+    const min = Number(sc.minYearsExp);
+    const student = Number(data.yearsExp ?? 0);
+    criteria.push({ key: "years", label: `Experiencia mínima: ${min} años`, met: student >= min });
+  }
+
+  // Level
+  if (requirements.level) {
+    const studentLvl = String(data.level ?? generalCard?.experienceLevel ?? "");
+    criteria.push({
+      key: "level",
+      label: `Nivel requerido: ${LEVEL_LABELS[requirements.level] ?? requirements.level}`,
+      met: studentLvl === requirements.level,
+    });
+  }
+
+  return { percent, genderCompatible: true, criteria };
 }

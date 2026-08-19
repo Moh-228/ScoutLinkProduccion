@@ -31,9 +31,36 @@ export async function POST(request: Request, { params }: Props) {
 		);
 	}
 
+	const { content, parentId } = parsed.data;
+
+	let parent: { id: string; authorId: string; eventId: string } | null = null;
+	if (parentId) {
+		parent = await prisma.comment.findUnique({
+			where: { id: parentId },
+			select: { id: true, authorId: true, eventId: true },
+		});
+		if (!parent || parent.eventId !== eventId) {
+			return Response.json({ ok: false, message: "Comentario a responder no encontrado." }, { status: 404 });
+		}
+	}
+
 	const comment = await prisma.comment.create({
-		data: { eventId, authorId: session.userId, content: parsed.data.content },
+		data: { eventId, authorId: session.userId, content, parentId: parentId ?? null },
 	});
+
+	// Notify the original comment's author about the reply.
+	if (parent && parent.authorId !== session.userId) {
+		await createNotificationIfEnabled({
+			userId: parent.authorId,
+			type: "comment_reply",
+			prefKey: "commentReplies",
+			payload: {
+				title: "Nueva respuesta a tu comentario",
+				message: `Alguien respondió a tu comentario en "${event.title}".`,
+				eventId,
+			},
+		});
+	}
 
 	// Notify the event organizer about new activity on their event.
 	if (event.coachId !== session.userId) {

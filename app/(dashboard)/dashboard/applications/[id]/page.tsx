@@ -5,6 +5,7 @@ import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { Icon } from "@/components/Icon";
+import { computeAffinityBreakdown, type AffinityEventRequirements } from "@/lib/affinity";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusActions } from "./_components/StatusActions";
@@ -55,7 +56,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 		where: { id },
 		include: {
 			event: {
-				select: { id: true, title: true, type: true, sport: true, coachId: true },
+				select: { id: true, title: true, type: true, sport: true, coachId: true, requirements: true },
 			},
 			student: {
 				select: {
@@ -95,6 +96,22 @@ export default async function ApplicationDetailPage({ params }: Props) {
 	const profile = application.student.studentProfile;
 	const card = application.student.generalCard;
 
+	let affinityCriteria: { key: string; label: string; met: boolean }[] = [];
+	if (application.event.type === "recruitment") {
+		const specializedCard = await prisma.studentSpecializedCard.findFirst({
+			where: { studentId: application.student.id, sport: application.event.sport },
+			select: { data: true },
+		});
+		const breakdown = computeAffinityBreakdown({
+			sport: application.event.sport,
+			requirements: (application.event.requirements ?? {}) as AffinityEventRequirements,
+			studentProfile: profile ? { gender: profile.gender } : null,
+			generalCard: card ? { experienceLevel: card.experienceLevel } : null,
+			specializedData: (specializedCard?.data ?? null) as Record<string, unknown> | null,
+		});
+		affinityCriteria = breakdown.criteria;
+	}
+
 	return (
 		<div className="space-y-6">
 			<header className="flex items-center gap-3">
@@ -130,10 +147,10 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					/>
 					{application.event.type === "recruitment" && (
 						<div className="pt-2">
-							<p className="mb-1.5 text-xs font-medium text-brand-primary/50">Compatibilidad</p>
-							<div className="flex items-center gap-3">
-								<div className="relative h-12 w-12 shrink-0">
-									<svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90">
+							<p className="mb-2 text-xs font-medium text-brand-primary/50">Compatibilidad</p>
+							<div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+								<div className="relative h-32 w-32 shrink-0">
+									<svg viewBox="0 0 36 36" className="h-32 w-32 -rotate-90">
 										<circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-brand-border)" strokeOpacity={0.35} strokeWidth="3.2" />
 										<circle
 											cx="18" cy="18" r="15.9" fill="none"
@@ -149,19 +166,39 @@ export default async function ApplicationDetailPage({ params }: Props) {
 											strokeLinecap="round"
 										/>
 									</svg>
-									<span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-brand-primary">
+									<span className="absolute inset-0 flex items-center justify-center text-3xl font-extrabold text-brand-primary">
 										{application.affinityPercent}%
 									</span>
 								</div>
-								<p className="text-sm text-brand-primary/70">
-									{application.affinityPercent >= 70
-										? "Alta compatibilidad con el perfil buscado."
-										: application.affinityPercent >= 40
-										? "Compatibilidad moderada."
-										: application.affinityPercent > 0
-										? "Compatibilidad baja con el perfil buscado."
-										: "Sin datos suficientes para calcular."}
-								</p>
+								<div className="space-y-2 text-center sm:text-left">
+									<p className="text-base font-semibold text-brand-primary">
+										{application.affinityPercent >= 70
+											? "Alta compatibilidad con el perfil buscado."
+											: application.affinityPercent >= 40
+											? "Compatibilidad moderada."
+											: application.affinityPercent > 0
+											? "Compatibilidad baja con el perfil buscado."
+											: "Sin datos suficientes para calcular."}
+									</p>
+									{affinityCriteria.length > 0 && (
+										<ul className="flex flex-wrap justify-center gap-1.5 sm:justify-start">
+											{affinityCriteria.map((c) => (
+												<li
+													key={c.key}
+													className={[
+														"inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+														c.met
+															? "border-emerald-300 bg-emerald-100 text-emerald-800"
+															: "border-red-300 bg-red-100 text-red-800",
+													].join(" ")}
+												>
+													<Icon name={c.met ? "check_small" : "close_small"} size={14} />
+													{c.label}
+												</li>
+											))}
+										</ul>
+									)}
+								</div>
 							</div>
 						</div>
 					)}

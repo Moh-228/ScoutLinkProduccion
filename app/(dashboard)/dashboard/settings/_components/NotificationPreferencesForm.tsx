@@ -11,19 +11,25 @@ type PrefKey =
 	| "postActivity"
 	| "applicationsOnEvents"
 	| "eventActivity"
-	| "contactInteractions";
+	| "contactInteractions"
+	| "commentReplies"
+	| "moderationAlerts";
 
 const STUDENT_TYPES: { key: PrefKey; label: string }[] = [
 	{ key: "newRecruitments", label: "Nuevas convocatorias" },
 	{ key: "applicationStatus", label: "Cambios en el estado de postulaciones" },
 	{ key: "postActivity", label: "Actividad en publicaciones" },
+	{ key: "commentReplies", label: "Respuestas a tus comentarios" },
 	{ key: "contactInteractions", label: "Interacciones de contacto" },
+	{ key: "moderationAlerts", label: "Alertas de moderación (fotos y comentarios eliminados)" },
 ];
 
 const COACH_TYPES: { key: PrefKey; label: string }[] = [
 	{ key: "applicationsOnEvents", label: "Postulaciones en mis eventos" },
 	{ key: "eventActivity", label: "Actividad en mis eventos" },
+	{ key: "commentReplies", label: "Respuestas a tus comentarios" },
 	{ key: "contactInteractions", label: "Interacciones de contacto" },
+	{ key: "moderationAlerts", label: "Alertas de moderación (fotos y comentarios eliminados)" },
 ];
 
 function Toggle({

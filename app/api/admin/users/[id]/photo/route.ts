@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit";
+import { createNotificationIfEnabled } from "@/lib/notifications";
 import { deleteObjectFromS3 } from "@/lib/s3";
 import { prisma } from "@/lib/prisma";
 
@@ -52,6 +53,18 @@ export async function DELETE(request: Request, { params }: Props) {
 		reason,
 		metadata: { email: user.email },
 	});
+
+	if (id !== session.userId) {
+		await createNotificationIfEnabled({
+			userId: id,
+			type: "profile_photo_removed",
+			prefKey: "moderationAlerts",
+			payload: {
+				title: "Foto de perfil eliminada",
+				message: `Tu foto de perfil fue eliminada por un administrador. Motivo: ${reason}`,
+			},
+		});
+	}
 
 	// Best-effort cleanup; the DB update above is what actually removes the photo from the app.
 	try {
