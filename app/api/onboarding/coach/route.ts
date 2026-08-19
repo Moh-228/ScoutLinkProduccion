@@ -20,12 +20,19 @@ export async function PATCH(request: Request) {
 			);
 		}
 
-		const { displayName, academicUnit, phone, bio, sports } = parsed.data;
+		const { displayName, academicUnit, phone, bio, sports, photoUrl } = parsed.data;
 
 		await prisma.$transaction(async (tx) => {
 			await tx.coachProfile.upsert({
 				where: { userId: session.userId },
-				update: { displayName, academicUnit: academicUnit || null, phone: phone || null, bio: bio || null, sports },
+				update: {
+					displayName,
+					academicUnit: academicUnit || null,
+					phone: phone || null,
+					bio: bio || null,
+					sports,
+					...(photoUrl ? { photoUrl } : {}),
+				},
 				create: {
 					userId: session.userId,
 					displayName,
@@ -33,6 +40,7 @@ export async function PATCH(request: Request) {
 					phone: phone || null,
 					bio: bio || null,
 					sports,
+					photoUrl: photoUrl || null,
 				},
 			});
 

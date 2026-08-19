@@ -13,6 +13,7 @@ const ACTION_CONFIG: Record<string, { label: string; icon: IconName }> = {
   event_reopened: { label: "Convocatoria reabierta", icon: "calendar" },
   event_closed: { label: "Convocatoria cerrada", icon: "calendar" },
   application_status_change: { label: "Cambio de estado de postulación", icon: "person_check" },
+  profile_photo_removed: { label: "Foto de perfil eliminada", icon: "delete" },
 };
 
 function fmt(d: Date) {
@@ -37,6 +38,8 @@ function describeMetadata(action: string, metadata: Record<string, unknown>): st
       return `Convocatoria: ${metadata.title ?? "?"}`;
     case "application_status_change":
       return `Nuevo estado: ${metadata.newStatus ?? "?"}`;
+    case "profile_photo_removed":
+      return `${metadata.email ?? "Usuario"}`;
     default:
       return null;
   }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { Select } from "@/components/Select";
 
 const SPORTS = [
@@ -38,6 +39,7 @@ export default function CoachOnboardingPage() {
     academicUnit: "",
     phone: "",
     bio: "",
+    photoUrl: "",
   });
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function CoachOnboardingPage() {
             academicUnit: p.academicUnit ?? "",
             phone: p.phone ?? "",
             bio: p.bio ?? "",
+            photoUrl: p.photoUrl ?? "",
           });
           if (Array.isArray(p.sports) && p.sports.length > 0) {
             setSelectedSports(p.sports);
@@ -63,6 +66,10 @@ export default function CoachOnboardingPage() {
   function set(field: keyof typeof values) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setValues((v) => ({ ...v, [field]: e.target.value }));
+  }
+
+  function setPhoto(key: string) {
+    setValues((v) => ({ ...v, photoUrl: key }));
   }
 
   function toggleSport(value: string) {
@@ -93,6 +100,7 @@ export default function CoachOnboardingPage() {
       phone: values.phone,
       bio: values.bio,
       sports: selectedSports,
+      photoUrl: values.photoUrl,
     };
 
     try {
@@ -131,6 +139,13 @@ export default function CoachOnboardingPage() {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <PhotoUploadField
+            id="ob-c-photo"
+            label="Foto de perfil"
+            displayName={values.displayName}
+            value={values.photoUrl}
+            onChange={setPhoto}
+          />
           <Input
             id="ob-c-name"
             name="displayName"

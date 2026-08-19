@@ -67,6 +67,7 @@ export const studentProfileSchema = z.object({
 	gender: genderEnum.optional(),
 	favoriteSport: sportEnum.optional(),
 	socialLink: z.string().url("Debe ser una URL válida.").optional().or(z.literal("")),
+	photoUrl: z.string().max(500).optional().or(z.literal("")),
 });
 
 export const studentGeneralCardSchema = z.object({
@@ -105,6 +106,7 @@ export const coachProfileSchema = z.object({
 	sports: z
 		.array(sportEnum)
 		.min(1, "Selecciona al menos un deporte."),
+	photoUrl: z.string().max(500).optional().or(z.literal("")),
 });
 
 export const coachDocumentsSchema = z.object({

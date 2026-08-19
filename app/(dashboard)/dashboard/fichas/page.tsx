@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Sport } from "@prisma/client";
+import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -27,15 +28,6 @@ const EXP_BADGE_VARIANT: Record<string, "neutral" | "info" | "warning"> = {
   advanced: "warning",
 };
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
-}
-
 type Props = { searchParams: Promise<{ sport?: string; q?: string }> };
 
 export default async function FichasPage({ searchParams }: Props) {
@@ -55,7 +47,7 @@ export default async function FichasPage({ searchParams }: Props) {
         select: {
           id: true,
           studentProfile: {
-            select: { fullName: true, school: true, gender: true, favoriteSport: true },
+            select: { fullName: true, school: true, gender: true, favoriteSport: true, photoUrl: true },
           },
           // Only needed to match `q` against sport/position — not fetched
           // when there's nothing to search.
@@ -105,12 +97,7 @@ export default async function FichasPage({ searchParams }: Props) {
             return (
               <Card key={card.id} className="gap-4">
                 <div className="flex items-start justify-between gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white"
-                  >
-                    {initials(fullName)}
-                  </span>
+                  <Avatar photoKey={profile?.photoUrl} name={fullName} size={56} />
                   {session && (
                     <FavoriteButton
                       targetType="ficha"

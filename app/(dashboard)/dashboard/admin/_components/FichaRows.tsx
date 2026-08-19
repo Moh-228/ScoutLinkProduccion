@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
+import { Avatar } from "@/components/Avatar";
 import { Icon, type IconName } from "@/components/Icon";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 
@@ -114,7 +115,7 @@ const verifLabels: Record<string, string> = {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Student = { id: string; email: string; studentProfile: { fullName: string } | null };
+type Student = { id: string; email: string; studentProfile: { fullName: string; photoUrl: string | null } | null };
 type Coach = { id: string; email: string; coachProfile: { displayName: string } | null };
 
 export type GeneralCard = {
@@ -152,6 +153,7 @@ export type CoachProfile = {
   phone: string | null;
   bio: string | null;
   sports: string[];
+  photoUrl: string | null;
   user: {
     email: string;
     coachVerifications: { sport: string; status: string }[];
@@ -168,7 +170,9 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
   return (
     <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div className="flex items-center gap-3">
+          <Avatar photoKey={card.student.studentProfile?.photoUrl} name={name} size={40} />
+          <div>
           <p className="font-semibold">{name}</p>
           <p className="text-sm text-brand-primary/70">
             {card.heightCm ? `${card.heightCm} cm` : "—"} ·{" "}
@@ -211,6 +215,7 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
               ) : null}
             </div>
           )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link href={`/dashboard/fichas/${card.id}`}>
@@ -359,11 +364,14 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
   return (
     <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-semibold">{name}</p>
-          <p className="text-sm text-brand-primary/70">
-            Deporte: {sportLabels[card.sport] ?? card.sport}
-          </p>
+        <div className="flex items-center gap-3">
+          <Avatar photoKey={card.student.studentProfile?.photoUrl} name={name} size={40} />
+          <div>
+            <p className="font-semibold">{name}</p>
+            <p className="text-sm text-brand-primary/70">
+              Deporte: {sportLabels[card.sport] ?? card.sport}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -463,7 +471,9 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
   return (
     <div className="rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div className="flex items-center gap-3">
+          <Avatar photoKey={coach.photoUrl} name={coach.displayName} size={40} />
+          <div>
           <p className="font-semibold">{coach.displayName}</p>
           <p className="text-sm text-brand-primary/70">{coach.user.email}</p>
           {coach.academicUnit && (
@@ -484,6 +494,7 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
                 {sportLabels[v.sport] ?? v.sport}: {verifLabels[v.status] ?? v.status}
               </Badge>
             ))}
+          </div>
           </div>
         </div>
         <Button

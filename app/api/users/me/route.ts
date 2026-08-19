@@ -28,6 +28,7 @@ export async function GET() {
 					gender: true,
 					favoriteSport: true,
 					socialLink: true,
+					photoUrl: true,
 				},
 			},
 			coachProfile: {
@@ -37,6 +38,7 @@ export async function GET() {
 					phone: true,
 					bio: true,
 					sports: true,
+					photoUrl: true,
 				},
 			},
 			generalCard: {

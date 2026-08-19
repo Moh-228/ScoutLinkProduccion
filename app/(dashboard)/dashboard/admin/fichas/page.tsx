@@ -29,7 +29,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         experienceLevel: true,
         isPublic: true,
         documents: true,
-        student: { select: { id: true, email: true, studentProfile: { select: { fullName: true } } } },
+        student: { select: { id: true, email: true, studentProfile: { select: { fullName: true, photoUrl: true } } } },
       },
     }),
     prisma.studentSpecializedCard.findMany({
@@ -46,7 +46,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         id: true,
         sport: true,
         data: true,
-        student: { select: { id: true, email: true, studentProfile: { select: { fullName: true } } } },
+        student: { select: { id: true, email: true, studentProfile: { select: { fullName: true, photoUrl: true } } } },
       },
     }),
     prisma.event.findMany({
@@ -77,6 +77,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         phone: true,
         bio: true,
         sports: true,
+        photoUrl: true,
         user: {
           select: {
             email: true,

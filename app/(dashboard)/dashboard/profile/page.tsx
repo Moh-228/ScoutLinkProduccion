@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Avatar } from "@/components/Avatar";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Badge } from "@/components/Badge";
@@ -45,15 +46,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">{children}</p>
   );
-}
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
 }
 
 function ageFromBirthDate(birthDate: Date | null | undefined) {
@@ -139,21 +131,7 @@ export default async function ProfilePage() {
       {(isStudent || isCoach) && displayName && (
         <Card>
           <div className="flex items-center gap-4">
-            {photoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={photoUrl}
-                alt={displayName}
-                className="h-24 w-24 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <span
-                aria-hidden="true"
-                className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-brand-primary text-2xl font-bold text-white"
-              >
-                {initials(displayName)}
-              </span>
-            )}
+            <Avatar photoKey={photoUrl} name={displayName} size={96} />
             <div>
               <p className="text-xl font-bold text-brand-primary">{displayName}</p>
               {age !== null && <p className="text-sm text-brand-primary/60">{age} años</p>}

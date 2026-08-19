@@ -1,7 +1,7 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const DOCUMENT_URL_TTL_SECONDS = 300;
+const SIGNED_URL_TTL_SECONDS = 300;
 
 let client: S3Client | null = null;
 
@@ -32,8 +32,29 @@ export async function uploadPdfToS3(key: string, body: Buffer) {
 	);
 }
 
+export async function uploadImageToS3(key: string, body: Buffer, contentType: string) {
+	await getClient().send(
+		new PutObjectCommand({
+			Bucket: getBucket(),
+			Key: key,
+			Body: body,
+			ContentType: contentType,
+		}),
+	);
+}
+
+export async function deleteObjectFromS3(key: string) {
+	await getClient().send(new DeleteObjectCommand({ Bucket: getBucket(), Key: key }));
+}
+
 // Documents are private in S3; callers must be authorized before requesting this URL.
 export async function getSignedDocumentUrl(key: string) {
 	const command = new GetObjectCommand({ Bucket: getBucket(), Key: key });
-	return getSignedUrl(getClient(), command, { expiresIn: DOCUMENT_URL_TTL_SECONDS });
+	return getSignedUrl(getClient(), command, { expiresIn: SIGNED_URL_TTL_SECONDS });
+}
+
+// Photos are private in S3 too; served only to signed-in users through /api/files/photo.
+export async function getSignedPhotoUrl(key: string) {
+	const command = new GetObjectCommand({ Bucket: getBucket(), Key: key });
+	return getSignedUrl(getClient(), command, { expiresIn: SIGNED_URL_TTL_SECONDS });
 }

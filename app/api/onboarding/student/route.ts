@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
 			);
 		}
 
-		const { fullName, birthDate, school, semester, gender, favoriteSport, socialLink } = parsed.data;
+		const { fullName, birthDate, school, semester, gender, favoriteSport, socialLink, photoUrl } = parsed.data;
 
 		const semesterValue = semester === "" ? null : Number(semester) || null;
 
@@ -34,6 +34,7 @@ export async function PATCH(request: Request) {
 				gender: gender || null,
 				favoriteSport: favoriteSport ?? null,
 				socialLink: socialLink || null,
+				...(photoUrl ? { photoUrl } : {}),
 			},
 			create: {
 				userId: session.userId,
@@ -44,6 +45,7 @@ export async function PATCH(request: Request) {
 				gender: gender || null,
 				favoriteSport: favoriteSport ?? null,
 				socialLink: socialLink || null,
+				photoUrl: photoUrl || null,
 			},
 		});
 

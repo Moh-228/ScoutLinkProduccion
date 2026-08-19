@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { Select } from "@/components/Select";
 
 const SPORT_OPTIONS = [
@@ -41,6 +42,7 @@ export default function StudentOnboardingPage() {
     gender: "",
     favoriteSport: "",
     socialLink: "",
+    photoUrl: "",
   });
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function StudentOnboardingPage() {
             gender: p.gender ?? "",
             favoriteSport: p.favoriteSport ?? "",
             socialLink: p.socialLink ?? "",
+            photoUrl: p.photoUrl ?? "",
           });
         }
       })
@@ -66,6 +69,10 @@ export default function StudentOnboardingPage() {
   function set(field: keyof typeof values) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setValues((v) => ({ ...v, [field]: e.target.value }));
+  }
+
+  function setPhoto(key: string) {
+    setValues((v) => ({ ...v, photoUrl: key }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -87,6 +94,7 @@ export default function StudentOnboardingPage() {
       gender: values.gender || undefined,
       favoriteSport: values.favoriteSport || undefined,
       socialLink: values.socialLink,
+      photoUrl: values.photoUrl,
     };
 
     try {
@@ -124,6 +132,13 @@ export default function StudentOnboardingPage() {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <PhotoUploadField
+            id="ob-photo"
+            label="Foto de perfil"
+            displayName={values.fullName}
+            value={values.photoUrl}
+            onChange={setPhoto}
+          />
           <Input
             id="ob-name"
             name="fullName"

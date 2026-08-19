@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Sport } from "@prisma/client";
 
+import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -34,15 +35,6 @@ const EXP_BADGE_VARIANT: Record<string, "neutral" | "info" | "warning"> = {
   intermediate: "info",
   advanced: "warning",
 };
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
-}
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
@@ -87,7 +79,7 @@ export default async function FavoritesPage({ searchParams }: Props) {
             student: {
               select: {
                 studentProfile: {
-                  select: { fullName: true, school: true, gender: true, favoriteSport: true },
+                  select: { fullName: true, school: true, gender: true, favoriteSport: true, photoUrl: true },
                 },
                 // Only needed to match `q` against sport/position.
                 ...(q ? { specializedCards: { select: { sport: true, data: true } } } : {}),
@@ -212,12 +204,7 @@ export default async function FavoritesPage({ searchParams }: Props) {
                   return (
                     <Card key={card.id} className="gap-4">
                       <div className="flex items-start justify-between gap-2">
-                        <span
-                          aria-hidden="true"
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white"
-                        >
-                          {initials(fullName)}
-                        </span>
+                        <Avatar photoKey={profile?.photoUrl} name={fullName} size={56} />
                         <FavoriteButton targetType="ficha" targetId={card.id} isFavorited={true} />
                       </div>
 

@@ -9,7 +9,8 @@ export type AdminAction =
 	| "report_dismissed"
 	| "event_reopened"
 	| "event_closed"
-	| "application_status_change";
+	| "application_status_change"
+	| "profile_photo_removed";
 
 /** Records an administrative action for the audit history view. */
 export function logAdminAction(params: {

@@ -28,8 +28,8 @@ export default async function AdminUsuariosPage({ searchParams }: Props) {
       isActive: true,
       onboardingCompleted: true,
       createdAt: true,
-      studentProfile: { select: { fullName: true } },
-      coachProfile: { select: { displayName: true } },
+      studentProfile: { select: { fullName: true, photoUrl: true } },
+      coachProfile: { select: { displayName: true, photoUrl: true } },
     },
   });
 
