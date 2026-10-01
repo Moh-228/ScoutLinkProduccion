@@ -35,7 +35,7 @@ const EXP_LABELS: Record<string, string> = {
 function Row({ label, value }: { label: string; value?: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
-    <div className="grid grid-cols-[160px_1fr] gap-2 text-sm">
+    <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[160px_1fr] sm:gap-2">
       <span className="font-medium text-brand-primary/50">{label}</span>
       <span className="min-w-0 wrap-break-word text-brand-primary">{value}</span>
     </div>
@@ -325,7 +325,7 @@ export default async function ProfilePage() {
                       {Object.entries(data)
                         .filter(([, v]) => v !== "" && v !== false && v !== null && v !== undefined)
                         .map(([k, v]) => (
-                          <div key={k} className="grid grid-cols-[200px_1fr] gap-2 text-sm">
+                          <div key={k} className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[200px_1fr] sm:gap-2">
                             <span className="font-medium text-brand-primary/50">{labelField(k)}</span>
                             <span className="text-brand-primary">{labelValue(v)}</span>
                           </div>

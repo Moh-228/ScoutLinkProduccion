@@ -1,24 +1,75 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { Pagination } from "@/components/Pagination";
 import { matchSports } from "@/lib/ficha-search";
+import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { GeneralCardRow, SpecializedCardRow, EventRow, CoachProfileRow } from "../_components/FichaRows";
 
-type Props = { searchParams: Promise<{ q?: string }> };
+type Props = {
+  searchParams: Promise<{
+    q?: string;
+    pageGeneral?: string;
+    pageSpecialized?: string;
+    pageEvents?: string;
+    pageCoaches?: string;
+  }>;
+};
 
 export default async function AdminFichasPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const {
+    q,
+    pageGeneral: pageGeneralRaw,
+    pageSpecialized: pageSpecializedRaw,
+    pageEvents: pageEventsRaw,
+    pageCoaches: pageCoachesRaw,
+  } = await searchParams;
   const matchedSports = q ? matchSports(q) : [];
+  const pageGeneral = parsePage(pageGeneralRaw);
+  const pageSpecialized = parsePage(pageSpecializedRaw);
+  const pageEvents = parsePage(pageEventsRaw);
+  const pageCoaches = parsePage(pageCoachesRaw);
 
-  const [generalCards, specializedCards, events, coachProfiles] = await Promise.all([
+  const generalWhere = q
+    ? {
+        OR: [
+          { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" as const } } } },
+          { student: { email: { contains: q, mode: "insensitive" as const } } },
+        ],
+      }
+    : {};
+  const specializedWhere = q
+    ? {
+        OR: [
+          { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" as const } } } },
+          ...(matchedSports.length > 0 ? [{ sport: { in: matchedSports } }] : []),
+        ],
+      }
+    : {};
+  const eventsWhere = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: "insensitive" as const } },
+          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
+        ],
+      }
+    : {};
+
+  const [
+    generalCount,
+    specializedCount,
+    eventsCount,
+    coachProfilesCount,
+    generalCards,
+    specializedCards,
+    events,
+    coachProfiles,
+  ] = await Promise.all([
+    prisma.studentGeneralCard.count({ where: generalWhere }),
+    prisma.studentSpecializedCard.count({ where: specializedWhere }),
+    prisma.event.count({ where: eventsWhere }),
+    prisma.coachProfile.count(),
     prisma.studentGeneralCard.findMany({
-      where: q
-        ? {
-            OR: [
-              { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
-              { student: { email: { contains: q, mode: "insensitive" } } },
-            ],
-          }
-        : {},
+      where: generalWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -31,16 +82,10 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         documents: true,
         student: { select: { id: true, email: true, studentProfile: { select: { fullName: true, photoUrl: true } } } },
       },
+      ...getPagination(pageGeneral),
     }),
     prisma.studentSpecializedCard.findMany({
-      where: q
-        ? {
-            OR: [
-              { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
-              ...(matchedSports.length > 0 ? [{ sport: { in: matchedSports } }] : []),
-            ],
-          }
-        : {},
+      where: specializedWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -48,16 +93,10 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         data: true,
         student: { select: { id: true, email: true, studentProfile: { select: { fullName: true, photoUrl: true } } } },
       },
+      ...getPagination(pageSpecialized),
     }),
     prisma.event.findMany({
-      where: q
-        ? {
-            OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
-            ],
-          }
-        : {},
+      where: eventsWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -67,6 +106,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         status: true,
         coach: { select: { id: true, email: true, coachProfile: { select: { displayName: true } } } },
       },
+      ...getPagination(pageEvents),
     }),
     prisma.coachProfile.findMany({
       orderBy: { createdAt: "desc" },
@@ -87,8 +127,18 @@ export default async function AdminFichasPage({ searchParams }: Props) {
           },
         },
       },
+      ...getPagination(pageCoaches),
     }),
   ]);
+
+  const basePath = "/dashboard/admin/fichas";
+  const preserved = {
+    q,
+    pageGeneral: pageGeneralRaw,
+    pageSpecialized: pageSpecializedRaw,
+    pageEvents: pageEventsRaw,
+    pageCoaches: pageCoachesRaw,
+  };
 
   return (
     <div className="space-y-6">
@@ -99,7 +149,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>Eventos ({events.length})</CardTitle>
+          <CardTitle>Eventos ({eventsCount})</CardTitle>
           <CardDescription>Todos los eventos creados por coaches. Puedes editar, desactivar o eliminar.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -108,12 +158,19 @@ export default async function AdminFichasPage({ searchParams }: Props) {
           ) : (
             events.map((e) => <EventRow key={e.id} event={e} />)
           )}
+          <Pagination
+            page={pageEvents}
+            totalPages={getTotalPages(eventsCount)}
+            basePath={basePath}
+            searchParams={preserved}
+            paramName="pageEvents"
+          />
         </CardContent>
       </Card>
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>Perfiles de entrenadores ({coachProfiles.length})</CardTitle>
+          <CardTitle>Perfiles de entrenadores ({coachProfilesCount})</CardTitle>
           <CardDescription>Datos de coaches registrados y sus verificaciones por deporte.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -122,12 +179,19 @@ export default async function AdminFichasPage({ searchParams }: Props) {
           ) : (
             coachProfiles.map((c) => <CoachProfileRow key={c.userId} coach={c} />)
           )}
+          <Pagination
+            page={pageCoaches}
+            totalPages={getTotalPages(coachProfilesCount)}
+            basePath={basePath}
+            searchParams={preserved}
+            paramName="pageCoaches"
+          />
         </CardContent>
       </Card>
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>Fichas generales de deportistas ({generalCards.length})</CardTitle>
+          <CardTitle>Fichas generales de deportistas ({generalCount})</CardTitle>
           <CardDescription>Ficha pública/privada de cada deportista.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -136,12 +200,19 @@ export default async function AdminFichasPage({ searchParams }: Props) {
           ) : (
             generalCards.map((c) => <GeneralCardRow key={c.id} card={c} />)
           )}
+          <Pagination
+            page={pageGeneral}
+            totalPages={getTotalPages(generalCount)}
+            basePath={basePath}
+            searchParams={preserved}
+            paramName="pageGeneral"
+          />
         </CardContent>
       </Card>
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>Fichas especializadas de deportistas ({specializedCards.length})</CardTitle>
+          <CardTitle>Fichas especializadas de deportistas ({specializedCount})</CardTitle>
           <CardDescription>Fichas por deporte de cada deportista.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -150,6 +221,13 @@ export default async function AdminFichasPage({ searchParams }: Props) {
           ) : (
             specializedCards.map((c) => <SpecializedCardRow key={c.id} card={c} />)
           )}
+          <Pagination
+            page={pageSpecialized}
+            totalPages={getTotalPages(specializedCount)}
+            basePath={basePath}
+            searchParams={preserved}
+            paramName="pageSpecialized"
+          />
         </CardContent>
       </Card>
     </div>

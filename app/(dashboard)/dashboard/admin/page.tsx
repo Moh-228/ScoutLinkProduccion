@@ -1,26 +1,31 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { Pagination } from "@/components/Pagination";
+import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { VerificationsList } from "./_components/VerificationsList";
 
-type Props = { searchParams: Promise<{ q?: string }> };
+type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
 export default async function AdminPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, page: pageRaw } = await searchParams;
+  const page = parsePage(pageRaw);
+  const where = q
+    ? {
+        OR: [
+          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
+          { coach: { email: { contains: q, mode: "insensitive" as const } } },
+        ],
+      }
+    : {};
 
-  const [userCount, activeEvents, closedEvents, pendingVerifCount, verifications] = await Promise.all([
+  const [userCount, activeEvents, closedEvents, pendingVerifCount, totalVerifications, verifications] = await Promise.all([
     prisma.user.count(),
     prisma.event.count({ where: { status: "open" } }),
     prisma.event.count({ where: { status: "closed" } }),
     prisma.coachVerification.count({ where: { status: "pending" } }),
+    prisma.coachVerification.count({ where }),
     prisma.coachVerification.findMany({
-      where: q
-        ? {
-            OR: [
-              { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
-              { coach: { email: { contains: q, mode: "insensitive" } } },
-            ],
-          }
-        : {},
+      where,
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
@@ -30,6 +35,7 @@ export default async function AdminPage({ searchParams }: Props) {
         rejectionReason: true,
         coach: { select: { id: true, email: true, coachProfile: { select: { displayName: true } } } },
       },
+      ...getPagination(page),
     }),
   ]);
 
@@ -65,6 +71,12 @@ export default async function AdminPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent>
           <VerificationsList verifications={verifications} />
+          <Pagination
+            page={page}
+            totalPages={getTotalPages(totalVerifications)}
+            basePath="/dashboard/admin"
+            searchParams={{ q }}
+          />
         </CardContent>
       </Card>
     </div>

@@ -57,7 +57,10 @@ export function SidebarNav({ role }: SidebarNavProps) {
   }, null);
 
   return (
-    <nav aria-label="Navegación principal" className="flex flex-row gap-1 lg:flex-col lg:gap-1">
+    <nav
+      aria-label="Navegación principal"
+      className="flex flex-row gap-1 overflow-x-auto scrollbar-hide lg:flex-col lg:gap-1 lg:overflow-visible"
+    >
       {items.map((item) => {
         const active = item === activeItem;
         return (
@@ -66,7 +69,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={[
-              "group flex flex-1 items-center justify-center rounded-lg text-center transition-colors lg:flex-none",
+              "group flex shrink-0 items-center justify-center rounded-lg text-center transition-colors lg:flex-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
             ].join(" ")}
           >

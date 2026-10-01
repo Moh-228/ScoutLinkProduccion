@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Pagination } from "@/components/Pagination";
+import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 import { ReportRow } from "./_components/ReportRow";
 
-type Props = { searchParams: Promise<{ status?: string }> };
+type Props = { searchParams: Promise<{ status?: string; page?: string }> };
 
 const TABS = [
   { label: "Pendientes", value: "pending" },
@@ -14,43 +16,49 @@ const TABS = [
 ];
 
 export default async function AdminReportsPage({ searchParams }: Props) {
-  const { status } = await searchParams;
+  const { status, page: pageRaw } = await searchParams;
   const activeStatus = status && ["pending", "resolved", "dismissed"].includes(status) ? status : "pending";
+  const page = parsePage(pageRaw);
+  const where = activeStatus === "all" ? {} : { status: activeStatus as never };
 
-  const reports = await prisma.commentReport.findMany({
-    where: activeStatus === "all" ? {} : { status: activeStatus as never },
-    orderBy: { createdAt: "desc" },
-    include: {
-      comment: {
-        select: {
-          id: true,
-          content: true,
-          eventId: true,
-          event: { select: { title: true } },
-          author: {
-            select: {
-              role: true,
-              studentProfile: { select: { fullName: true } },
-              coachProfile: { select: { displayName: true } },
+  const [totalReports, reports] = await Promise.all([
+    prisma.commentReport.count({ where }),
+    prisma.commentReport.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        comment: {
+          select: {
+            id: true,
+            content: true,
+            eventId: true,
+            event: { select: { title: true } },
+            author: {
+              select: {
+                role: true,
+                studentProfile: { select: { fullName: true } },
+                coachProfile: { select: { displayName: true } },
+              },
             },
           },
         },
-      },
-      reporter: {
-        select: {
-          role: true,
-          studentProfile: { select: { fullName: true } },
-          coachProfile: { select: { displayName: true } },
+        reporter: {
+          select: {
+            role: true,
+            studentProfile: { select: { fullName: true } },
+            coachProfile: { select: { displayName: true } },
+          },
+        },
+        resolvedBy: {
+          select: {
+            studentProfile: { select: { fullName: true } },
+            coachProfile: { select: { displayName: true } },
+          },
         },
       },
-      resolvedBy: {
-        select: {
-          studentProfile: { select: { fullName: true } },
-          coachProfile: { select: { displayName: true } },
-        },
-      },
-    },
-  });
+      ...getPagination(page),
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -78,7 +86,7 @@ export default async function AdminReportsPage({ searchParams }: Props) {
 
       <Card className="mx-auto w-full max-w-3xl">
         <CardHeader>
-          <CardTitle>Reportes ({reports.length})</CardTitle>
+          <CardTitle>Reportes ({totalReports})</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {reports.length === 0 ? (
@@ -111,6 +119,12 @@ export default async function AdminReportsPage({ searchParams }: Props) {
               );
             })
           )}
+          <Pagination
+            page={page}
+            totalPages={getTotalPages(totalReports)}
+            basePath="/dashboard/admin/reportes"
+            searchParams={{ status: activeStatus }}
+          />
         </CardContent>
       </Card>
     </div>

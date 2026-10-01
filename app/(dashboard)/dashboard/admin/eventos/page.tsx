@@ -5,11 +5,13 @@ import { Badge } from "@/components/Badge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Icon } from "@/components/Icon";
+import { Pagination } from "@/components/Pagination";
+import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { ReopenEventButton } from "./_components/ReopenEventButton";
 
-type Props = { searchParams: Promise<{ q?: string }> };
+type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -38,30 +40,37 @@ function fmt(d: Date | null) {
 }
 
 export default async function AdminEventsPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, page: pageRaw } = await searchParams;
+  const page = parsePage(pageRaw);
 
-  const events = await prisma.event.findMany({
-    where: q
-      ? {
-          OR: [
-            { title: { contains: q, mode: "insensitive" } },
-            { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
-          ],
-        }
-      : {},
-    orderBy: { createdAt: "desc" },
-    include: {
-      coach: { select: { coachProfile: { select: { displayName: true } } } },
-      applications: {
-        select: {
-          id: true,
-          status: true,
-          student: { select: { studentProfile: { select: { fullName: true } } } },
+  const where = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: "insensitive" as const } },
+          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
+        ],
+      }
+    : {};
+
+  const [totalEvents, events] = await Promise.all([
+    prisma.event.count({ where }),
+    prisma.event.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        coach: { select: { coachProfile: { select: { displayName: true } } } },
+        applications: {
+          select: {
+            id: true,
+            status: true,
+            student: { select: { studentProfile: { select: { fullName: true } } } },
+          },
+          orderBy: { createdAt: "desc" },
         },
-        orderBy: { createdAt: "desc" },
       },
-    },
-  });
+      ...getPagination(page),
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -145,6 +154,12 @@ export default async function AdminEventsPage({ searchParams }: Props) {
               </Card>
             );
           })}
+          <Pagination
+            page={page}
+            totalPages={getTotalPages(totalEvents)}
+            basePath="/dashboard/admin/eventos"
+            searchParams={{ q }}
+          />
         </div>
       )}
     </div>

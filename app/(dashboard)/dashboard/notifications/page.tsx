@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { Pagination } from "@/components/Pagination";
 import { verifySession } from "@/lib/auth";
+import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 import { MarkReadButton, MarkAllReadButton } from "./_components/MarkReadButtons";
 
@@ -12,15 +14,24 @@ function fmt(d: Date) {
   );
 }
 
-export default async function NotificationsPage() {
+type Props = { searchParams: Promise<{ page?: string }> };
+
+export default async function NotificationsPage({ searchParams }: Props) {
   const session = await verifySession();
   if (!session) redirect("/auth/login");
 
-  const notifications = await prisma.notification.findMany({
-    where: { userId: session.userId },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const { page: pageRaw } = await searchParams;
+  const page = parsePage(pageRaw);
+
+  const [total, unreadCount, notifications] = await Promise.all([
+    prisma.notification.count({ where: { userId: session.userId } }),
+    prisma.notification.count({ where: { userId: session.userId, readAt: null } }),
+    prisma.notification.findMany({
+      where: { userId: session.userId },
+      orderBy: { createdAt: "desc" },
+      ...getPagination(page),
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -29,7 +40,7 @@ export default async function NotificationsPage() {
           <h1 className="text-xl font-bold text-brand-primary">Notificaciones</h1>
           <p className="text-brand-primary/70">Avisos sobre eventos, postulaciones y contacto.</p>
         </div>
-        <MarkAllReadButton hasUnread={notifications.some((n) => !n.readAt)} />
+        <MarkAllReadButton hasUnread={unreadCount > 0} />
       </header>
 
       {notifications.length === 0 ? (
@@ -62,6 +73,7 @@ export default async function NotificationsPage() {
           })}
         </div>
       )}
+      <Pagination page={page} totalPages={getTotalPages(total)} basePath="/dashboard/notifications" />
     </div>
   );
 }

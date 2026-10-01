@@ -27,7 +27,7 @@ const EXP_LABELS: Record<string, string> = {
 function Row({ label, value }: { label: string; value?: string | number | boolean | null }) {
   if (value === "" || value === null || value === undefined || value === false) return null;
   return (
-    <div className="grid grid-cols-[200px_1fr] gap-2 text-sm">
+    <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[200px_1fr] sm:gap-2">
       <span className="font-medium text-brand-primary/50">{label}</span>
       <span className="text-brand-primary">{value === true ? "Sí" : String(value)}</span>
     </div>
@@ -132,7 +132,7 @@ export default async function FichaDetailPage({ params }: Props) {
               {card.phone && <Row label="Teléfono" value={card.phone} />}
               {card.publicEmail && <Row label="Correo público" value={card.publicEmail} />}
               {profile?.socialLink && <Row label="Enlace social" value={profile.socialLink} />}
-              <div className="grid grid-cols-[200px_1fr] items-center gap-2 pt-1 text-sm">
+              <div className="grid grid-cols-1 items-start gap-2 pt-1 text-sm sm:grid-cols-[200px_1fr] sm:items-center">
                 <span className="font-medium text-brand-primary/50">Correo institucional</span>
                 <ContactRevealButton userId={card.student.id} className="w-fit" />
               </div>

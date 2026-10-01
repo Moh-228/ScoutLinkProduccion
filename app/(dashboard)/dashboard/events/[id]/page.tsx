@@ -72,7 +72,7 @@ function fmt(dateStr: Date | null | undefined) {
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
-    <div className="grid grid-cols-[160px_1fr] gap-2 text-sm">
+    <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[160px_1fr] sm:gap-2">
       <span className="font-medium text-brand-primary/50">{label}</span>
       <span className="text-brand-primary">{value}</span>
     </div>

@@ -17,3 +17,13 @@ body {
   outline: 2px solid rgb(14 116 144);
   outline-offset: 2px;
 }
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

@@ -38,7 +38,7 @@ const GENDER_LABELS: Record<string, string> = {
 function Row({ label, value }: { label: string; value?: string | number | null }) {
 	if (!value && value !== 0) return null;
 	return (
-		<div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+		<div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[180px_1fr] sm:gap-2">
 			<span className="font-medium text-brand-primary/50">{label}</span>
 			<span className="text-brand-primary">{value}</span>
 		</div>
@@ -253,7 +253,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						<p className="text-sm text-brand-primary/50">El alumno no tiene ficha registrada.</p>
 					)}
 					{canManage && (
-						<div className="grid grid-cols-[180px_1fr] items-center gap-2 pt-1">
+						<div className="grid grid-cols-1 items-start gap-2 pt-1 sm:grid-cols-[180px_1fr] sm:items-center">
 							<span className="text-sm font-medium text-brand-primary/50">Correo institucional</span>
 							<ContactRevealButton userId={application.student.id} className="w-fit" />
 						</div>
