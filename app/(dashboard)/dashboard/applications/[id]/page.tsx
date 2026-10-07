@@ -8,6 +8,7 @@ import { Icon } from "@/components/Icon";
 import { computeAffinityBreakdown, type AffinityEventRequirements } from "@/lib/affinity";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { CoachRating } from "./_components/CoachRating";
 import { StatusActions } from "./_components/StatusActions";
 
 const SPORT_LABELS: Record<string, string> = {
@@ -260,6 +261,31 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					)}
 				</CardContent>
 			</Card>
+
+			{/* Retroalimentación del entrenador */}
+			{application.coachFeedback && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Comentarios del entrenador</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="whitespace-pre-wrap text-sm text-brand-primary">{application.coachFeedback}</p>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Calificación — solo entrenador (apoyo visual, no afecta funcionamiento) */}
+			{isCoach && (
+				<Card>
+					<CardContent className="pt-6">
+						<CoachRating
+							eventId={application.event.id}
+							appId={application.id}
+							initialRating={application.coachRating}
+						/>
+					</CardContent>
+				</Card>
+			)}
 
 			{/* Acciones — solo entrenador / admin */}
 			{canManage && (

@@ -251,6 +251,9 @@ export default async function ProfilePage() {
                     <Row label="Lesión actual" value={medicalInfo.currentInjury as string} />
                     <Row label="Cirugías" value={medicalInfo.surgeries as string} />
                     {medicalInfo.asthma && <Row label="Asma" value="Sí" />}
+                    <Row label="Patologías" value={medicalInfo.pathologies as string} />
+                    <Row label="Enfermedades crónicas" value={medicalInfo.chronicDiseases as string} />
+                    <Row label="Padecimientos cardíacos" value={medicalInfo.cardiacConditions as string} />
                   </>
                 )}
 

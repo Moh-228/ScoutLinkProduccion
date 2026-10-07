@@ -155,34 +155,52 @@ export default async function Home() {
       </div>
 
       {/* ── Hero ── */}
-      <section className="grid items-center gap-10 lg:grid-cols-2">
-        <div>
-          <Badge variant="info">Reclutamiento deportivo universitario</Badge>
-          <h1 className="mt-5 max-w-xl text-4xl font-bold tracking-tight text-brand-primary sm:text-5xl">
-            Conecta talento estudiantil con oportunidades de reclutamiento universitario.
-          </h1>
-          <p className="mt-5 max-w-lg text-lg text-brand-primary/70">
-            Un espacio para que estudiantes deportistas muestren su perfil, postulen a eventos y reciban seguimiento de entrenadores.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/auth/login" className={buttonClassNames("primary", "w-full sm:w-auto")}>
-              Iniciar sesión
-            </Link>
-            <Link href="/auth/register" className={buttonClassNames("secondary", "w-full sm:w-auto")}>
-              Registrarme
-            </Link>
+      <section className="relative -mx-4 overflow-hidden rounded-3xl bg-linear-to-br from-brand-primary via-brand-primary to-brand-secondary px-6 py-14 sm:mx-0 sm:px-12 sm:py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-secondary/40 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-sport-volleyball/30 blur-3xl"
+        />
+        <div className="relative grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <Badge variant="info" className="border-white/30 bg-white/15 text-white">
+              Reclutamiento deportivo universitario
+            </Badge>
+            <h1 className="mt-5 max-w-xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Conecta talento estudiantil con oportunidades de reclutamiento universitario.
+            </h1>
+            <p className="mt-5 max-w-lg text-lg text-white/80">
+              Un espacio para que estudiantes deportistas muestren su perfil, postulen a eventos y reciban seguimiento de entrenadores.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/auth/login"
+                className="inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-brand-primary shadow-lg shadow-black/10 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction sm:w-auto"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/auth/register"
+                className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/50 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction sm:w-auto"
+              >
+                Registrarme
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className="relative hidden h-72 lg:block" aria-hidden="true">
-          {DECOR_SPORTS.map((s) => (
-            <span
-              key={s.icon}
-              className={`absolute flex items-center justify-center rounded-full text-white shadow-lg ${s.accent} ${s.className}`}
-            >
-              <Icon name={s.icon} size={s.iconSize} />
-            </span>
-          ))}
+          <div className="relative hidden h-72 lg:block" aria-hidden="true">
+            {DECOR_SPORTS.map((s) => (
+              <span
+                key={s.icon}
+                className={`absolute flex items-center justify-center rounded-full text-white shadow-xl ring-4 ring-white/20 ${s.accent} ${s.className}`}
+              >
+                <Icon name={s.icon} size={s.iconSize} />
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -193,9 +211,13 @@ export default async function Home() {
           Todo lo que necesitas para tu proceso de reclutamiento
         </h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {FEATURES.map((feature) => (
-            <Card key={feature.title}>
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-secondary/10 text-brand-secondary">
+          {FEATURES.map((feature, i) => (
+            <Card key={feature.title} className="border-transparent bg-linear-to-br from-white to-brand-background">
+              <span
+                className={`flex h-12 w-12 items-center justify-center rounded-xl text-white ${
+                  ["bg-brand-secondary", "bg-sport-volleyball", "bg-brand-primary"][i % 3]
+                }`}
+              >
                 <Icon name={feature.icon} size={24} />
               </span>
               <CardHeader>
@@ -366,7 +388,12 @@ export default async function Home() {
       </section>
 
       <footer className="border-t border-brand-border py-8 text-sm text-brand-primary/70">
-        <p>Scoutlink - Prototipo UI 2026</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p>Scoutlink - Prototipo UI 2026</p>
+          <Link href="/aviso-de-privacidad" className="font-medium text-brand-secondary hover:text-brand-primary hover:underline">
+            Aviso de privacidad
+          </Link>
+        </div>
       </footer>
     </main>
   );

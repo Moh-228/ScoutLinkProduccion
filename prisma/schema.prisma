@@ -271,6 +271,10 @@ model EventApplication {
   status         ApplicationStatus @default(postulado)
   affinityPercent Int              @default(0)
 
+  // Coach-only visual aid; never used in affinity/ranking calculations.
+  coachRating   Int?
+  coachFeedback String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

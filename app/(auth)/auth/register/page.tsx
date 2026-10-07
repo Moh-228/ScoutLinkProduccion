@@ -132,6 +132,13 @@ export default function RegisterPage() {
                 {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
               </Button>
             </div>
+            <p className="text-center text-xs text-brand-primary/60">
+              Al crear tu cuenta aceptas nuestro{" "}
+              <Link href="/aviso-de-privacidad" className="font-medium text-brand-secondary underline hover:text-brand-primary">
+                aviso de privacidad
+              </Link>
+              .
+            </p>
           </form>
           <p className="mt-4 text-center text-sm text-brand-primary">
             ¿Ya tienes cuenta?{" "}

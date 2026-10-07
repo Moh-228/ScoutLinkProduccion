@@ -7,9 +7,20 @@ import { prisma } from "@/lib/prisma";
 
 type RouteProps = { params: Promise<{ id: string; appId: string }> };
 
-const updateStatusSchema = z.object({
-	status: z.enum(["preseleccionado", "aceptado", "rechazado"]),
-});
+const updateApplicationSchema = z
+	.object({
+		status: z.enum(["preseleccionado", "aceptado", "rechazado"]).optional(),
+		feedback: z.string().trim().min(1).max(2000).optional(),
+		// Coach-only visual aid; never used in affinity/ranking calculations. `null` clears the rating.
+		coachRating: z.union([z.number().int().min(1).max(5), z.null()]).optional(),
+	})
+	.refine((data) => data.status !== undefined || data.feedback !== undefined || data.coachRating !== undefined, {
+		message: "No hay cambios para aplicar.",
+	})
+	.refine((data) => data.status === undefined || (data.feedback !== undefined && data.feedback.length > 0), {
+		message: "Debes agregar un comentario de retroalimentación al cambiar el estado.",
+		path: ["feedback"],
+	});
 
 const STATUS_MESSAGES: Record<string, string> = {
 	preseleccionado: "Fuiste preseleccionado para el evento.",
@@ -54,22 +65,32 @@ export async function PATCH(request: Request, { params }: RouteProps) {
 		return Response.json({ ok: false, message: "Cuerpo inválido." }, { status: 400 });
 	}
 
-	const parsed = updateStatusSchema.safeParse(body);
+	const parsed = updateApplicationSchema.safeParse(body);
 	if (!parsed.success) {
 		return Response.json(
-			{ ok: false, message: "Estado inválido.", errors: parsed.error.flatten().fieldErrors },
+			{ ok: false, message: "Datos inválidos.", errors: parsed.error.flatten().fieldErrors },
 			{ status: 400 },
 		);
 	}
 
-	const { status } = parsed.data;
+	const { status, feedback, coachRating } = parsed.data;
 
-	const notifyStudent = await isNotificationEnabled(application.studentId, "applicationStatus");
+	// Rating is a coach-only visual aid, never visible/settable by admins or students.
+	if (coachRating !== undefined && session.role !== "coach") {
+		return Response.json({ ok: false, message: "Solo el entrenador puede calificar postulantes." }, { status: 403 });
+	}
+
+	const data: { status?: typeof status; coachFeedback?: string; coachRating?: number | null } = {};
+	if (status !== undefined) data.status = status;
+	if (feedback !== undefined) data.coachFeedback = feedback;
+	if (coachRating !== undefined) data.coachRating = coachRating;
+
+	const notifyStudent = status !== undefined && (await isNotificationEnabled(application.studentId, "applicationStatus"));
 
 	const [updated] = await prisma.$transaction([
 		prisma.eventApplication.update({
 			where: { id: appId },
-			data: { status },
+			data,
 		}),
 		...(notifyStudent
 			? [
@@ -79,7 +100,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
 							type: `application_${status}`,
 							payload: {
 								title: "Actualización de postulación",
-								message: STATUS_MESSAGES[status],
+								message: feedback ? `${STATUS_MESSAGES[status!]} Comentario: ${feedback}` : STATUS_MESSAGES[status!],
 								eventId,
 								applicationId: appId,
 							},
@@ -89,7 +110,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
 			: []),
 	]);
 
-	if (session.role === "admin" && event.coachId !== session.userId) {
+	if (status !== undefined && session.role === "admin" && event.coachId !== session.userId) {
 		await logAdminAction({
 			adminId: session.userId,
 			action: "application_status_change",
@@ -101,3 +122,4 @@ export async function PATCH(request: Request, { params }: RouteProps) {
 
 	return Response.json({ ok: true, data: updated });
 }
+

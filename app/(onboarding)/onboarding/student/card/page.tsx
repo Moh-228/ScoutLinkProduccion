@@ -49,6 +49,9 @@ export default function StudentCardPage() {
     currentInjury: "",
     surgeries: "",
     asthma: false,
+    pathologies: "",
+    chronicDiseases: "",
+    cardiacConditions: "",
     inscriptionProof: "",
     medicalInsurance: "",
   });
@@ -72,6 +75,9 @@ export default function StudentCardPage() {
             currentInjury: (med.currentInjury as string) ?? "",
             surgeries: (med.surgeries as string) ?? "",
             asthma: (med.asthma as boolean) ?? false,
+            pathologies: (med.pathologies as string) ?? "",
+            chronicDiseases: (med.chronicDiseases as string) ?? "",
+            cardiacConditions: (med.cardiacConditions as string) ?? "",
             inscriptionProof: (docs.inscriptionProof as string) ?? "",
             medicalInsurance: (docs.medicalInsurance as string) ?? "",
           });
@@ -111,6 +117,9 @@ export default function StudentCardPage() {
         currentInjury: fields.currentInjury,
         surgeries: fields.surgeries,
         asthma: fields.asthma,
+        pathologies: fields.pathologies,
+        chronicDiseases: fields.chronicDiseases,
+        cardiacConditions: fields.cardiacConditions,
       },
       documents: {
         inscriptionProof: fields.inscriptionProof,
@@ -255,6 +264,42 @@ export default function StudentCardPage() {
             />
             Padece asma
           </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
+            <span>Patologías relevantes para el deporte</span>
+            <textarea
+              name="pathologies"
+              rows={2}
+              placeholder="Ej. displasia de cadera, escoliosis..."
+              className={TA_CLASS}
+              value={fields.pathologies}
+              onChange={setStr("pathologies")}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
+            <span>Enfermedades crónicas</span>
+            <textarea
+              name="chronicDiseases"
+              rows={2}
+              placeholder="Ej. diabetes, hipertensión..."
+              className={TA_CLASS}
+              value={fields.chronicDiseases}
+              onChange={setStr("chronicDiseases")}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
+            <span>Padecimientos cardíacos</span>
+            <textarea
+              name="cardiacConditions"
+              rows={2}
+              placeholder="Ej. soplo cardíaco, arritmia..."
+              className={TA_CLASS}
+              value={fields.cardiacConditions}
+              onChange={setStr("cardiacConditions")}
+            />
+          </label>
+          <p className="text-xs text-brand-primary/50">
+            Esta información es solo informativa para entrenadores y personal médico; no afecta el cálculo de afinidad.
+          </p>
 
           {/* Documentación */}
           <SectionTitle>Documentación</SectionTitle>

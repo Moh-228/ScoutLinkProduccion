@@ -146,6 +146,10 @@ export default async function FichaDetailPage({ params }: Props) {
               <Row label="Lesión actual" value={medicalInfo.currentInjury as string} />
               <Row label="Cirugías" value={medicalInfo.surgeries as string} />
               {medicalInfo.asthma && <Row label="Asma" value={true} />}
+              <Row label="Patologías" value={medicalInfo.pathologies as string} />
+              <Row label="Enfermedades crónicas" value={medicalInfo.chronicDiseases as string} />
+              <Row label="Padecimientos cardíacos" value={medicalInfo.cardiacConditions as string} />
+              <p className="pt-1 text-xs text-brand-primary/40">Esta información no afecta el cálculo de afinidad.</p>
             </>
           )}
         </CardContent>

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { verifySession } from "@/lib/auth";
@@ -82,6 +83,21 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Privacidad y datos personales</CardTitle>
+            <CardDescription>Consulta cómo tratamos tus datos personales dentro de la plataforma.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/aviso-de-privacidad"
+              className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline"
+            >
+              Ver aviso de privacidad →
+            </Link>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
