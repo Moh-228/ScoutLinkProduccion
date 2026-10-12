@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
 
 type Status = "preseleccionado" | "aceptado" | "rechazado";
@@ -13,10 +14,10 @@ type StatusActionsProps = {
 	currentStatus: string;
 };
 
-const ACTIONS: { status: Status; label: string; variant: "primary" | "secondary" | "ghost" }[] = [
+const ACTIONS: { status: Status; label: string; variant: "primary" | "secondary" | "ghost" | "danger" }[] = [
 	{ status: "preseleccionado", label: "Preseleccionar", variant: "secondary" },
 	{ status: "aceptado", label: "Invitar", variant: "primary" },
-	{ status: "rechazado", label: "Descartar", variant: "ghost" },
+	{ status: "rechazado", label: "Descartar", variant: "danger" },
 ];
 
 export function StatusActions({ eventId, appId, currentStatus }: StatusActionsProps) {
@@ -58,12 +59,12 @@ export function StatusActions({ eventId, appId, currentStatus }: StatusActionsPr
 	const availableActions = ACTIONS.filter((a) => a.status !== currentStatus);
 
 	if (availableActions.length === 0) {
-		return <p className="text-sm text-brand-primary/50">No hay más estados disponibles.</p>;
+		return <p className="text-sm text-brand-primary/70">No hay más estados disponibles.</p>;
 	}
 
 	return (
 		<div className="space-y-3">
-			<p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+			<p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
 				Cambiar estado
 			</p>
 			<div className="flex flex-wrap gap-2">
@@ -111,7 +112,7 @@ export function StatusActions({ eventId, appId, currentStatus }: StatusActionsPr
 					</div>
 				</div>
 			)}
-			{error && <p className="text-sm text-red-600">{error}</p>}
+			{error && <Alert variant="error">{error}</Alert>}
 		</div>
 	);
 }

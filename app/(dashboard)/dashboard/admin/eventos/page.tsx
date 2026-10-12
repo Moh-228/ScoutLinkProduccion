@@ -4,11 +4,13 @@ import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Badge } from "@/components/Badge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
 import { Icon } from "@/components/Icon";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
-import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
+import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS } from "@/lib/sport-colors";
 import { ReopenEventButton } from "./_components/ReopenEventButton";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
@@ -74,15 +76,13 @@ export default async function AdminEventsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Convocatorias</h1>
-        <p className="text-brand-primary/70">
-          Eventos registrados por todos los entrenadores, con estado y postulantes por categoría.
-        </p>
-      </header>
+      <PageHeader
+        title="Convocatorias"
+        description="Eventos registrados por todos los entrenadores, con estado y postulantes por categoría."
+      />
 
       {events.length === 0 ? (
-        <p className="text-center text-brand-primary/50 py-12">No hay convocatorias registradas.</p>
+        <EmptyState title="No hay convocatorias registradas." icon="calendar" />
       ) : (
         <div className="space-y-4">
           {events.map((event) => {
@@ -91,7 +91,11 @@ export default async function AdminEventsPage({ searchParams }: Props) {
               {} as Record<(typeof STATUS_KEYS)[number], number>,
             );
             return (
-              <Card key={event.id} className="mx-auto w-full max-w-3xl">
+              <Card key={event.id} className="relative mx-auto w-full max-w-3xl overflow-hidden pt-6">
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-0 top-0 h-1.5 ${SPORT_DOT_CLASS[event.sport] ?? "bg-brand-border"}`}
+                />
                 <CardHeader>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -105,7 +109,7 @@ export default async function AdminEventsPage({ searchParams }: Props) {
                         </Badge>
                       </div>
                       <CardTitle>
-                        <Link href={`/dashboard/events/${event.id}`} className="hover:underline">
+                        <Link href={`/dashboard/events/${event.id}`} className="rounded hover:text-brand-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction">
                           {event.title}
                         </Link>
                       </CardTitle>
@@ -113,11 +117,11 @@ export default async function AdminEventsPage({ searchParams }: Props) {
                         {event.coach.coachProfile?.displayName ?? "—"} · {fmt(event.startAt)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {event.status === "closed" && <ReopenEventButton eventId={event.id} />}
                       <a
                         href={`/api/admin/events/${event.id}/applicants/csv`}
-                        className={buttonClassNames("secondary", "gap-2 px-3 py-1 text-xs")}
+                        className={buttonClassNames("secondary", "gap-2", "sm")}
                       >
                         <Icon name="add_link" size={14} />
                         Descargar CSV
@@ -129,20 +133,20 @@ export default async function AdminEventsPage({ searchParams }: Props) {
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {STATUS_KEYS.map((key) => (
                       <div key={key} className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
-                        <p className="text-xl font-bold text-brand-primary">{counts[key]}</p>
-                        <p className="text-xs font-medium text-brand-primary/60">{STATUS_LABELS[key]}</p>
+                        <p className="font-display text-xl font-bold text-brand-primary">{counts[key]}</p>
+                        <p className="text-xs font-medium text-brand-primary/70">{STATUS_LABELS[key]}</p>
                       </div>
                     ))}
                   </div>
 
                   {event.applications.length > 0 && (
                     <div className="space-y-1.5 border-t border-brand-border/50 pt-3">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Postulantes</p>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Postulantes</p>
                       {event.applications.map((app) => (
                         <Link
                           key={app.id}
                           href={`/dashboard/applications/${app.id}`}
-                          className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background"
+                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                         >
                           <span className="text-brand-primary">{app.student.studentProfile?.fullName ?? "Estudiante"}</span>
                           <ApplicationStatusBadge status={app.status} />

@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { Alert } from "@/components/Alert";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { EmptyState } from "@/components/EmptyState";
 
 type Verification = {
   id: string;
@@ -46,23 +48,23 @@ export function VerificationsList({ verifications }: { verifications: Verificati
   }
 
   if (verifications.length === 0) {
-    return <p className="text-sm text-brand-primary/70">No hay solicitudes pendientes.</p>;
+    return <EmptyState size="compact" icon="verified_user" title="No hay solicitudes pendientes." />;
   }
 
   return (
     <div className="space-y-3">
-      {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <Alert variant="error">{error}</Alert>}
       {verifications.map((v) => (
         <div key={v.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-background p-3">
           <div>
-            <p className="font-semibold">{v.coach.coachProfile?.displayName ?? v.coach.email}</p>
+            <p className="font-display font-semibold text-brand-primary">{v.coach.coachProfile?.displayName ?? v.coach.email}</p>
             <p className="text-sm text-brand-primary/70">Deporte: {sportLabels[v.sport] ?? v.sport}</p>
             {v.documentUrl && (
               <a
                 href={`/api/files/document?key=${encodeURIComponent(v.documentUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-brand-secondary underline hover:text-brand-primary"
+                className="text-xs rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
               >
                 Ver documento certificado
               </a>
@@ -71,7 +73,7 @@ export function VerificationsList({ verifications }: { verifications: Verificati
               <p className="text-xs text-red-600">Motivo rechazo: {v.rejectionReason}</p>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant={v.status === "verified" ? "success" : v.status === "rejected" ? "danger" : "warning"}>
               {v.status === "verified" ? "Verificado" : v.status === "rejected" ? "Rechazado" : "Pendiente"}
             </Badge>
@@ -80,7 +82,7 @@ export function VerificationsList({ verifications }: { verifications: Verificati
                 <Button
                   disabled={!!loading || pending}
                   onClick={() => handleAction(v.id, "verify")}
-                  className="px-3 py-1 text-xs"
+                  size="sm"
                 >
                   {loading === v.id + "verify" ? "..." : "Aprobar"}
                 </Button>
@@ -88,7 +90,7 @@ export function VerificationsList({ verifications }: { verifications: Verificati
                   variant="secondary"
                   disabled={!!loading || pending}
                   onClick={() => handleAction(v.id, "reject")}
-                  className="px-3 py-1 text-xs"
+                  size="sm"
                 >
                   {loading === v.id + "reject" ? "..." : "Rechazar"}
                 </Button>

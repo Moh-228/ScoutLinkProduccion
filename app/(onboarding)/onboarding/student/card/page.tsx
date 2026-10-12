@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { OnboardingCard } from "@/app/(onboarding)/_components/OnboardingCard";
+import { Alert } from "@/components/Alert";
 import { Input } from "@/components/Input";
 import { PdfUploadField } from "@/components/PdfUploadField";
 import { Select } from "@/components/Select";
@@ -157,17 +158,12 @@ export default function StudentCardPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
-          Paso 2 de 3 — Opcional
-        </div>
-        <CardTitle>Ficha deportiva general</CardTitle>
-        <CardDescription>
-          Esta información ayuda a los entrenadores a encontrarte. Puedes completarla después.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <OnboardingCard
+      step={2}
+      label="Paso 2 de 3 — Opcional"
+      title="Ficha deportiva general"
+      description="Esta información ayuda a los entrenadores a encontrarte. Puedes completarla después."
+    >
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Fisico */}
           <div className="grid grid-cols-2 gap-4">
@@ -297,7 +293,7 @@ export default function StudentCardPage() {
               onChange={setStr("cardiacConditions")}
             />
           </label>
-          <p className="text-xs text-brand-primary/50">
+          <p className="text-xs text-brand-primary/70">
             Esta información es solo informativa para entrenadores y personal médico; no afecta el cálculo de afinidad.
           </p>
 
@@ -333,14 +329,7 @@ export default function StudentCardPage() {
             Hacer mi ficha visible para entrenadores
           </label>
 
-          {error ? (
-            <p
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-              role="alert"
-            >
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert variant="error">{error}</Alert> : null}
 
           <div className="flex gap-3">
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
@@ -356,7 +345,6 @@ export default function StudentCardPage() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </OnboardingCard>
   );
 }

@@ -1,5 +1,7 @@
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Icon, type IconName } from "@/components/Icon";
 import { prisma } from "@/lib/prisma";
 
@@ -54,12 +56,10 @@ export default async function AdminHistoryPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Historial administrativo</h1>
-        <p className="text-brand-primary/70">
-          Registro de cambios de rol, verificaciones, moderaciones y apertura/cierre de convocatorias.
-        </p>
-      </header>
+      <PageHeader
+        title="Historial administrativo"
+        description="Registro de cambios de rol, verificaciones, moderaciones y apertura/cierre de convocatorias."
+      />
 
       <Card className="mx-auto w-full max-w-3xl">
         <CardHeader>
@@ -67,7 +67,7 @@ export default async function AdminHistoryPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {logs.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Aún no se han registrado acciones administrativas.</p>
+            <EmptyState size="compact" icon="hourglass" title="Aún no se han registrado acciones administrativas." />
           ) : (
             logs.map((log) => {
               const config = ACTION_CONFIG[log.action] ?? { label: log.action, icon: "error" as IconName };
@@ -80,10 +80,10 @@ export default async function AdminHistoryPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-brand-primary">{config.label}</p>
+                      <p className="font-display text-sm font-semibold text-brand-primary">{config.label}</p>
                       <Badge variant="neutral" className="text-[10px]">{fmt(log.createdAt)}</Badge>
                     </div>
-                    <p className="text-xs text-brand-primary/60">Por {log.admin.email}</p>
+                    <p className="text-xs text-brand-primary/70">Por {log.admin.email}</p>
                     {details && <p className="mt-1 text-sm text-brand-primary/80">{details}</p>}
                     {log.reason && (
                       <p className="mt-1 text-sm text-brand-primary/70">

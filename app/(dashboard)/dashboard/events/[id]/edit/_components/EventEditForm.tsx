@@ -3,8 +3,10 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/Button";
+import { Alert } from "@/components/Alert";
+import { Button, buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { SPORT_DOT_CLASS } from "@/lib/sport-colors";
 import { Input } from "@/components/Input";
 import { Select, type SelectOption } from "@/components/Select";
 
@@ -146,7 +148,7 @@ const HAND_OPTIONS: SelectOption[] = [
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="border-t border-brand-border/50 pt-5">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
         {children}
       </h3>
     </div>
@@ -339,7 +341,11 @@ export function EventEditForm({ eventId, initial }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* ── Información base ── */}
-      <Card>
+      <Card className="relative overflow-hidden pt-6">
+        <span
+          aria-hidden="true"
+          className={`absolute inset-x-0 top-0 h-1.5 ${SPORT_DOT_CLASS[form.sport] ?? "bg-brand-border"}`}
+        />
         <CardHeader>
           <CardTitle>Información base</CardTitle>
         </CardHeader>
@@ -630,7 +636,7 @@ export function EventEditForm({ eventId, initial }: Props) {
 
       {/* ── Acciones ── */}
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <Alert variant="error">{error}</Alert>
       )}
 
       <div className="flex items-center justify-between gap-3 pb-8">
@@ -639,7 +645,7 @@ export function EventEditForm({ eventId, initial }: Props) {
           type="button"
           onClick={handleDelete}
           disabled={isDeleting || isSubmitting}
-          className="rounded-lg border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction disabled:cursor-not-allowed disabled:opacity-50"
+          className={buttonClassNames("danger")}
         >
           {isDeleting
             ? "Eliminando…"

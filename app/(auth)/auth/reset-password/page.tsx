@@ -1,12 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+import { AUTH_SUBMIT_CLASS, AuthShell } from "@/app/(auth)/_components/AuthShell";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 
 function ResetPasswordForm() {
@@ -84,17 +84,13 @@ function ResetPasswordForm() {
         placeholder="********"
         required
       />
-      <p className="text-xs text-brand-primary/50">
+      <p className="text-xs text-brand-primary/70">
         La contraseña debe tener al menos 8 caracteres, una mayúscula y un símbolo.
       </p>
 
-      {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <Alert variant="error">{error}</Alert> : null}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className={AUTH_SUBMIT_CLASS} disabled={isSubmitting}>
         {isSubmitting ? "Actualizando..." : "Restablecer contraseña"}
       </Button>
     </form>
@@ -103,31 +99,14 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="mx-auto w-full max-w-lg">
-      <div className="mb-6">
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
-        >
-          <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio de sesión
-        </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Restablecer contraseña</CardTitle>
-          <CardDescription>
-            Elige una nueva contraseña segura para tu cuenta.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
-            <ResetPasswordForm />
-          </Suspense>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell
+      back={{ href: "/auth/login", label: "Volver al inicio de sesión" }}
+      title="Restablecer contraseña"
+      description="Elige una nueva contraseña segura para tu cuenta."
+    >
+      <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthShell>
   );
 }

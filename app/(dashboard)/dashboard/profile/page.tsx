@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { EmptyState } from "@/components/EmptyState";
 import { Icon } from "@/components/Icon";
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { labelField, labelValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
@@ -36,7 +38,7 @@ function Row({ label, value }: { label: string; value?: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
     <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[160px_1fr] sm:gap-2">
-      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="font-medium text-brand-primary/70">{label}</span>
       <span className="min-w-0 wrap-break-word text-brand-primary">{value}</span>
     </div>
   );
@@ -44,7 +46,7 @@ function Row({ label, value }: { label: string; value?: React.ReactNode }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">{children}</p>
+    <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">{children}</p>
   );
 }
 
@@ -64,7 +66,7 @@ function IdentityField({ label, value }: { label: string; value?: React.ReactNod
   if (!value && value !== 0) return null;
   return (
     <div className="w-full space-y-1 text-left">
-      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">{label}</p>
       {typeof value === "string" || typeof value === "number" ? (
         <p className="text-sm text-brand-primary">{value}</p>
       ) : (
@@ -110,22 +112,26 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex w-full items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-brand-primary">Mi perfil</h1>
-          {displayName && <p className="text-sm font-semibold text-brand-primary">{displayName}</p>}
-          <p className="text-brand-primary/70">{user.email}</p>
-        </div>
-        {(isStudent || isCoach) && (
-          <Link
-            href={isStudent ? "/onboarding/student" : "/onboarding/coach"}
-            className={buttonClassNames("secondary", "gap-2")}
-          >
-            <Icon name="person_edit" size={16} />
-            Editar perfil
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title="Mi perfil"
+        description={
+          <>
+            {displayName && <p className="text-sm font-semibold text-brand-primary">{displayName}</p>}
+            <p>{user.email}</p>
+          </>
+        }
+        actions={
+          (isStudent || isCoach) && (
+            <Link
+              href={isStudent ? "/onboarding/student" : "/onboarding/coach"}
+              className={buttonClassNames("secondary", "gap-2")}
+            >
+              <Icon name="person_edit" size={16} />
+              Editar perfil
+            </Link>
+          )
+        }
+      />
 
       <div className="mx-auto w-full max-w-2xl space-y-6">
       {(isStudent || isCoach) && displayName && (
@@ -133,8 +139,8 @@ export default async function ProfilePage() {
           <div className="flex items-center gap-4">
             <ProfilePhotoField photoUrl={photoUrl ?? null} displayName={displayName} />
             <div>
-              <p className="text-xl font-bold text-brand-primary">{displayName}</p>
-              {age !== null && <p className="text-sm text-brand-primary/60">{age} años</p>}
+              <p className="font-display text-xl font-bold text-brand-primary">{displayName}</p>
+              {age !== null && <p className="text-sm text-brand-primary/70">{age} años</p>}
             </div>
           </div>
 
@@ -144,22 +150,22 @@ export default async function ProfilePage() {
             {isStudent ? (
               <>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Escuela</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Escuela</p>
                   <p className="text-sm font-semibold text-brand-primary">{user.studentProfile?.school ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Semestre</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Semestre</p>
                   <p className="text-sm font-semibold text-brand-primary">{user.studentProfile?.semester ?? "—"}</p>
                 </div>
               </>
             ) : (
               <>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Unidad académica</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Unidad académica</p>
                   <p className="text-sm font-semibold text-brand-primary">{user.coachProfile?.academicUnit ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Años de experiencia</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Años de experiencia</p>
                   <p className="text-sm font-semibold text-brand-primary">{user.coachProfile?.yearsExperience ?? "—"}</p>
                 </div>
               </>
@@ -226,7 +232,7 @@ export default async function ProfilePage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
               <CardTitle>Ficha general</CardTitle>
-              <Link href="/onboarding/student/card" className={buttonClassNames("secondary") + " text-xs px-3 py-1"}>
+              <Link href="/onboarding/student/card" className={buttonClassNames("secondary", "", "sm")}>
                 Editar
               </Link>
             </div>
@@ -294,7 +300,7 @@ export default async function ProfilePage() {
                 )}
               </>
             ) : (
-              <p className="text-sm text-brand-primary/50">Aún no has completado tu ficha general.</p>
+              <EmptyState size="compact" title="Aún no has completado tu ficha general." icon="id_card" />
             )}
           </CardContent>
         </Card>
@@ -305,14 +311,14 @@ export default async function ProfilePage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
               <CardTitle>Fichas especializadas</CardTitle>
-              <Link href="/onboarding/student/specialized" className={buttonClassNames("secondary") + " text-xs px-3 py-1"}>
+              <Link href="/onboarding/student/specialized" className={buttonClassNames("secondary", "", "sm")}>
                 + Agregar ficha
               </Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {user.specializedCards.length === 0 ? (
-              <p className="text-sm text-brand-primary/50">Aún no tienes fichas especializadas.</p>
+              <EmptyState size="compact" title="Aún no tienes fichas especializadas." icon="id_card" />
             ) : (
               user.specializedCards.map((sc) => {
                 const data = sc.data as Record<string, unknown>;
@@ -329,7 +335,7 @@ export default async function ProfilePage() {
                         .filter(([, v]) => v !== "" && v !== false && v !== null && v !== undefined)
                         .map(([k, v]) => (
                           <div key={k} className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[200px_1fr] sm:gap-2">
-                            <span className="font-medium text-brand-primary/50">{labelField(k)}</span>
+                            <span className="font-medium text-brand-primary/70">{labelField(k)}</span>
                             <span className="text-brand-primary">{labelValue(v)}</span>
                           </div>
                         ))}

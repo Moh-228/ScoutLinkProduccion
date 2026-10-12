@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { verifySession } from "@/lib/auth";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
@@ -35,16 +37,14 @@ export default async function NotificationsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-brand-primary">Notificaciones</h1>
-          <p className="text-brand-primary/70">Avisos sobre eventos, postulaciones y contacto.</p>
-        </div>
-        <MarkAllReadButton hasUnread={unreadCount > 0} />
-      </header>
+      <PageHeader
+        title="Notificaciones"
+        description="Avisos sobre eventos, postulaciones y contacto."
+        actions={<MarkAllReadButton hasUnread={unreadCount > 0} />}
+      />
 
       {notifications.length === 0 ? (
-        <p className="text-center text-brand-primary/50 py-12">No tienes notificaciones.</p>
+        <EmptyState title="No tienes notificaciones." icon="notifications" />
       ) : (
         <div className="space-y-3">
           {notifications.map((n) => {
@@ -66,7 +66,7 @@ export default async function NotificationsPage({ searchParams }: Props) {
                   {payload.message && (
                     <p className="text-sm text-brand-primary/70">{payload.message}</p>
                   )}
-                  <p className="text-xs text-brand-primary/50">{fmt(n.createdAt)}</p>
+                  <p className="text-xs text-brand-primary/70">{fmt(n.createdAt)}</p>
                 </CardContent>
               </Card>
             );

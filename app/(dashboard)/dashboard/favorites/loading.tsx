@@ -1,6 +1,6 @@
 export default function FavoritesLoading() {
   return (
-    <div className="space-y-8 animate-pulse">
+    <div className="space-y-8 motion-safe:animate-pulse">
       {/* Header */}
       <header>
         <div className="h-8 w-40 rounded-lg bg-brand-border/40" />

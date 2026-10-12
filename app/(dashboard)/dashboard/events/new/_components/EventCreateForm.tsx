@@ -4,7 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
+import { Alert } from "@/components/Alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { SPORT_DOT_CLASS } from "@/lib/sport-colors";
 import { Input } from "@/components/Input";
 import { Select, type SelectOption } from "@/components/Select";
 import { SPORT_CHARACTERISTICS, type CharField } from "@/lib/sport-characteristics";
@@ -149,7 +152,7 @@ function Row({ children }: { children: React.ReactNode }) {
 
 function SubTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-2 border-t border-brand-border/50 pt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+    <p className="mt-2 border-t border-brand-border/50 pt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
       {children}
     </p>
   );
@@ -212,19 +215,19 @@ function StepIndicator({ steps, current }: { steps: StepId[]; current: number })
           return (
             <li key={step} className="flex items-center gap-1">
               <span className={[
-                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                done ? "bg-emerald-100 text-emerald-700" : active ? "bg-interaction text-white" : "bg-brand-background text-brand-primary/50",
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-display text-xs font-bold",
+                done ? "bg-emerald-100 text-emerald-700" : active ? "bg-interaction text-white" : "bg-brand-background text-brand-primary/70",
               ].join(" ")}>
                 {done ? "✓" : i + 1}
               </span>
               <span className={[
                 "hidden text-xs sm:inline",
-                active ? "font-semibold text-brand-primary" : "text-brand-primary/50",
+                active ? "font-semibold text-brand-primary" : "text-brand-primary/70",
               ].join(" ")}>
                 {STEP_LABELS[step]}
               </span>
               {i < steps.length - 1 && (
-                <svg aria-hidden="true" className="mx-1 h-3 w-3 text-brand-primary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="mx-1 h-3 w-3 text-brand-primary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               )}
@@ -248,10 +251,10 @@ function SportCharacteristicsPanel({
   const fields = SPORT_CHARACTERISTICS[sport] ?? [];
 
   if (!sport) {
-    return <p className="py-4 text-sm text-brand-primary/50">Selecciona un deporte en el primer paso para ver las características disponibles.</p>;
+    return <EmptyState size="compact" icon="search" title="Selecciona un deporte en el primer paso para ver las características disponibles." />;
   }
   if (fields.length === 0) {
-    return <p className="py-4 text-sm text-brand-primary/50">No hay características definidas para este deporte.</p>;
+    return <EmptyState size="compact" icon="search" title="No hay características definidas para este deporte." />;
   }
 
   function toggleSkill(key: string, skill: string) {
@@ -632,11 +635,15 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
     <div className="space-y-5">
       <StepIndicator steps={steps} current={currentStep} />
 
-      <Card>
+      <Card className="relative overflow-hidden pt-6">
+        <span
+          aria-hidden="true"
+          className={`absolute inset-x-0 top-0 h-1.5 ${SPORT_DOT_CLASS[form.sport] ?? "bg-brand-border"}`}
+        />
         <CardHeader>
           <CardTitle>{STEP_LABELS[currentStepId]}</CardTitle>
           {currentStepId === "sport_characteristics" && form.sport && (
-            <p className="text-sm text-brand-primary/50">
+            <p className="text-sm text-brand-primary/70">
               {SPORT_OPTIONS.find((o) => o.value === form.sport)?.label ?? form.sport}
             </p>
           )}
@@ -647,7 +654,7 @@ export function EventCreateForm({ organizerName, defaultAcademicUnit, verifiedSp
       </Card>
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <Alert variant="error">{error}</Alert>
       )}
 
       <div className="flex justify-between gap-3 pb-8">

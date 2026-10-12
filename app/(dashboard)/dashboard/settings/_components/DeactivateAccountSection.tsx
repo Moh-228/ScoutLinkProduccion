@@ -34,9 +34,8 @@ export function DeactivateAccountSection() {
 	return (
 		<div>
 			<Button
-				variant="secondary"
+				variant="danger"
 				onClick={() => setOpen(true)}
-				className="text-red-600 hover:bg-red-50"
 			>
 				Desactivar mi cuenta
 			</Button>

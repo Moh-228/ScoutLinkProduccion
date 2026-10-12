@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
+import { Alert } from "@/components/Alert";
 import { buttonClassNames } from "@/components/Button";
 import { Icon } from "@/components/Icon";
 
@@ -91,17 +92,17 @@ export function ConfirmDialog({
           <Icon name="error" size={28} />
         </div>
 
-        <h2 id={titleId} className="mt-4 text-base font-semibold text-brand-primary">
+        <h2 id={titleId} className="mt-4 font-display text-lg font-semibold text-brand-primary">
           {title}
         </h2>
-        <p id={descriptionId} className="mt-2 text-sm text-brand-primary/70">
+        <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-brand-primary/70">
           {message}
         </p>
 
         {error && (
-          <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          <Alert variant="error" className="mt-3">
             {error}
-          </p>
+          </Alert>
         )}
 
         <div className="mt-6 flex justify-end gap-3">
@@ -119,7 +120,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={buttonClassNames("secondary", "text-red-600 hover:bg-red-50")}
+            className={buttonClassNames("danger")}
           >
             {loading ? "Eliminando..." : confirmLabel}
           </button>

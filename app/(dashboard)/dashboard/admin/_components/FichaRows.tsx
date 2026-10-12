@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { Button } from "@/components/Button";
+import { Button, buttonClassNames } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { Avatar } from "@/components/Avatar";
 import { Icon, type IconName } from "@/components/Icon";
@@ -52,7 +52,7 @@ function ActionButton({
   if (icon) {
     const iconCls =
       variant === "danger"
-        ? "border-brand-border bg-white text-red-600 hover:bg-red-50"
+        ? "border-red-200 bg-white text-red-600 hover:bg-red-50"
         : "border-brand-border bg-white text-brand-primary/70 hover:bg-brand-background";
     return (
       <div>
@@ -71,14 +71,9 @@ function ActionButton({
     );
   }
 
-  const cls =
-    variant === "danger"
-      ? "px-3 py-1 text-xs text-red-600 hover:bg-red-50"
-      : "px-3 py-1 text-xs text-brand-primary/70 hover:bg-brand-background";
-
   return (
     <div>
-      <Button variant="secondary" disabled={loading || pending} onClick={handleAction} className={cls}>
+      <Button variant={variant} size="sm" disabled={loading || pending} onClick={handleAction}>
         {loading ? "..." : label}
       </Button>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
@@ -173,7 +168,7 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
         <div className="flex items-center gap-3">
           <Avatar photoKey={card.student.studentProfile?.photoUrl} name={name} size={40} />
           <div>
-          <p className="font-semibold">{name}</p>
+          <p className="font-display font-semibold text-brand-primary">{name}</p>
           <p className="text-sm text-brand-primary/70">
             {card.heightCm ? `${card.heightCm} cm` : "—"} ·{" "}
             {card.weightKg ? `${card.weightKg} kg` : "—"}
@@ -186,15 +181,15 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           </Badge>
           {docs && !!(docs.inscriptionProof || docs.medicalInsurance) && (
             <div className="mt-2 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">Documentos</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Documentos</p>
               {docs.inscriptionProof ? (
                 <p className="text-xs text-brand-primary/70">
-                  <span className="text-brand-primary/50">Comprobante de inscripción:</span>{" "}
+                  <span className="text-brand-primary/70">Comprobante de inscripción:</span>{" "}
                   <a
                     href={`/api/files/document?key=${encodeURIComponent(String(docs.inscriptionProof))}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-secondary underline hover:text-brand-primary"
+                    className="rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                   >
                     Ver PDF
                   </a>
@@ -202,12 +197,12 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
               ) : null}
               {docs.medicalInsurance ? (
                 <p className="text-xs text-brand-primary/70">
-                  <span className="text-brand-primary/50">Comprobante de servicio médico:</span>{" "}
+                  <span className="text-brand-primary/70">Comprobante de servicio médico:</span>{" "}
                   <a
                     href={`/api/files/document?key=${encodeURIComponent(String(docs.medicalInsurance))}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-secondary underline hover:text-brand-primary"
+                    className="rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                   >
                     Ver PDF
                   </a>
@@ -218,8 +213,8 @@ export function GeneralCardRow({ card }: { card: GeneralCard }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/dashboard/fichas/${card.id}`}>
-            <Button variant="secondary" className="px-3 py-1 text-xs">Ver detalle</Button>
+          <Link href={`/dashboard/fichas/${card.id}`} className={buttonClassNames("secondary", "", "sm")}>
+            Ver detalle
           </Link>
           <button
             type="button"
@@ -279,7 +274,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
 
   return (
     <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
         Editar ficha general
       </p>
       <div className="grid grid-cols-2 gap-3">
@@ -346,7 +341,7 @@ function GeneralCardEditForm({ card }: { card: GeneralCard }) {
       </div>
       {error && <p className="text-xs text-red-600">{error}</p>}
       {success && <p className="text-xs text-emerald-700">Guardado correctamente.</p>}
-      <Button onClick={handleSave} disabled={saving} className="text-xs px-3 py-1">
+      <Button onClick={handleSave} disabled={saving} size="sm">
         {saving ? "Guardando..." : "Guardar cambios"}
       </Button>
     </div>
@@ -367,7 +362,7 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
         <div className="flex items-center gap-3">
           <Avatar photoKey={card.student.studentProfile?.photoUrl} name={name} size={40} />
           <div>
-            <p className="font-semibold">{name}</p>
+            <p className="font-display font-semibold text-brand-primary">{name}</p>
             <p className="text-sm text-brand-primary/70">
               Deporte: {sportLabels[card.sport] ?? card.sport}
             </p>
@@ -376,7 +371,7 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
-            className="px-3 py-1 text-xs"
+            size="sm"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? "Ocultar" : "Ver datos"}
@@ -392,16 +387,16 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
 
       {expanded && (
         <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
             Datos especializados — {sportLabels[card.sport] ?? card.sport}
           </p>
           {dataEntries.length === 0 ? (
-            <p className="text-xs text-brand-primary/50">Sin datos registrados.</p>
+            <p className="text-xs text-brand-primary/70">Sin datos registrados.</p>
           ) : (
             <div className="grid grid-cols-2 gap-x-6 gap-y-1">
               {dataEntries.map(([k, v]) => (
                 <div key={k} className="flex justify-between text-xs">
-                  <span className="text-brand-primary/50 capitalize">{k.replace(/_/g, " ")}</span>
+                  <span className="text-brand-primary/70 capitalize">{k.replace(/_/g, " ")}</span>
                   <span className="text-brand-primary font-medium">{String(v ?? "—")}</span>
                 </div>
               ))}
@@ -429,12 +424,12 @@ export function EventRow({ event }: { event: EventCard }) {
             {isOpen ? "Abierto" : "Cerrado"}
           </Badge>
         </div>
-        <p className="font-semibold">{event.title}</p>
+        <p className="font-display font-semibold text-brand-primary">{event.title}</p>
         <p className="text-sm text-brand-primary/70">Coach: {coachName}</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Link href={`/dashboard/events/${event.id}`}>
-          <Button variant="secondary" className="px-3 py-1 text-xs">Ver</Button>
+        <Link href={`/dashboard/events/${event.id}`} className={buttonClassNames("secondary", "", "sm")}>
+          Ver
         </Link>
         <Link
           href={`/dashboard/events/${event.id}/edit`}
@@ -474,7 +469,7 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
         <div className="flex items-center gap-3">
           <Avatar photoKey={coach.photoUrl} name={coach.displayName} size={40} />
           <div>
-          <p className="font-semibold">{coach.displayName}</p>
+          <p className="font-display font-semibold text-brand-primary">{coach.displayName}</p>
           <p className="text-sm text-brand-primary/70">{coach.user.email}</p>
           {coach.academicUnit && (
             <p className="text-sm text-brand-primary/70">{coach.academicUnit}</p>
@@ -499,7 +494,7 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
         </div>
         <Button
           variant="secondary"
-          className="px-3 py-1 text-xs"
+          size="sm"
           onClick={() => setExpanded((v) => !v)}
         >
           {expanded ? "Ocultar" : "Ver detalle"}
@@ -510,18 +505,18 @@ export function CoachProfileRow({ coach }: { coach: CoachProfile }) {
         <div className="mt-2 rounded-lg border border-brand-border bg-brand-background p-3 space-y-2 text-sm">
           {coach.phone && (
             <p>
-              <span className="text-brand-primary/50">Teléfono:</span> {coach.phone}
+              <span className="text-brand-primary/70">Teléfono:</span> {coach.phone}
             </p>
           )}
           {coach.sports.length > 0 && (
             <p>
-              <span className="text-brand-primary/50">Deportes:</span>{" "}
+              <span className="text-brand-primary/70">Deportes:</span>{" "}
               {coach.sports.map((s) => sportLabels[s] ?? s).join(", ")}
             </p>
           )}
           {coach.bio && (
             <div>
-              <p className="text-brand-primary/50 text-xs uppercase tracking-widest mb-1">Biografía</p>
+              <p className="mb-1 text-xs uppercase tracking-widest text-brand-primary/70">Biografía</p>
               <p className="text-brand-primary/70 whitespace-pre-line">{coach.bio}</p>
             </div>
           )}

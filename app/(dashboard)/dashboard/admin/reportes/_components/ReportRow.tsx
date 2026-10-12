@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { Alert } from "@/components/Alert";
 import { Badge } from "@/components/Badge";
+import { buttonClassNames } from "@/components/Button";
 
 type ReportStatus = "pending" | "resolved" | "dismissed";
 
@@ -41,8 +43,13 @@ function ReasonDialog({
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-			<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-brand-border">
-				<h2 className="text-base font-semibold text-brand-primary">{title}</h2>
+			<div
+				role="dialog"
+				aria-modal="true"
+				aria-label={title}
+				className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-brand-border"
+			>
+				<h2 className="font-display text-lg font-semibold text-brand-primary">{title}</h2>
 				<p className="mt-2 text-sm text-brand-primary/70">Este motivo quedará registrado en el historial administrativo.</p>
 				<textarea
 					value={reason}
@@ -52,19 +59,19 @@ function ReasonDialog({
 					className="mt-3 w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-sm text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40"
 				/>
 				{error && (
-					<p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+					<Alert variant="error" className="mt-2">
 						{error}
-					</p>
+					</Alert>
 				)}
 				<div className="mt-4 flex justify-end gap-3">
-					<button type="button" onClick={onCancel} disabled={loading} className="rounded-lg px-4 py-2 text-sm font-semibold text-brand-primary ring-1 ring-brand-border hover:bg-brand-background disabled:cursor-not-allowed disabled:opacity-60">
+					<button type="button" onClick={onCancel} disabled={loading} className={buttonClassNames("secondary")}>
 						Cancelar
 					</button>
 					<button
 						type="button"
 						onClick={() => onSubmit(reason)}
 						disabled={loading || reason.trim().length < 3}
-						className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+						className={buttonClassNames("primary")}
 					>
 						{loading ? "Enviando..." : confirmLabel}
 					</button>
@@ -154,20 +161,20 @@ export function ReportRow({
 		<div className="rounded-lg border border-brand-border bg-brand-background p-3">
 			<div className="flex flex-wrap items-start justify-between gap-2">
 				<div className="min-w-0">
-					<Link href={`/dashboard/events/${eventId}`} className="text-sm font-semibold text-brand-secondary hover:underline">
+					<Link href={`/dashboard/events/${eventId}`} className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction">
 						{eventTitle}
 					</Link>
 					<p className="mt-1 text-sm text-brand-primary">
 						<span className="font-semibold">{commentAuthorName}:</span> {commentContent}
 					</p>
-					<p className="mt-1 text-xs text-brand-primary/60">
+					<p className="mt-1 text-xs text-brand-primary/70">
 						Reportado por <span className="font-semibold">{reporterName}</span> el {fmt(createdAt)}
 					</p>
 					<p className="mt-1 text-xs text-brand-primary/70">
 						<span className="font-semibold">Motivo del reporte:</span> {reason}
 					</p>
 					{status !== "pending" && (
-						<p className="mt-1 text-xs text-brand-primary/60">
+						<p className="mt-1 text-xs text-brand-primary/70">
 							{status === "resolved" ? "Resuelto" : "Descartado"} por{" "}
 							<span className="font-semibold">{resolverName ?? "Admin"}</span>
 							{resolvedAt ? ` el ${fmt(resolvedAt)}` : ""}
@@ -185,21 +192,21 @@ export function ReportRow({
 					<button
 						type="button"
 						onClick={() => setDialog("delete")}
-						className="rounded-lg bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700"
+						className={buttonClassNames("danger", "", "sm")}
 					>
 						Eliminar comentario
 					</button>
 					<button
 						type="button"
 						onClick={() => setDialog("resolve")}
-						className="rounded-lg px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-brand-border hover:bg-white"
+						className={buttonClassNames("secondary", "", "sm")}
 					>
 						Marcar como resuelto
 					</button>
 					<button
 						type="button"
 						onClick={() => setDialog("dismiss")}
-						className="rounded-lg px-3 py-1 text-xs font-semibold text-brand-primary/70 ring-1 ring-brand-border hover:bg-white"
+						className={buttonClassNames("secondary", "", "sm")}
 					>
 						Descartar reporte
 					</button>

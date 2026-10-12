@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+import { AUTH_FOCUS_RING, AUTH_FOOTER_LINK, AUTH_SUBMIT_CLASS, AuthShell } from "@/app/(auth)/_components/AuthShell";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { PasswordInput } from "@/components/PasswordInput";
 
@@ -61,24 +62,27 @@ function LoginForm() {
   return (
     <>
       {wasReset ? (
-        <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">
+        <Alert variant="success" className="mb-4">
           Contraseña actualizada. Ya puedes iniciar sesión.
-        </p>
+        </Alert>
       ) : null}
       <form className="space-y-4" onSubmit={handleSubmit}>
         <Input id="login-email" name="email" type="email" label="Correo electrónico" placeholder="tu@correo.com" required />
         <div className="flex flex-col gap-1.5">
           <PasswordInput id="login-password" name="password" label="Contraseña" placeholder="********" required />
-          <Link href="/auth/forgot-password" className="self-end text-xs text-brand-primary/70 hover:text-brand-primary">
+          <Link
+            href="/auth/forgot-password"
+            className={`self-end rounded text-xs font-medium text-brand-primary/70 underline-offset-2 transition-colors hover:text-brand-secondary hover:underline ${AUTH_FOCUS_RING}`}
+          >
             Olvidé mi contraseña
           </Link>
         </div>
-        {error ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {error ? <Alert variant="error">{error}</Alert> : null}
+        <Button
+          type="submit"
+          className={AUTH_SUBMIT_CLASS}
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Entrando..." : "Entrar"}
         </Button>
       </form>
@@ -88,35 +92,22 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="mx-auto w-full max-w-lg">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
-        >
-          <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio
-        </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Iniciar sesión</CardTitle>
-          <CardDescription>Accede a tu panel de reclutamiento deportivo.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
-            <LoginForm />
-          </Suspense>
-          <p className="mt-4 text-center text-sm text-brand-primary">
-            ¿Aún no tienes cuenta?{" "}
-            <Link href="/auth/register" className="font-semibold text-brand-secondary hover:text-brand-primary underline">
-              Registrarme
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell
+      back={{ href: "/", label: "Volver al inicio" }}
+      title="Iniciar sesión"
+      description="Accede a tu panel de reclutamiento deportivo."
+      footer={
+        <>
+          ¿Aún no tienes cuenta?{" "}
+          <Link href="/auth/register" className={AUTH_FOOTER_LINK}>
+            Registrarme
+          </Link>
+        </>
+      }
+    >
+      <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
+        <LoginForm />
+      </Suspense>
+    </AuthShell>
   );
 }

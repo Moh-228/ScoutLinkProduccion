@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { Icon } from "@/components/Icon";
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AffinitySortToggle } from "./_components/AffinitySortToggle";
@@ -17,9 +20,9 @@ function AffinityBadge({ pct }: { pct: number }) {
   const color =
     pct >= 70 ? "text-emerald-800 border-emerald-300 bg-emerald-100"
     : pct >= 40 ? "text-amber-800 border-amber-300 bg-amber-100"
-    : "text-brand-primary/50 border-brand-border bg-brand-background";
+    : "text-brand-primary/70 border-brand-border bg-brand-background";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border-2 px-3 py-1 text-base font-extrabold ${color}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border-2 px-3 py-1 font-display text-base font-extrabold ${color}`}>
       {pct}%
     </span>
   );
@@ -47,25 +50,28 @@ export default async function ApplicationsPage({ searchParams }: Props) {
 
     return (
       <div className="space-y-6">
-        <header>
-          <h1 className="text-xl font-bold text-brand-primary">Mis postulaciones</h1>
-          <p className="text-brand-primary/70">Seguimiento de estados en tus solicitudes.</p>
-        </header>
+        <PageHeader title="Mis postulaciones" description="Seguimiento de estados en tus solicitudes." />
         {applications.length === 0 ? (
-          <p className="text-center text-brand-primary/50 py-12">No tienes postulaciones aún.</p>
+          <EmptyState title="No tienes postulaciones aún." icon="person_check" />
         ) : (
           <div className="space-y-3">
             {applications.map((app) => (
               <Card key={app.id} className="mx-auto w-full max-w-2xl">
                 <CardHeader>
                   <CardTitle className="text-base">
-                    <Link href={`/dashboard/events/${app.event.id}`} className="hover:underline">
+                    <Link
+                      href={`/dashboard/events/${app.event.id}`}
+                      className="rounded hover:text-brand-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+                    >
                       {app.event.title}
                     </Link>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center justify-between gap-3">
-                  <p className="text-sm text-brand-primary/70">Inicio: {fmt(app.event.startAt)}</p>
+                <CardContent className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="flex items-center gap-2 text-sm text-brand-primary/70">
+                    <Icon name="calendar" size={16} className="shrink-0 text-brand-primary/40" />
+                    Inicio: {fmt(app.event.startAt)}
+                  </p>
                   <ApplicationStatusBadge status={app.status} />
                 </CardContent>
               </Card>
@@ -110,28 +116,29 @@ export default async function ApplicationsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-brand-primary">Postulaciones a mis eventos</h1>
-          <p className="text-brand-primary/70">Gestiona los candidatos de cada evento.</p>
-        </div>
-        {hasRecruitmentEvents && <AffinitySortToggle active={sortByAffinity} />}
-      </header>
+      <PageHeader
+        title="Postulaciones a mis eventos"
+        description="Gestiona los candidatos de cada evento."
+        actions={hasRecruitmentEvents && <AffinitySortToggle active={sortByAffinity} />}
+      />
       {events.length === 0 ? (
-        <p className="text-center text-brand-primary/50 py-12">No has creado eventos aún.</p>
+        <EmptyState title="No has creado eventos aún." icon="calendar" />
       ) : (
         <div className="space-y-4">
           {events.map((event) => (
             <Card key={event.id} className="mx-auto w-full max-w-2xl">
               <CardHeader>
                 <CardTitle>
-                  <Link href={`/dashboard/events/${event.id}`} className="hover:underline">
+                  <Link
+                    href={`/dashboard/events/${event.id}`}
+                    className="rounded hover:text-brand-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+                  >
                     {event.title}
                   </Link>
                 </CardTitle>
               </CardHeader>
               {event.applications.length > 0 && (
-                <div className="-mt-2 flex flex-wrap gap-3 text-xs text-brand-primary/60">
+                <div className="-mt-2 flex flex-wrap gap-3 text-xs text-brand-primary/70">
                   <span>Postulado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "postulado").length}</strong></span>
                   <span>Preseleccionado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "preseleccionado").length}</strong></span>
                   <span>Invitado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "aceptado").length}</strong></span>
@@ -140,14 +147,14 @@ export default async function ApplicationsPage({ searchParams }: Props) {
               )}
               <CardContent>
                 {event.applications.length === 0 ? (
-                  <p className="text-sm text-brand-primary/50">Sin postulaciones.</p>
+                  <EmptyState size="compact" icon="person_check" title="Sin postulaciones." />
                 ) : (
                   <div className="space-y-2">
                     {event.applications.map((app) => (
                       <Link
                         key={app.id}
                         href={`/dashboard/applications/${app.id}`}
-                        className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background"
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                       >
                         <span className="text-brand-primary">
                           {app.student.studentProfile?.fullName ?? "Estudiante"}
@@ -157,7 +164,7 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                             <AffinityBadge pct={app.affinityPercent} />
                           )}
                           <ApplicationStatusBadge status={app.status} />
-                          <span className={buttonClassNames("secondary", "px-3 py-1 text-xs")}>Gestionar</span>
+                          <span className={buttonClassNames("secondary", "", "sm")}>Gestionar</span>
                         </div>
                       </Link>
                     ))}

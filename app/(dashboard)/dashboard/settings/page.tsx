@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DeactivateAccountSection } from "./_components/DeactivateAccountSection";
@@ -32,10 +33,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Configuración</h1>
-        <p className="text-brand-primary/70">Privacidad, notificaciones y seguridad de tu cuenta.</p>
-      </header>
+      <PageHeader title="Configuración" description="Privacidad, notificaciones y seguridad de tu cuenta." />
 
       <div className="mx-auto w-full max-w-2xl space-y-6">
         {isStudent && (
@@ -92,7 +90,7 @@ export default async function SettingsPage() {
           <CardContent>
             <Link
               href="/aviso-de-privacidad"
-              className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline"
+              className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
             >
               Ver aviso de privacidad →
             </Link>

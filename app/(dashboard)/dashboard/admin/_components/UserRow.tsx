@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { Alert } from "@/components/Alert";
 import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
+import { Button, buttonClassNames } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Select } from "@/components/Select";
 
@@ -107,7 +108,7 @@ export function UserRow({ user }: { user: User }) {
       <div className="flex min-w-0 items-center gap-3">
         <Avatar photoKey={photoUrl} name={displayName} size={40} />
         <div className="min-w-0">
-          <p className="truncate font-semibold">{displayName}</p>
+          <p className="truncate font-display font-semibold text-brand-primary">{displayName}</p>
           <p className="truncate text-sm text-brand-primary/70">{user.email}</p>
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
@@ -133,25 +134,25 @@ export function UserRow({ user }: { user: User }) {
           variant="secondary"
           disabled={!!loading || pending}
           onClick={toggle}
-          className="px-3 py-1 text-xs"
+          size="sm"
         >
           {loading === "toggle" ? "..." : user.isActive ? "Desactivar" : "Activar"}
         </Button>
         {photoUrl && (
           <Button
-            variant="secondary"
+            variant="danger"
+            size="sm"
             disabled={!!loading || pending}
             onClick={() => setReportingPhoto(true)}
-            className="px-3 py-1 text-xs text-red-600 hover:bg-red-50"
           >
             Reportar foto
           </Button>
         )}
         <Button
-          variant="secondary"
+          variant="danger"
+          size="sm"
           disabled={!!loading || pending}
           onClick={remove}
-          className="px-3 py-1 text-xs text-red-600 hover:bg-red-50"
         >
           {loading === "delete" ? "..." : "Eliminar"}
         </Button>
@@ -170,8 +171,13 @@ export function UserRow({ user }: { user: User }) {
 
       {reportingPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-brand-border">
-            <h2 className="text-base font-semibold text-brand-primary">Reportar y eliminar foto de perfil</h2>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Reportar y eliminar foto de perfil"
+            className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-brand-border"
+          >
+            <h2 className="font-display text-lg font-semibold text-brand-primary">Reportar y eliminar foto de perfil</h2>
             <p className="mt-2 text-sm text-brand-primary/70">
               La foto de {displayName} se eliminará de inmediato. Este motivo quedará registrado en el historial administrativo.
             </p>
@@ -184,16 +190,16 @@ export function UserRow({ user }: { user: User }) {
               className="mt-3 w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-sm text-brand-primary shadow-sm outline-none transition-colors placeholder:text-brand-primary/40 focus:border-interaction focus:ring-2 focus:ring-interaction/40"
             />
             {error && (
-              <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+              <Alert variant="error" className="mt-2">
                 {error}
-              </p>
+              </Alert>
             )}
             <div className="mt-4 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => { setReportingPhoto(false); setPhotoReason(""); setError(null); }}
                 disabled={loading === "photo"}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-brand-primary ring-1 ring-brand-border hover:bg-brand-background disabled:cursor-not-allowed disabled:opacity-60"
+                className={buttonClassNames("secondary")}
               >
                 Cancelar
               </button>
@@ -201,7 +207,7 @@ export function UserRow({ user }: { user: User }) {
                 type="button"
                 onClick={confirmRemovePhoto}
                 disabled={loading === "photo" || photoReason.trim().length < 3}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className={buttonClassNames("danger")}
               >
                 {loading === "photo" ? "Eliminando..." : "Eliminar foto"}
               </button>

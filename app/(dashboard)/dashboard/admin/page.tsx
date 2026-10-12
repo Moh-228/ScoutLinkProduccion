@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { VerificationsList } from "./_components/VerificationsList";
@@ -48,17 +49,17 @@ export default async function AdminPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Panel de Administrador</h1>
-        <p className="text-brand-primary/70">Métricas, verificaciones y moderación.</p>
-      </header>
+      <PageHeader
+        title="Panel de Administrador"
+        description="Métricas, verificaciones y moderación."
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
           <Card key={item.label}>
             <CardHeader>
               <CardDescription>{item.label}</CardDescription>
-              <CardTitle className="text-3xl">{item.value}</CardTitle>
+              <p className="font-display text-3xl font-bold text-brand-primary">{item.value}</p>
             </CardHeader>
           </Card>
         ))}

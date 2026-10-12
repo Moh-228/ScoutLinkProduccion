@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Icon } from "@/components/Icon";
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { labelField, labelValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
@@ -28,7 +29,7 @@ function Row({ label, value }: { label: string; value?: string | number | boolea
   if (value === "" || value === null || value === undefined || value === false) return null;
   return (
     <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[200px_1fr] sm:gap-2">
-      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="font-medium text-brand-primary/70">{label}</span>
       <span className="text-brand-primary">{value === true ? "Sí" : String(value)}</span>
     </div>
   );
@@ -36,7 +37,7 @@ function Row({ label, value }: { label: string; value?: string | number | boolea
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/50 border-t border-brand-border/40 pt-4">
+    <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-brand-primary/70 border-t border-brand-border/40 pt-4">
       {children}
     </p>
   );
@@ -88,28 +89,32 @@ export default async function FichaDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/fichas"
-          aria-label="Volver"
-          title="Volver"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
-        >
-          <Icon name="arrow" size={18} />
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-brand-primary">{profile?.fullName ?? "Deportista"}</h1>
-          {profile?.school && <p className="text-brand-primary/70">{profile.school}</p>}
-        </div>
-        {profile?.favoriteSport && (
-          <Badge variant="info" className={`ml-auto ${SPORT_BADGE_CLASS[profile.favoriteSport] ?? ""}`}>
-            {SPORT_LABELS[profile.favoriteSport] ?? profile.favoriteSport}
-          </Badge>
-        )}
-        {session && (
-          <FavoriteButton targetType="ficha" targetId={card.id} isFavorited={isFavorited} />
-        )}
-      </header>
+      <PageHeader
+        eyebrow={
+          <Link
+            href="/dashboard/fichas"
+            aria-label="Volver"
+            title="Volver"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+          >
+            <Icon name="arrow" size={18} />
+          </Link>
+        }
+        title={profile?.fullName ?? "Deportista"}
+        description={profile?.school}
+        actions={
+          <>
+            {profile?.favoriteSport && (
+              <Badge variant="info" className={SPORT_BADGE_CLASS[profile.favoriteSport] ?? ""}>
+                {SPORT_LABELS[profile.favoriteSport] ?? profile.favoriteSport}
+              </Badge>
+            )}
+            {session && (
+              <FavoriteButton targetType="ficha" targetId={card.id} isFavorited={isFavorited} />
+            )}
+          </>
+        }
+      />
 
       <div className="mx-auto w-full max-w-2xl space-y-6">
       {/* General card */}
@@ -133,7 +138,7 @@ export default async function FichaDetailPage({ params }: Props) {
               {card.publicEmail && <Row label="Correo público" value={card.publicEmail} />}
               {profile?.socialLink && <Row label="Enlace social" value={profile.socialLink} />}
               <div className="grid grid-cols-1 items-start gap-2 pt-1 text-sm sm:grid-cols-[200px_1fr] sm:items-center">
-                <span className="font-medium text-brand-primary/50">Correo institucional</span>
+                <span className="font-medium text-brand-primary/70">Correo institucional</span>
                 <ContactRevealButton userId={card.student.id} className="w-fit" />
               </div>
             </>
@@ -149,7 +154,7 @@ export default async function FichaDetailPage({ params }: Props) {
               <Row label="Patologías" value={medicalInfo.pathologies as string} />
               <Row label="Enfermedades crónicas" value={medicalInfo.chronicDiseases as string} />
               <Row label="Padecimientos cardíacos" value={medicalInfo.cardiacConditions as string} />
-              <p className="pt-1 text-xs text-brand-primary/40">Esta información no afecta el cálculo de afinidad.</p>
+              <p className="pt-1 text-xs text-brand-primary/70">Esta información no afecta el cálculo de afinidad.</p>
             </>
           )}
         </CardContent>

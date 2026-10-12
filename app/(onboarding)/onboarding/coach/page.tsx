@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { OnboardingCard } from "@/app/(onboarding)/_components/OnboardingCard";
+import { Alert } from "@/components/Alert";
 import { Input } from "@/components/Input";
 import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { Select } from "@/components/Select";
@@ -127,17 +128,12 @@ export default function CoachOnboardingPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
-          Paso 1 de 3
-        </div>
-        <CardTitle>Configura tu perfil de entrenador</CardTitle>
-        <CardDescription>
-          Completa tu información profesional para comenzar.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <OnboardingCard
+      step={1}
+      label="Paso 1 de 3"
+      title="Configura tu perfil de entrenador"
+      description="Completa tu información profesional para comenzar."
+    >
         <form className="space-y-4" onSubmit={handleSubmit}>
           <PhotoUploadField
             id="ob-c-photo"
@@ -220,11 +216,7 @@ export default function CoachOnboardingPage() {
             </div>
           </fieldset>
 
-          {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert variant="error">{error}</Alert> : null}
 
           <div className="flex gap-3">
             <Button
@@ -241,7 +233,6 @@ export default function CoachOnboardingPage() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </OnboardingCard>
   );
 }

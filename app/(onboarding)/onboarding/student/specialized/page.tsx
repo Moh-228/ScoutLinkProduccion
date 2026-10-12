@@ -4,7 +4,9 @@ import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { OnboardingCard } from "@/app/(onboarding)/_components/OnboardingCard";
+import { Alert } from "@/components/Alert";
+import { Card, CardContent } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 
@@ -572,7 +574,7 @@ async function completeOnboarding() {
 
 export default function StudentSpecializedPage() {
   return (
-    <Suspense fallback={<Card><CardContent><p className="text-sm text-brand-primary/50">Cargando...</p></CardContent></Card>}>
+    <Suspense fallback={<Card><CardContent><p className="text-sm text-brand-primary/70">Cargando...</p></CardContent></Card>}>
       <StudentSpecializedForm />
     </Suspense>
   );
@@ -664,17 +666,12 @@ function StudentSpecializedForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
-          Paso 3 de 3 — Opcional
-        </div>
-        <CardTitle>Ficha deportiva especializada</CardTitle>
-        <CardDescription>
-          Detalla tu experiencia en un deporte específico. Puedes agregar más fichas desde tu perfil.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <OnboardingCard
+      step={3}
+      label="Paso 3 de 3 — Opcional"
+      title="Ficha deportiva especializada"
+      description="Detalla tu experiencia en un deporte específico. Puedes agregar más fichas desde tu perfil."
+    >
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Select
             id="ob-sp-sport"
@@ -704,14 +701,7 @@ function StudentSpecializedForm() {
           {sport === "flag_football" && <FlagFootballForm key={formKey} defaults={defaults} />}
           {sport !== "" && <ConductSection key={conductKey} defaults={defaults} />}
 
-          {error ? (
-            <p
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-              role="alert"
-            >
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert variant="error">{error}</Alert> : null}
 
           <div className="flex gap-3">
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
@@ -727,7 +717,6 @@ function StudentSpecializedForm() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </OnboardingCard>
   );
 }

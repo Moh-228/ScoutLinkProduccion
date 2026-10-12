@@ -32,7 +32,7 @@ export function ReopenEventButton({ eventId }: { eventId: string }) {
 
 	return (
 		<div className="flex flex-col items-end gap-1">
-			<Button variant="secondary" onClick={handleReopen} disabled={loading} className="px-3 py-1 text-xs">
+			<Button variant="secondary" size="sm" onClick={handleReopen} disabled={loading}>
 				{loading ? "Reabriendo..." : "Reabrir convocatoria"}
 			</Button>
 			{error && <p className="text-xs text-red-600">{error}</p>}

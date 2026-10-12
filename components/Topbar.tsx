@@ -174,7 +174,7 @@ export function Topbar({ userName }: TopbarProps) {
           >
             <div
               aria-hidden="true"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary font-display text-sm font-bold text-white ring-2 ring-brand-secondary/30"
             >
               {userName.slice(0, 2).toUpperCase()}
             </div>
@@ -189,14 +189,14 @@ export function Topbar({ userName }: TopbarProps) {
           {open && (
             <div
               role="menu"
-              className="absolute right-0 top-full z-50 mt-2 min-w-40 rounded-xl border border-brand-border/60 bg-white py-2 shadow-lg"
+              className="absolute right-0 top-full z-50 mt-2 min-w-40 rounded-xl border border-brand-border/60 bg-white py-2 shadow-lg shadow-brand-primary/10"
             >
               <button
                 role="menuitem"
                 type="button"
                 tabIndex={0}
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 focus-visible:bg-rose-50 focus-visible:outline-none"
               >
                 <Icon name="logout" size={16} />
                 Cerrar sesión

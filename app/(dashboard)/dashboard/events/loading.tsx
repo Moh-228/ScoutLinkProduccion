@@ -1,6 +1,6 @@
 export default function EventsLoading() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-6 motion-safe:animate-pulse">
       {/* Header */}
       <header className="flex items-start justify-between gap-4">
         <div>

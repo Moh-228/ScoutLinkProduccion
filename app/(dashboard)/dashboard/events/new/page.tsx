@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -35,12 +36,10 @@ export default async function NewEventPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Crear evento</h1>
-        <p className="text-sm text-brand-primary/70">
-          Publica un torneo, entrenamiento o convocatoria de reclutamiento.
-        </p>
-      </header>
+      <PageHeader
+        title="Crear evento"
+        description="Publica un torneo, entrenamiento o convocatoria de reclutamiento."
+      />
       <EventCreateForm
         organizerName={organizerName}
         defaultAcademicUnit={defaultAcademicUnit}

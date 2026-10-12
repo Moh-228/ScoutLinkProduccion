@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
+import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { ContactRevealButton } from "@/components/ContactRevealButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { PageHeader } from "@/components/PageHeader";
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { SPORT_CHARACTERISTICS } from "@/lib/sport-characteristics";
@@ -73,7 +74,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
     <div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[160px_1fr] sm:gap-2">
-      <span className="font-medium text-brand-primary/50">{label}</span>
+      <span className="font-medium text-brand-primary/70">{label}</span>
       <span className="text-brand-primary">{value}</span>
     </div>
   );
@@ -165,9 +166,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="mb-2 flex flex-wrap gap-2">
+      <PageHeader
+        eyebrow={
+          <>
             <Badge variant="info">{TYPE_LABELS[event.type] ?? event.type}</Badge>
             <Badge variant="neutral" className={SPORT_BADGE_CLASS[event.sport]}>
               {SPORT_LABELS[event.sport] ?? event.sport}
@@ -177,8 +178,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             >
               {event.status === "open" ? "Abierto" : "Cerrado"}
             </Badge>
-          </div>
-          <h1 className="text-xl font-bold text-brand-primary">{event.title}</h1>
+          </>
+        }
+        title={event.title}
+        description={
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <p className="text-sm text-brand-primary/70">
               {organizerName}
@@ -190,23 +193,25 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <ContactRevealButton userId={event.coach.id} className="px-2 py-0.5 text-xs" />
             )}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {canManage && <EventStatusToggle eventId={event.id} initialStatus={event.status} />}
-          {canManage && (
-            <Link href={`/dashboard/events/${event.id}/edit`}>
-              <Button variant="secondary">Editar</Button>
-            </Link>
-          )}
-          {session && (
-            <FavoriteButton
-              targetType="event"
-              targetId={event.id}
-              isFavorited={isEventFavorited}
-            />
-          )}
-        </div>
-      </header>
+        }
+        actions={
+          <>
+            {canManage && <EventStatusToggle eventId={event.id} initialStatus={event.status} />}
+            {canManage && (
+              <Link href={`/dashboard/events/${event.id}/edit`} className={buttonClassNames("secondary")}>
+                Editar
+              </Link>
+            )}
+            {session && (
+              <FavoriteButton
+                targetType="event"
+                targetId={event.id}
+                isFavorited={isEventFavorited}
+              />
+            )}
+          </>
+        }
+      />
 
       {/* ── Resumen de postulantes (solo organizador/admin) ── */}
       {statusCounts && (
@@ -216,20 +221,20 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
-              <p className="text-2xl font-bold text-brand-primary">{statusCounts.postulado}</p>
-              <p className="text-xs font-medium text-brand-primary/60">Postulado</p>
+              <p className="font-display text-2xl font-bold text-brand-primary">{statusCounts.postulado}</p>
+              <p className="text-xs font-medium text-brand-primary/70">Postulado</p>
             </div>
             <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
-              <p className="text-2xl font-bold text-brand-primary">{statusCounts.preseleccionado}</p>
-              <p className="text-xs font-medium text-brand-primary/60">Preseleccionado</p>
+              <p className="font-display text-2xl font-bold text-brand-primary">{statusCounts.preseleccionado}</p>
+              <p className="text-xs font-medium text-brand-primary/70">Preseleccionado</p>
             </div>
             <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
-              <p className="text-2xl font-bold text-brand-primary">{statusCounts.aceptado}</p>
-              <p className="text-xs font-medium text-brand-primary/60">Invitado</p>
+              <p className="font-display text-2xl font-bold text-brand-primary">{statusCounts.aceptado}</p>
+              <p className="text-xs font-medium text-brand-primary/70">Invitado</p>
             </div>
             <div className="rounded-lg border border-brand-border/50 bg-brand-background p-3 text-center">
-              <p className="text-2xl font-bold text-brand-primary">{statusCounts.rechazado}</p>
-              <p className="text-xs font-medium text-brand-primary/60">Descartado</p>
+              <p className="font-display text-2xl font-bold text-brand-primary">{statusCounts.rechazado}</p>
+              <p className="text-xs font-medium text-brand-primary/70">Descartado</p>
             </div>
           </CardContent>
         </Card>
@@ -264,7 +269,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={event.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-secondary hover:text-brand-primary underline"
+                    className="rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                   >
                     Ver en Google Maps
                   </a>
@@ -316,7 +321,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={event.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-secondary hover:text-brand-primary underline"
+                    className="rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                   >
                     Ver en Google Maps
                   </a>
@@ -344,7 +349,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           />
           {!!req.notes && (
             <div className="pt-2">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
                 Notas / políticas
               </p>
               <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.notes)}</p>
@@ -409,7 +414,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     href={String(req.rulesLink)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-secondary hover:text-brand-primary underline"
+                    className="rounded text-brand-secondary underline hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                   >
                     Ver reglamento
                   </a>
@@ -418,7 +423,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             )}
             {!!req.registrationRequirements && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
                   Requisitos de registro
                 </p>
                 <p className="text-sm text-brand-primary/70 whitespace-pre-line">
@@ -444,7 +449,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               typeof req.sportsCharacteristics === "object" &&
               Object.keys(req.sportsCharacteristics as object).length > 0 && (
                 <div className="pt-2 space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
                     Características buscadas
                   </p>
                   {(SPORT_CHARACTERISTICS[event.sport] ?? []).map((field) => {
@@ -470,7 +475,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               )}
             {!!req.whatToBring && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
                   Qué llevar
                 </p>
                 <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.whatToBring)}</p>
@@ -478,7 +483,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             )}
             {!!req.evaluationFormat && (
               <div className="pt-2">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
                   Formato de evaluación
                 </p>
                 <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.evaluationFormat)}</p>

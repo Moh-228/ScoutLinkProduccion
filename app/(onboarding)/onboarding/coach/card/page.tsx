@@ -4,7 +4,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { OnboardingCard } from "@/app/(onboarding)/_components/OnboardingCard";
+import { Alert } from "@/components/Alert";
 import { Input } from "@/components/Input";
 
 const TA_CLASS =
@@ -77,17 +78,12 @@ export default function CoachCardPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
-          Paso 3 de 3 — Opcional
-        </div>
-        <CardTitle>Ficha de entrenador</CardTitle>
-        <CardDescription>
-          Comparte tu trayectoria y certificaciones. Puedes editarlas después desde tu perfil.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <OnboardingCard
+      step={3}
+      label="Paso 3 de 3 — Opcional"
+      title="Ficha de entrenador"
+      description="Comparte tu trayectoria y certificaciones. Puedes editarlas después desde tu perfil."
+    >
         <form className="space-y-4" onSubmit={handleSubmit}>
 
           {/* Categorías */}
@@ -157,11 +153,7 @@ export default function CoachCardPage() {
             />
           </label>
 
-          {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert variant="error">{error}</Alert> : null}
 
           <div className="flex gap-3">
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
@@ -172,7 +164,6 @@ export default function CoachCardPage() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </OnboardingCard>
   );
 }

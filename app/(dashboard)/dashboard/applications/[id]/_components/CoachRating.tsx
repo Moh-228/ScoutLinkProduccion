@@ -47,7 +47,7 @@ export function CoachRating({ eventId, appId, initialRating }: CoachRatingProps)
 
 	return (
 		<div className="space-y-1.5">
-			<p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/50">
+			<p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
 				Tu calificación (solo visible para ti)
 			</p>
 			<div className="flex items-center gap-1" role="radiogroup" aria-label="Calificación del postulado">
@@ -62,19 +62,19 @@ export function CoachRating({ eventId, appId, initialRating }: CoachRatingProps)
 						onMouseEnter={() => setHovered(value)}
 						onMouseLeave={() => setHovered(null)}
 						onClick={() => setStars(value)}
-						className="p-0.5 text-brand-border transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+						className="rounded p-0.5 text-brand-border transition-transform hover:scale-110 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction motion-reduce:transform-none"
 					>
 						<Icon
 							name="star"
 							size={22}
-							className={value <= display ? "text-sport-volleyball" : "text-brand-border"}
+							className={value <= display ? "text-amber-500" : "text-brand-border"}
 						/>
 					</button>
 				))}
 				{rating > 0 && <span className="ml-1 text-sm font-medium text-brand-primary/70">{rating}/5</span>}
 			</div>
 			{error && <p className="text-xs text-red-600">{error}</p>}
-			<p className="text-xs text-brand-primary/40">Es solo apoyo visual; no afecta la afinidad ni el estado de la postulación.</p>
+			<p className="text-xs text-brand-primary/70">Es solo apoyo visual; no afecta la afinidad ni el estado de la postulación.</p>
 		</div>
 	);
 }

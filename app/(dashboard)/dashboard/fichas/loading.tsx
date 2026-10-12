@@ -1,6 +1,6 @@
 export default function FichasLoading() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-6 motion-safe:animate-pulse">
       {/* Header */}
       <header>
         <div className="h-8 w-56 rounded-lg bg-brand-border/40" />

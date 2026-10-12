@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { matchSports } from "@/lib/ficha-search";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
@@ -142,10 +144,10 @@ export default async function AdminFichasPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Gestión de Fichas</h1>
-        <p className="text-brand-primary/70">Administra fichas de deportistas, entrenadores y eventos.</p>
-      </header>
+      <PageHeader
+        title="Gestión de Fichas"
+        description="Administra fichas de deportistas, entrenadores y eventos."
+      />
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
@@ -154,7 +156,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {events.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin eventos registrados.</p>
+            <EmptyState size="compact" icon="calendar" title="Sin eventos registrados." />
           ) : (
             events.map((e) => <EventRow key={e.id} event={e} />)
           )}
@@ -175,7 +177,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {coachProfiles.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin coaches registrados.</p>
+            <EmptyState size="compact" icon="person" title="Sin coaches registrados." />
           ) : (
             coachProfiles.map((c) => <CoachProfileRow key={c.userId} coach={c} />)
           )}
@@ -196,7 +198,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {generalCards.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin fichas generales.</p>
+            <EmptyState size="compact" icon="id_card" title="Sin fichas generales." />
           ) : (
             generalCards.map((c) => <GeneralCardRow key={c.id} card={c} />)
           )}
@@ -217,7 +219,7 @@ export default async function AdminFichasPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {specializedCards.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin fichas especializadas.</p>
+            <EmptyState size="compact" icon="id_card" title="Sin fichas especializadas." />
           ) : (
             specializedCards.map((c) => <SpecializedCardRow key={c.id} card={c} />)
           )}

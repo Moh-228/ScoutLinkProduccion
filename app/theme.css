@@ -13,6 +13,9 @@
   --color-brand-muted: #698696;
 
   --color-sport-basketball: #ea4630;
+  /* Darker, more orange basketball for surfaces that carry white text (badge, CTA):
+     5.18:1 on white (AA). The base tone above stays for dots, bars, stripes and icons. */
+  --color-sport-basketball-strong: #c2410c;
   --color-sport-football: #146b3a;
   --color-sport-volleyball: #f8b229;
   --color-sport-tocho: #bb2528;
@@ -21,4 +24,7 @@
      backgrounds, headings, or body text; reserved for active/selected/focus
      states (active nav item, selected toggle/checkbox, focus rings). */
   --color-interaction: #0474c4;
+
+  /* Display typeface for headings (`font-display`). Body text stays on Geist. */
+  --font-display: var(--font-outfit), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }

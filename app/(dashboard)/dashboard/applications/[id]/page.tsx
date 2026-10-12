@@ -4,7 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { ContactRevealButton } from "@/components/ContactRevealButton";
+import { EmptyState } from "@/components/EmptyState";
 import { Icon } from "@/components/Icon";
+import { PageHeader } from "@/components/PageHeader";
 import { computeAffinityBreakdown, type AffinityEventRequirements } from "@/lib/affinity";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -40,7 +42,7 @@ function Row({ label, value }: { label: string; value?: string | number | null }
 	if (!value && value !== 0) return null;
 	return (
 		<div className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[180px_1fr] sm:gap-2">
-			<span className="font-medium text-brand-primary/50">{label}</span>
+			<span className="font-medium text-brand-primary/70">{label}</span>
 			<span className="text-brand-primary">{value}</span>
 		</div>
 	);
@@ -115,17 +117,19 @@ export default async function ApplicationDetailPage({ params }: Props) {
 
 	return (
 		<div className="space-y-6">
-			<header className="flex items-center gap-3">
-				<Link
-					href="/dashboard/applications"
-					aria-label="Volver"
-					title="Volver"
-					className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
-				>
-					<Icon name="arrow" size={18} />
-				</Link>
-				<h1 className="text-lg font-bold text-brand-primary">Detalle de postulación</h1>
-			</header>
+			<PageHeader
+				eyebrow={
+					<Link
+						href="/dashboard/applications"
+						aria-label="Volver"
+						title="Volver"
+						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border bg-white text-brand-primary/70 transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+					>
+						<Icon name="arrow" size={18} />
+					</Link>
+				}
+				title="Detalle de postulación"
+			/>
 
 			<div className="mx-auto w-full max-w-2xl space-y-6">
 			{/* Estado actual */}
@@ -148,7 +152,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 					/>
 					{application.event.type === "recruitment" && (
 						<div className="pt-2">
-							<p className="mb-2 text-xs font-medium text-brand-primary/50">Compatibilidad</p>
+							<p className="mb-2 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Compatibilidad</p>
 							<div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
 								<div className="relative h-32 w-32 shrink-0">
 									<svg viewBox="0 0 36 36" className="h-32 w-32 -rotate-90">
@@ -167,7 +171,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 											strokeLinecap="round"
 										/>
 									</svg>
-									<span className="absolute inset-0 flex items-center justify-center text-3xl font-extrabold text-brand-primary">
+									<span className="absolute inset-0 flex items-center justify-center font-display text-3xl font-extrabold text-brand-primary">
 										{application.affinityPercent}%
 									</span>
 								</div>
@@ -214,7 +218,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						{card?.isPublic && (
 							<Link
 								href={`/dashboard/fichas/${card.id}`}
-								className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline"
+								className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
 							>
 								Ver ficha completa
 							</Link>
@@ -251,11 +255,11 @@ export default async function ApplicationDetailPage({ params }: Props) {
 						</>
 					)}
 					{!card && (
-						<p className="text-sm text-brand-primary/50">El alumno no tiene ficha registrada.</p>
+						<EmptyState size="compact" icon="id_card" title="El alumno no tiene ficha registrada." />
 					)}
 					{canManage && (
 						<div className="grid grid-cols-1 items-start gap-2 pt-1 sm:grid-cols-[180px_1fr] sm:items-center">
-							<span className="text-sm font-medium text-brand-primary/50">Correo institucional</span>
+							<span className="text-sm font-medium text-brand-primary/70">Correo institucional</span>
 							<ContactRevealButton userId={application.student.id} className="w-fit" />
 						</div>
 					)}

@@ -1,11 +1,11 @@
 "use client";
 
 import { FormEvent, Suspense, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { AUTH_FOOTER_LINK, AUTH_SUBMIT_CLASS, AuthShell } from "@/app/(auth)/_components/AuthShell";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -104,28 +104,17 @@ function VerifyEmailContent() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-lg">
-      <div className="mb-6">
-        <Link
-          href="/auth/register"
-          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
-        >
-          <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al registro
-        </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Verifica tu correo</CardTitle>
-          <CardDescription>
-            Enviamos un código de 6 dígitos a{" "}
-            <span className="font-semibold text-brand-primary">{email || "tu correo"}</span>.
-            Ingrésalo a continuación para activar tu cuenta.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <AuthShell
+      back={{ href: "/auth/register", label: "Volver al registro" }}
+      title="Verifica tu correo"
+      description={
+        <>
+          Enviamos un código de 6 dígitos a{" "}
+          <span className="font-semibold text-brand-primary">{email || "tu correo"}</span>.
+          Ingrésalo a continuación para activar tu cuenta.
+        </>
+      }
+    >
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* 6-digit code inputs */}
             <div className="flex justify-center gap-2 sm:gap-3">
@@ -142,7 +131,7 @@ function VerifyEmailContent() {
                   onKeyDown={(e) => handleKeyDown(i, e)}
                   onPaste={handlePaste}
                   aria-label={`Dígito ${i + 1}`}
-                  className="h-14 w-12 rounded-lg border border-brand-border bg-white text-center text-2xl font-bold text-brand-primary
+                  className="h-14 w-11 rounded-xl border border-brand-border bg-white text-center font-display text-2xl font-bold text-brand-primary shadow-sm
                     caret-transparent outline-none transition focus:border-interaction focus:ring-2 focus:ring-interaction
                     disabled:opacity-50 sm:w-14"
                   disabled={isSubmitting}
@@ -150,37 +139,27 @@ function VerifyEmailContent() {
               ))}
             </div>
 
-            {error ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-                {error}
-              </p>
-            ) : null}
+            {error ? <Alert variant="error">{error}</Alert> : null}
 
-            {info ? (
-              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">
-                {info}
-              </p>
-            ) : null}
+            {info ? <Alert variant="success">{info}</Alert> : null}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || digits.join("").length !== 6}>
+            <Button type="submit" className={AUTH_SUBMIT_CLASS} disabled={isSubmitting || digits.join("").length !== 6}>
               {isSubmitting ? "Verificando..." : "Verificar cuenta"}
             </Button>
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-1 text-sm text-brand-primary/70">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-1 border-t border-brand-border/50 pt-5 text-sm text-brand-primary/80">
             <span>¿No recibiste el correo?</span>
             <button
               type="button"
               onClick={handleResend}
               disabled={resendCooldown > 0}
-              className="rounded font-semibold text-brand-secondary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+              className={`${AUTH_FOOTER_LINK} disabled:cursor-not-allowed disabled:opacity-50`}
             >
               {resendCooldown > 0 ? `Reenviar (${resendCooldown}s)` : "Reenviar código"}
             </button>
           </div>
-        </CardContent>
-      </Card>
-    </main>
+    </AuthShell>
   );
 }
 

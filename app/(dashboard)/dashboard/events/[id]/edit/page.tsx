@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -70,10 +71,7 @@ export default async function EventEditPage({ params }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Editar evento</h1>
-        <p className="text-sm text-brand-primary/70">{event.title}</p>
-      </header>
+      <PageHeader title="Editar evento" description={event.title} />
       <EventEditForm eventId={id} initial={initial} />
     </div>
   );

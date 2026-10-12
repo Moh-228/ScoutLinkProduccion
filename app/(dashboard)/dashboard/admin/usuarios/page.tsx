@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { UserRow } from "../_components/UserRow";
@@ -54,10 +56,10 @@ export default async function AdminUsuariosPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Gestión de Usuarios</h1>
-        <p className="text-brand-primary/70">Activa, desactiva o elimina cuentas de deportistas y coaches.</p>
-      </header>
+      <PageHeader
+        title="Gestión de Usuarios"
+        description="Activa, desactiva o elimina cuentas de deportistas y coaches."
+      />
 
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
@@ -66,7 +68,7 @@ export default async function AdminUsuariosPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {coaches.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin coaches registrados.</p>
+            <EmptyState size="compact" icon="person" title="Sin coaches registrados." />
           ) : (
             coaches.map((u) => <UserRow key={u.id} user={u} />)
           )}
@@ -87,7 +89,7 @@ export default async function AdminUsuariosPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {students.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">Sin deportistas registrados.</p>
+            <EmptyState size="compact" icon="person" title="Sin deportistas registrados." />
           ) : (
             students.map((u) => <UserRow key={u.id} user={u} />)
           )}

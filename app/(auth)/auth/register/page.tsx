@@ -4,8 +4,9 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { AUTH_FOCUS_RING, AUTH_FOOTER_LINK, AUTH_SUBMIT_CLASS, AuthShell } from "@/app/(auth)/_components/AuthShell";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Select } from "@/components/Select";
@@ -67,24 +68,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-lg">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 hover:text-brand-primary transition-colors"
-        >
-          <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio
-        </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Crear cuenta</CardTitle>
-          <CardDescription>Registra tu perfil para comenzar a explorar oportunidades.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <AuthShell
+      back={{ href: "/", label: "Volver al inicio" }}
+      title="Crear cuenta"
+      description="Registra tu perfil para comenzar a explorar oportunidades."
+      footer={
+        <>
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/auth/login" className={AUTH_FOOTER_LINK}>
+            Iniciar sesión
+          </Link>
+        </>
+      }
+    >
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Select
               id="register-role"
@@ -113,7 +109,7 @@ export default function RegisterPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <PasswordInput id="register-password" name="password" label="Contraseña" placeholder="Min. 8 caracteres" required />
-              <p className="text-xs text-brand-primary/50">Debe incluir al menos una mayúscula y un símbolo (ej. !, @, #).</p>
+              <p className="text-xs text-brand-primary/70">Debe incluir al menos una mayúscula y un símbolo (ej. !, @, #).</p>
             </div>
             <PasswordInput
               id="register-confirm-password"
@@ -122,32 +118,23 @@ export default function RegisterPage() {
               placeholder="********"
               required
             />
-            {error ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-                {error}
-              </p>
-            ) : null}
+            {error ? <Alert variant="error">{error}</Alert> : null}
             <div className="flex justify-center">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className={AUTH_SUBMIT_CLASS} disabled={isSubmitting}>
                 {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
               </Button>
             </div>
-            <p className="text-center text-xs text-brand-primary/60">
+            <p className="text-center text-xs text-brand-primary/70">
               Al crear tu cuenta aceptas nuestro{" "}
-              <Link href="/aviso-de-privacidad" className="font-medium text-brand-secondary underline hover:text-brand-primary">
+              <Link
+                href="/aviso-de-privacidad"
+                className={`rounded font-medium text-brand-secondary underline underline-offset-2 transition-colors hover:text-brand-primary ${AUTH_FOCUS_RING}`}
+              >
                 aviso de privacidad
               </Link>
               .
             </p>
           </form>
-          <p className="mt-4 text-center text-sm text-brand-primary">
-            ¿Ya tienes cuenta?{" "}
-            <Link href="/auth/login" className="font-semibold text-brand-secondary hover:text-brand-primary underline">
-              Iniciar sesión
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+    </AuthShell>
   );
 }

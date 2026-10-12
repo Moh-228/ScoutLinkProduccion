@@ -39,7 +39,7 @@ export function PrivacyToggle({ initialVisible }: { initialVisible: boolean }) {
 				<p className="text-sm font-medium text-brand-primary">
 					{visible ? "Permitir que me contacten" : "Correo de contacto oculto"}
 				</p>
-				<p className="text-xs text-brand-primary/50">
+				<p className="text-xs text-brand-primary/70">
 					{visible
 						? "Al hacer clic en \"Contactar\", tu correo se revelará."
 						: "Nadie podrá ver tu correo de contacto, ni siquiera al seleccionar \"Contactar\"."}

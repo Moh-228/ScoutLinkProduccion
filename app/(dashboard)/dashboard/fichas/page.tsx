@@ -3,11 +3,13 @@ import type { Sport } from "@prisma/client";
 import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { studentMatchesSportOrPosition } from "@/lib/ficha-search";
 import { prisma } from "@/lib/prisma";
-import { SPORT_BADGE_CLASS, SPORT_SOFT_BUTTON_CLASS } from "@/lib/sport-colors";
+import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS, SPORT_SOFT_BUTTON_CLASS } from "@/lib/sport-colors";
 
 const SPORT_LABELS: Record<string, string> = {
   basketball: "Básquetbol",
@@ -81,13 +83,10 @@ export default async function FichasPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Fichas de deportistas</h1>
-        <p className="text-brand-primary/70">Directorio de fichas públicas con filtros.</p>
-      </header>
+      <PageHeader title="Fichas de deportistas" description="Directorio de fichas públicas con filtros." />
 
       {visibleCards.length === 0 ? (
-        <p className="text-center text-brand-primary/50 py-12">No hay fichas públicas disponibles.</p>
+        <EmptyState title="No hay fichas públicas disponibles." icon="id_card" />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {visibleCards.map((card) => {
@@ -95,7 +94,11 @@ export default async function FichasPage({ searchParams }: Props) {
             const favSport = profile?.favoriteSport;
             const fullName = profile?.fullName ?? "Jugador";
             return (
-              <Card key={card.id} className="gap-4">
+              <Card key={card.id} className="relative gap-4 overflow-hidden pt-6">
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-0 top-0 h-1.5 ${favSport ? SPORT_DOT_CLASS[favSport] : "bg-brand-border"}`}
+                />
                 <div className="flex items-start justify-between gap-2">
                   <Avatar photoKey={profile?.photoUrl} name={fullName} size={56} />
                   {session && (
@@ -121,32 +124,32 @@ export default async function FichasPage({ searchParams }: Props) {
                 <div className="space-y-1.5 text-sm">
                   {card.heightCm && (
                     <div className="flex items-center justify-between">
-                      <span className="text-brand-primary/50">Estatura</span>
+                      <span className="text-brand-primary/70">Estatura</span>
                       <span className="font-semibold text-brand-primary">{card.heightCm} cm</span>
                     </div>
                   )}
                   {card.weightKg && (
                     <div className="flex items-center justify-between">
-                      <span className="text-brand-primary/50">Peso</span>
+                      <span className="text-brand-primary/70">Peso</span>
                       <span className="font-semibold text-brand-primary">{card.weightKg} kg</span>
                     </div>
                   )}
                   {profile?.gender && (
                     <div className="flex items-center justify-between">
-                      <span className="text-brand-primary/50">Género</span>
+                      <span className="text-brand-primary/70">Género</span>
                       <span className="font-semibold text-brand-primary">{profile.gender}</span>
                     </div>
                   )}
                   {/* Only coaches/admins see full contact info */}
                   {(session?.role === "coach" || session?.role === "admin") && card.phone && (
                     <div className="flex items-center justify-between">
-                      <span className="text-brand-primary/50">Tel</span>
+                      <span className="text-brand-primary/70">Tel</span>
                       <span className="font-semibold text-brand-primary">{card.phone}</span>
                     </div>
                   )}
                   {card.experienceLevel && (
                     <div className="flex items-center justify-between pt-1">
-                      <span className="text-brand-primary/50">Nivel</span>
+                      <span className="text-brand-primary/70">Nivel</span>
                       <Badge variant={EXP_BADGE_VARIANT[card.experienceLevel] ?? "neutral"}>
                         {EXP_LABELS[card.experienceLevel] ?? card.experienceLevel}
                       </Badge>

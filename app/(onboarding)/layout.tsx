@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { Logo } from "@/components/Logo";
 import { verifySession } from "@/lib/auth";
 
 export default async function OnboardingLayout({
@@ -18,7 +19,10 @@ export default async function OnboardingLayout({
   return (
     <div className="min-h-screen bg-brand-background px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-2xl">
-        <p className="mb-8 text-xl font-bold text-brand-primary">Scoutlink</p>
+        <div className="mb-8 flex items-center gap-2.5">
+          <Logo size={36} />
+          <p className="font-display text-xl font-bold tracking-tight text-brand-primary">ScoutLink</p>
+        </div>
         {children}
       </div>
     </div>

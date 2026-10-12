@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
@@ -62,18 +64,19 @@ export default async function AdminReportsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold text-brand-primary">Comentarios reportados</h1>
-        <p className="text-brand-primary/70">Revisa reportes de comentarios y aplica moderación.</p>
-      </header>
+      <PageHeader
+        title="Comentarios reportados"
+        description="Revisa reportes de comentarios y aplica moderación."
+      />
 
       <nav className="flex flex-wrap gap-2">
         {TABS.map((tab) => (
           <Link
             key={tab.value}
             href={`/dashboard/admin/reportes?status=${tab.value}`}
+            aria-current={activeStatus === tab.value ? "page" : undefined}
             className={[
-              "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors",
+              "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction",
               activeStatus === tab.value
                 ? "bg-brand-primary text-white"
                 : "bg-white text-brand-primary/70 ring-1 ring-brand-border hover:bg-brand-background",
@@ -90,7 +93,7 @@ export default async function AdminReportsPage({ searchParams }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {reports.length === 0 ? (
-            <p className="text-sm text-brand-primary/70">No hay reportes en esta categoría.</p>
+            <EmptyState size="compact" icon="error" title="No hay reportes en esta categoría." />
           ) : (
             reports.map((r) => {
               const reporterName =

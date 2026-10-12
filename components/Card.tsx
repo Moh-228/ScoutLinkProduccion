@@ -21,7 +21,7 @@ export function CardHeader({ className = "", ...props }: HTMLAttributes<HTMLDivE
 export function CardTitle({ className = "", ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={["text-lg font-semibold leading-tight tracking-tight text-brand-primary", className].join(" ")}
+      className={["font-display text-lg font-semibold leading-tight tracking-tight text-brand-primary", className].join(" ")}
       {...props}
     />
   );

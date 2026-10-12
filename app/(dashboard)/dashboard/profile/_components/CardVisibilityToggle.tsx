@@ -39,7 +39,7 @@ export function CardVisibilityToggle({ initialIsPublic }: { initialIsPublic: boo
 				<p className="text-sm font-medium text-brand-primary">
 					{isPublic ? "Ficha visible al público" : "Ficha oculta"}
 				</p>
-				<p className="text-xs text-brand-primary/50">
+				<p className="text-xs text-brand-primary/70">
 					{isPublic
 						? "Entrenadores pueden encontrarte en el directorio."
 						: "Solo tú puedes ver tu ficha."}

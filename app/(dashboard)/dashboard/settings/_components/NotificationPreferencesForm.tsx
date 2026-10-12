@@ -49,7 +49,7 @@ function Toggle({
 		<div className="flex items-center justify-between gap-3 py-1.5">
 			<div>
 				<p className="text-sm font-medium text-brand-primary">{label}</p>
-				{description && <p className="text-xs text-brand-primary/50">{description}</p>}
+				{description && <p className="text-xs text-brand-primary/70">{description}</p>}
 			</div>
 			<button
 				type="button"

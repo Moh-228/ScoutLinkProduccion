@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { Button } from "@/components/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { OnboardingCard } from "@/app/(onboarding)/_components/OnboardingCard";
+import { Alert } from "@/components/Alert";
 import { PdfUploadField } from "@/components/PdfUploadField";
 
 const SPORT_LABELS: Record<string, string> = {
@@ -68,7 +69,7 @@ function CoachDocumentsForm() {
   }
 
   if (sports.length === 0) {
-    return <p className="text-sm text-brand-primary/70">No se encontraron deportes seleccionados. Regresa al paso anterior.</p>;
+    return <Alert variant="warning">No se encontraron deportes seleccionados. Regresa al paso anterior.</Alert>;
   }
 
   return (
@@ -88,11 +89,7 @@ function CoachDocumentsForm() {
         </div>
       ))}
 
-      {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <Alert variant="error">{error}</Alert> : null}
 
       <div className="flex gap-3">
         <Button
@@ -114,21 +111,15 @@ function CoachDocumentsForm() {
 
 export default function CoachDocumentsPage() {
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
-          Paso 2 de 3
-        </div>
-        <CardTitle>Documentos de certificación</CardTitle>
-        <CardDescription>
-          Sube un documento por deporte que acredite tu rol como entrenador. Un administrador los revisará para verificarte.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <OnboardingCard
+      step={2}
+      label="Paso 2 de 3"
+      title="Documentos de certificación"
+      description="Sube un documento por deporte que acredite tu rol como entrenador. Un administrador los revisará para verificarte."
+    >
         <Suspense fallback={<p className="text-sm text-brand-primary/70">Cargando...</p>}>
           <CoachDocumentsForm />
         </Suspense>
-      </CardContent>
-    </Card>
+    </OnboardingCard>
   );
 }
