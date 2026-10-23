@@ -8,7 +8,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
-import { labelField, labelValue } from "@/lib/ficha-labels";
+import { labelField, labelFieldValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 
@@ -43,9 +43,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ deporte?: string }> };
 
-export default async function FichaDetailPage({ params }: Props) {
+export default async function FichaDetailPage({ params, searchParams }: Props) {
+  const { deporte } = await searchParams;
   const session = await verifySession();
   const { id } = await params;
 
@@ -75,6 +76,12 @@ export default async function FichaDetailPage({ params }: Props) {
   if (!card || !card.isPublic) notFound();
 
   const profile = card.student.studentProfile;
+  // `?deporte=` (from the per-sport tiles) narrows the view to that sport's card;
+  // without it, or if the student has no card for it, every card is shown as before.
+  const allSpecialized = card.student.specializedCards;
+  const selectedCard = deporte ? allSpecialized.find((sc) => sc.sport === deporte) : undefined;
+  const shownSpecialized = selectedCard ? [selectedCard] : allSpecialized;
+  const headerSport = selectedCard?.sport ?? profile?.favoriteSport;
   const isCoachOrAdmin = session?.role === "coach" || session?.role === "admin";
   const medicalInfo = card.medicalInfo as Record<string, unknown> | null;
 
@@ -104,9 +111,9 @@ export default async function FichaDetailPage({ params }: Props) {
         description={profile?.school}
         actions={
           <>
-            {profile?.favoriteSport && (
-              <Badge variant="info" className={SPORT_BADGE_CLASS[profile.favoriteSport] ?? ""}>
-                {SPORT_LABELS[profile.favoriteSport] ?? profile.favoriteSport}
+            {headerSport && (
+              <Badge variant="info" className={SPORT_BADGE_CLASS[headerSport] ?? ""}>
+                {SPORT_LABELS[headerSport] ?? headerSport}
               </Badge>
             )}
             {session && (
@@ -161,13 +168,17 @@ export default async function FichaDetailPage({ params }: Props) {
       </Card>
 
       {/* Specialized cards */}
-      {card.student.specializedCards.length > 0 && (
+      {shownSpecialized.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Fichas especializadas</CardTitle>
+            <CardTitle>
+              {selectedCard
+                ? `Ficha especializada · ${SPORT_LABELS[selectedCard.sport] ?? selectedCard.sport}`
+                : "Fichas especializadas"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {card.student.specializedCards.map((sc) => {
+            {shownSpecialized.map((sc) => {
               const data = sc.data as Record<string, unknown>;
               const entries = Object.entries(data).filter(
                 ([, v]) => v !== "" && v !== false && v !== null && v !== undefined,
@@ -178,11 +189,33 @@ export default async function FichaDetailPage({ params }: Props) {
                     {SPORT_LABELS[sc.sport] ?? sc.sport}
                   </Badge>
                   {entries.map(([k, v]) => (
-                    <Row key={k} label={labelField(k)} value={labelValue(v)} />
+                    <Row key={k} label={labelField(k)} value={labelFieldValue(k, v)} />
                   ))}
                 </div>
               );
             })}
+
+            {/* Switch between this student's real sport cards (archive-style). */}
+            {selectedCard && allSpecialized.length > 1 && (
+              <nav aria-label="Otras fichas de este deportista" className="border-t border-brand-border/50 pt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-brand-primary/70">
+                  Otras fichas de este deportista
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {allSpecialized
+                    .filter((sc) => sc.sport !== selectedCard.sport)
+                    .map((sc) => (
+                      <Link
+                        key={sc.id}
+                        href={`/dashboard/fichas/${card.id}?deporte=${sc.sport}`}
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction focus-visible:ring-offset-2 ${SPORT_BADGE_CLASS[sc.sport] ?? ""}`}
+                      >
+                        {SPORT_LABELS[sc.sport] ?? sc.sport}
+                      </Link>
+                    ))}
+                </div>
+              </nav>
+            )}
           </CardContent>
         </Card>
       )}

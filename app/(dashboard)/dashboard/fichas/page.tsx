@@ -51,9 +51,13 @@ export default async function FichasPage({ searchParams }: Props) {
           studentProfile: {
             select: { fullName: true, school: true, gender: true, favoriteSport: true, photoUrl: true },
           },
-          // Only needed to match `q` against sport/position — not fetched
-          // when there's nothing to search.
-          ...(q ? { specializedCards: { select: { sport: true, data: true } } } : {}),
+          // Sport of each specialized card (read-only) so every card can be
+          // listed on its own; `data` is only needed to match `q` against
+          // positions, so it's still fetched only when there's a search.
+          specializedCards: {
+            select: q ? { sport: true, data: true } : { sport: true },
+            orderBy: { sport: "asc" },
+          },
         },
       },
     },
@@ -66,10 +70,23 @@ export default async function FichasPage({ searchParams }: Props) {
         studentMatchesSportOrPosition(
           q,
           card.student.studentProfile?.favoriteSport,
-          (card.student as { specializedCards?: { sport: Sport; data: unknown }[] }).specializedCards ?? [],
+          // `data` is selected whenever `q` is set (this branch), see the query above.
+          card.student.specializedCards as { sport: Sport; data: unknown }[],
         ),
       )
     : cards;
+
+  // One tile per existing specialized card (sport); students without any keep
+  // their single general tile. With the sport filter active, only that sport's
+  // tiles are shown. Purely presentational over the data fetched above.
+  const tiles = visibleCards.flatMap((card) => {
+    const sports = card.student.specializedCards
+      .map((sc) => sc.sport as string)
+      .filter((s) => !sport || sport === "all" || s === sport);
+    return sports.length > 0
+      ? sports.map((s) => ({ card, sport: s as string | null }))
+      : [{ card, sport: null as string | null }];
+  });
 
   // Build a set of favorited ficha IDs for the current user
   const favoritedIds = new Set<string>();
@@ -89,12 +106,16 @@ export default async function FichasPage({ searchParams }: Props) {
         <EmptyState title="No hay fichas públicas disponibles." icon="id_card" />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {visibleCards.map((card) => {
+          {tiles.map(({ card, sport: tileSport }) => {
             const profile = card.student.studentProfile;
-            const favSport = profile?.favoriteSport;
+            // Sport tiles show their own sport; the general tile keeps the favorite sport.
+            const favSport = tileSport ?? profile?.favoriteSport;
             const fullName = profile?.fullName ?? "Jugador";
+            const href = tileSport
+              ? `/dashboard/fichas/${card.id}?deporte=${tileSport}`
+              : `/dashboard/fichas/${card.id}`;
             return (
-              <Card key={card.id} className="relative gap-4 overflow-hidden pt-6">
+              <Card key={`${card.id}-${tileSport ?? "general"}`} className="relative gap-4 overflow-hidden pt-6">
                 <span
                   aria-hidden="true"
                   className={`absolute inset-x-0 top-0 h-1.5 ${favSport ? SPORT_DOT_CLASS[favSport] : "bg-brand-border"}`}
@@ -158,7 +179,7 @@ export default async function FichasPage({ searchParams }: Props) {
                 </div>
 
                 <Link
-                  href={`/dashboard/fichas/${card.id}`}
+                  href={href}
                   className={`inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction ${favSport ? SPORT_SOFT_BUTTON_CLASS[favSport] : "border border-brand-border bg-brand-background text-brand-primary hover:bg-brand-border/20"}`}
                 >
                   Ver perfil

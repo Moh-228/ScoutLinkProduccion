@@ -50,13 +50,16 @@ export default async function NotificationsPage({ searchParams }: Props) {
           {notifications.map((n) => {
             const payload = (n.payload ?? {}) as Record<string, string>;
             return (
-              <Card key={n.id} className={`mx-auto w-full max-w-2xl ${!n.readAt ? "ring-2 ring-interaction/40" : ""}`}>
+              <Card
+                key={n.id}
+                className={`mx-auto w-full max-w-2xl ${!n.readAt ? "border-interaction/40! bg-interaction/15! ring-2 ring-interaction/40" : ""}`}
+              >
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <CardTitle className="text-base">{payload.title ?? n.type}</CardTitle>
                     <div className="flex items-center gap-2">
                       {!n.readAt && <MarkReadButton notificationId={n.id} />}
-                      <Badge variant={!n.readAt ? "info" : "neutral"}>
+                      <Badge variant={!n.readAt ? "info" : "neutral"} className={!n.readAt ? "bg-interaction! text-white!" : ""}>
                         {!n.readAt ? "Nueva" : "Leída"}
                       </Badge>
                     </div>
@@ -64,9 +67,9 @@ export default async function NotificationsPage({ searchParams }: Props) {
                 </CardHeader>
                 <CardContent className="space-y-1">
                   {payload.message && (
-                    <p className="text-sm text-brand-primary/70">{payload.message}</p>
+                    <p className={`text-sm ${!n.readAt ? "text-brand-primary/80" : "text-brand-primary/70"}`}>{payload.message}</p>
                   )}
-                  <p className="text-xs text-brand-primary/70">{fmt(n.createdAt)}</p>
+                  <p className={`text-xs ${!n.readAt ? "text-brand-primary/80" : "text-brand-primary/70"}`}>{fmt(n.createdAt)}</p>
                 </CardContent>
               </Card>
             );

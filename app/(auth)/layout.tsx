@@ -3,9 +3,8 @@ export default function AuthLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="min-h-screen bg-brand-background px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-3xl">{children}</div>
-    </div>
-  );
+  // Only the page background lives here. The padded, centered frame is applied by
+  // each page through AuthPageFrame (app/(auth)/_components/AuthShell.tsx), so the
+  // split login/register layout can span the full viewport.
+  return <div className="min-h-screen bg-brand-background">{children}</div>;
 }

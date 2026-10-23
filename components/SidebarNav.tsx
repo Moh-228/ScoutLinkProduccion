@@ -7,7 +7,11 @@ import { Icon, type IconName } from "@/components/Icon";
 
 type SidebarNavProps = {
   role: "student" | "coach" | "admin";
+  /** Shows a small dot on the notifications bell when the user has unread notifications. */
+  hasUnreadNotifications?: boolean;
 };
+
+const NOTIFICATIONS_HREF = "/dashboard/notifications";
 
 type NavItem = {
   label: string;
@@ -15,7 +19,7 @@ type NavItem = {
   icon: IconName;
 };
 
-export function SidebarNav({ role }: SidebarNavProps) {
+export function SidebarNav({ role, hasUnreadNotifications = false }: SidebarNavProps) {
   const pathname = usePathname();
 
   const items: NavItem[] =
@@ -27,6 +31,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
           { label: "Reportes", href: "/dashboard/admin/reportes", icon: "error" },
           { label: "Fichas", href: "/dashboard/admin/fichas", icon: "id_card" },
           { label: "Historial", href: "/dashboard/admin/historial", icon: "hourglass" },
+          { label: "Notificaciones", href: "/dashboard/notifications", icon: "notifications" },
           { label: "Configuración", href: "/dashboard/settings", icon: "settings" },
         ]
       : [
@@ -34,7 +39,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
           { label: "Eventos", href: "/dashboard/events", icon: "calendar" },
           { label: "Favoritos", href: "/dashboard/favorites", icon: "star" },
           { label: "Fichas", href: "/dashboard/fichas", icon: "id_card" },
-          { label: "Avisos", href: "/dashboard/notifications", icon: "notifications" },
+          { label: "Notificaciones", href: "/dashboard/notifications", icon: "notifications" },
           { label: "Perfil", href: "/dashboard/profile", icon: "person" },
           {
             label: "Postulaciones",
@@ -63,6 +68,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
     >
       {items.map((item) => {
         const active = item === activeItem;
+        const showUnreadDot = hasUnreadNotifications && item.href === NOTIFICATIONS_HREF;
         return (
           <Link
             key={item.href}
@@ -82,11 +88,20 @@ export function SidebarNav({ role }: SidebarNavProps) {
                   : "text-brand-primary/50 group-hover:bg-brand-background group-hover:text-brand-primary",
               ].join(" ")}
             >
-              <Icon
-                name={item.icon}
-                size={20}
-                className={active ? "shrink-0 text-interaction" : "shrink-0 text-brand-primary/50 group-hover:text-brand-primary"}
-              />
+              {/* Icon wrapper is the positioning context for the unread dot, so the dot never shifts the layout. */}
+              <span className="relative inline-flex shrink-0">
+                <Icon
+                  name={item.icon}
+                  size={20}
+                  className={active ? "shrink-0 text-interaction" : "shrink-0 text-brand-primary/50 group-hover:text-brand-primary"}
+                />
+                {showUnreadDot && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-interaction ring-2 ring-white"
+                  />
+                )}
+              </span>
               <span
                 className={[
                   "block max-w-full truncate whitespace-nowrap text-[10px] leading-tight tracking-tight",
@@ -95,6 +110,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
               >
                 {item.label}
               </span>
+              {showUnreadDot && <span className="sr-only"> (hay notificaciones sin leer)</span>}
             </span>
           </Link>
         );

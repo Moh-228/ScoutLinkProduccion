@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Icon } from "@/components/Icon";
 
+import { ReadConfirmation } from "./_components/ReadConfirmation";
+
 export const metadata = {
   title: "Aviso de privacidad — Scoutlink",
 };
@@ -15,15 +17,29 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default function PrivacyNoticePage() {
+// Allowed return destinations, keyed by a controlled `?desde=` value. Only these
+// internal routes can be produced (the param is never used as a URL), so it
+// can't redirect to external sites; anything else falls back to the home page.
+const RETURN_TARGETS: Record<string, { href: string; label: string }> = {
+  configuracion: { href: "/dashboard/settings#privacidad", label: "Volver a Configuración" },
+  registro: { href: "/auth/register", label: "Volver al registro" },
+};
+const DEFAULT_RETURN = { href: "/", label: "Volver al inicio" };
+
+const BACK_LINK_CLASS =
+  "inline-flex items-center gap-1.5 rounded text-sm text-brand-primary/70 transition-colors hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction focus-visible:ring-offset-2";
+
+type Props = { searchParams: Promise<{ desde?: string }> };
+
+export default async function PrivacyNoticePage({ searchParams }: Props) {
+  const { desde } = await searchParams;
+  const back = (desde && RETURN_TARGETS[desde]) || DEFAULT_RETURN;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-brand-primary/70 transition-colors hover:text-brand-primary"
-      >
+      <Link href={back.href} className={BACK_LINK_CLASS}>
         <Icon name="arrow" size={16} />
-        Volver al inicio
+        {back.label}
       </Link>
 
       <header className="mt-6 mb-10">
@@ -109,6 +125,15 @@ export default function PrivacyNoticePage() {
             Publicaremos cualquier modificación en esta misma página.
           </p>
         </Section>
+      </div>
+
+      <ReadConfirmation />
+
+      <div className="mt-6">
+        <Link href={back.href} className={BACK_LINK_CLASS}>
+          <Icon name="arrow" size={16} />
+          {back.label}
+        </Link>
       </div>
     </main>
   );

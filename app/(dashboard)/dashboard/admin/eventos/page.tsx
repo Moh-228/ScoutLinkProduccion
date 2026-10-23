@@ -149,7 +149,7 @@ export default async function AdminEventsPage({ searchParams }: Props) {
                           className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
                         >
                           <span className="text-brand-primary">{app.student.studentProfile?.fullName ?? "Estudiante"}</span>
-                          <ApplicationStatusBadge status={app.status} />
+                          <ApplicationStatusBadge status={app.status} inLink />
                         </Link>
                       ))}
                     </div>

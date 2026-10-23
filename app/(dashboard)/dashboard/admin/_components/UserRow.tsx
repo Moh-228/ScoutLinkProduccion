@@ -8,6 +8,7 @@ import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
 import { Button, buttonClassNames } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Icon } from "@/components/Icon";
 import { Select } from "@/components/Select";
 
 type User = {
@@ -148,14 +149,16 @@ export function UserRow({ user }: { user: User }) {
             Reportar foto
           </Button>
         )}
-        <Button
-          variant="danger"
-          size="sm"
+        <button
+          type="button"
+          title="Eliminar usuario"
+          aria-label="Eliminar usuario"
           disabled={!!loading || pending}
           onClick={remove}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-white text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading === "delete" ? "..." : "Eliminar"}
-        </Button>
+          {loading === "delete" ? <span aria-hidden="true">…</span> : <Icon name="delete" size={16} />}
+        </button>
       </div>
 
       <ConfirmDialog

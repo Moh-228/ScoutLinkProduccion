@@ -82,14 +82,15 @@ export default async function SettingsPage() {
           </Card>
         )}
 
-        <Card>
+        {/* `#privacidad` is the return anchor used by the privacy notice's "Volver a Configuración". */}
+        <Card id="privacidad" className="scroll-mt-6">
           <CardHeader>
             <CardTitle>Privacidad y datos personales</CardTitle>
             <CardDescription>Consulta cómo tratamos tus datos personales dentro de la plataforma.</CardDescription>
           </CardHeader>
           <CardContent>
             <Link
-              href="/aviso-de-privacidad"
+              href="/aviso-de-privacidad?desde=configuracion"
               className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
             >
               Ver aviso de privacidad →

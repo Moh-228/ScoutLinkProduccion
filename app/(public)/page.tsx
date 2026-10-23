@@ -5,7 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/Badge";
 import { Icon, type IconName } from "@/components/Icon";
 import { Logo } from "@/components/Logo";
+import { SportCorner } from "@/components/EventCard";
+import { SportArtwork, type SportArtworkKey } from "@/components/SportArtwork";
 import { SportStripe } from "@/components/SportStripe";
+import { BRAND_HERO_GLOW, BRAND_HERO_SURFACE } from "@/lib/brand-surfaces";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS } from "@/lib/sport-colors";
 
@@ -45,6 +48,29 @@ const HOW_IT_WORKS = [
   },
 ];
 
+// Coach/coordinator perspective — only features that exist today (coach
+// onboarding + admin verification, event creation, fichas directory and the
+// applications view with affinity and status changes).
+const HOW_IT_WORKS_COACH = [
+  {
+    title: "1. Crea tu perfil de entrenador",
+    description: "Registra tu información profesional y sube los documentos que acreditan los deportes a tu cargo para que un administrador te verifique.",
+  },
+  {
+    title: "2. Publica convocatorias",
+    description: "Una vez verificado, crea torneos, entrenamientos o eventos de reclutamiento.",
+  },
+  {
+    title: "3. Encuentra talento y da seguimiento",
+    description: "Consulta las fichas de deportistas, revisa la afinidad de cada postulación y actualiza su estado.",
+  },
+];
+
+const HOW_IT_WORKS_TRACKS: { audience: string; icon: IconName; steps: typeof HOW_IT_WORKS; numberClass: string }[] = [
+  { audience: "Para deportistas", icon: "person", steps: HOW_IT_WORKS, numberClass: "bg-brand-primary group-hover:bg-brand-secondary" },
+  { audience: "Para entrenadores", icon: "verified_user", steps: HOW_IT_WORKS_COACH, numberClass: "bg-brand-secondary group-hover:bg-brand-primary" },
+];
+
 const SPORTS = [
   {
     name: "Fútbol",
@@ -68,38 +94,28 @@ const SPORTS = [
   },
 ];
 
-const SPORT_ICON: Record<string, IconName> = {
-  Fútbol: "sports_soccer",
-  Básquetbol: "sports_basketball",
-  "Tocho bandera": "sports_tocho",
-  Voleibol: "sports_volleyball",
-};
-
 const REQUIREMENTS = [
   {
-    role: "Deportista",
+    role: "deportistas",
     items: [
       {
         label: "Comprobante de inscripción",
         description: "Documento oficial que acredita que estás inscrito en la institución.",
-        link: null as string | null,
       },
       {
         label: "Seguro médico",
         description:
           "Constancia de seguro médico activo. No es obligatorio para registrarse, pero es necesario para acceder a todas las funcionalidades de la aplicación.",
-        link: "https://drive.google.com",
       },
     ],
   },
   {
-    role: "Entrenador",
+    role: "entrenadores",
     items: [
       {
         label: "Documento de responsable del deporte",
         description:
           "Documento que acredita tu designación como responsable técnico del deporte en la institución.",
-        link: "https://drive.google.com",
       },
     ],
   },
@@ -107,20 +123,20 @@ const REQUIREMENTS = [
 
 const SPORT_ACCENT = SPORT_DOT_CLASS;
 
-const SPORT_KEY_BY_NAME: Record<string, string> = {
+const SPORT_KEY_BY_NAME: Record<string, SportArtworkKey> = {
   Fútbol: "soccer",
   Básquetbol: "basketball",
   "Tocho bandera": "flag_football",
   Voleibol: "volleyball",
 };
 
-// Laid out around the logo disc in the same order as the logo's quadrants.
-// Volleyball's gold is too light for white, so it uses brand-primary (as in SPORT_BADGE_CLASS).
-const DECOR_SPORTS: { icon: IconName; accent: string; className: string; iconSize: number }[] = [
-  { icon: "sports_basketball", accent: "bg-sport-basketball text-white", className: "left-[8%] top-2 h-24 w-24", iconSize: 40 },
-  { icon: "sports_soccer", accent: "bg-sport-football text-white", className: "right-[10%] top-6 h-20 w-20", iconSize: 32 },
-  { icon: "sports_volleyball", accent: "bg-sport-volleyball text-brand-primary", className: "left-[14%] bottom-4 h-20 w-20", iconSize: 32 },
-  { icon: "sports_tocho", accent: "bg-sport-tocho text-white", className: "right-[6%] bottom-0 h-24 w-24", iconSize: 40 },
+// Laid out around the logo in the same order as its quadrants.
+// The artwork carries its own colors and sits directly on the hero background.
+const DECOR_SPORTS: { sport: SportArtworkKey; className: string; size: number }[] = [
+  { sport: "basketball", className: "left-[8%] top-2 h-24 w-24", size: 92 },
+  { sport: "soccer", className: "right-[10%] top-6 h-20 w-20", size: 76 },
+  { sport: "volleyball", className: "left-[14%] bottom-4 h-20 w-20", size: 76 },
+  { sport: "flag_football", className: "right-[6%] bottom-0 h-24 w-24", size: 92 },
 ];
 
 const FEATURE_ICON_CLASS = ["bg-brand-secondary text-white", "bg-sport-volleyball text-brand-primary", "bg-brand-primary text-white"];
@@ -209,10 +225,10 @@ export default async function Home() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative -mx-4 -mt-8 overflow-hidden rounded-3xl bg-linear-to-br from-brand-primary via-brand-primary to-brand-secondary px-6 py-14 sm:mx-0 sm:-mt-10 sm:px-12 sm:py-20">
+      <section className={`relative -mx-4 -mt-8 overflow-hidden rounded-3xl px-6 py-14 sm:mx-0 sm:-mt-10 sm:px-12 sm:py-20 ${BRAND_HERO_SURFACE}`}>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-secondary/40 blur-3xl"
+          className={BRAND_HERO_GLOW}
         />
         <div className="relative grid items-center gap-10 lg:grid-cols-2">
           <div>
@@ -220,12 +236,17 @@ export default async function Home() {
               Reclutamiento deportivo universitario
             </Badge>
             <h1 className="mt-6 max-w-xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-white sm:text-5xl">
-              Conecta talento estudiantil con oportunidades de reclutamiento universitario.
+              Conectando talento estudiantil con oportunidades de reclutamiento universitario.
             </h1>
             <SportStripe className="mt-6 h-1.5 w-28 rounded-full" />
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/80">
-              Un espacio para que estudiantes deportistas muestren su perfil, postulen a eventos y reciban seguimiento de entrenadores.
-            </p>
+            <div className="mt-6 max-w-lg space-y-3 text-base leading-relaxed text-white/80 sm:text-lg">
+              <p>
+                Un espacio para que estudiantes deportistas muestren su perfil, postulen a eventos y reciban seguimiento de entrenadores.
+              </p>
+              <p>
+                Un espacio para que entrenadores encuentren talento deportivo, publiquen convocatorias y den seguimiento a estudiantes interesados en integrarse a sus equipos.
+              </p>
+            </div>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/auth/login"
@@ -244,15 +265,15 @@ export default async function Home() {
           </div>
 
           <div className="relative hidden h-80 lg:block" aria-hidden="true">
-            <span className="absolute left-1/2 top-1/2 flex h-44 w-44 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-2xl shadow-black/25 ring-8 ring-white/15">
-              <Logo size={112} />
+            <span className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+              <Logo size={150} onDark />
             </span>
             {DECOR_SPORTS.map((s) => (
               <span
-                key={s.icon}
-                className={`absolute flex items-center justify-center rounded-full shadow-xl ring-4 ring-white/20 transition-transform duration-300 hover:-translate-y-1 hover:scale-105 motion-reduce:transform-none ${s.accent} ${s.className}`}
+                key={s.sport}
+                className={`absolute flex items-center justify-center drop-shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:scale-105 motion-reduce:transform-none ${s.className}`}
               >
-                <Icon name={s.icon} size={s.iconSize} />
+                <SportArtwork sport={s.sport} size={s.size} />
               </span>
             ))}
           </div>
@@ -286,22 +307,36 @@ export default async function Home() {
       {/* ── How it works ── */}
       <section id="como-funciona" className="scroll-mt-8">
         <SectionHeading kicker="Proceso" title="Cómo funciona" />
-        <div className="relative mt-10">
-          <div
-            className="absolute left-6 right-6 top-6 hidden border-t-2 border-dashed border-brand-border md:block"
-            aria-hidden="true"
-          />
-          <ol className="relative grid gap-8 md:grid-cols-3">
-            {HOW_IT_WORKS.map((step, i) => (
-              <li key={step.title} className="group flex flex-col items-start gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary font-display text-lg font-bold text-white ring-4 ring-brand-background transition-colors duration-200 group-hover:bg-brand-secondary">
-                  {i + 1}
+        <div className="mt-10 space-y-12">
+          {HOW_IT_WORKS_TRACKS.map((track) => (
+            <div key={track.audience}>
+              <h3 className="flex items-center gap-2.5 font-display text-lg font-semibold text-brand-primary">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-secondary/10 text-brand-secondary">
+                  <Icon name={track.icon} size={20} />
                 </span>
-                <p className="font-display text-lg font-semibold text-brand-primary">{step.title.replace(/^\d+\.\s*/, "")}</p>
-                <p className="text-sm leading-relaxed text-brand-primary/70">{step.description}</p>
-              </li>
-            ))}
-          </ol>
+                {track.audience}
+              </h3>
+              <div className="relative mt-6">
+                <div
+                  className="absolute left-6 right-6 top-6 hidden border-t-2 border-dashed border-brand-border md:block"
+                  aria-hidden="true"
+                />
+                <ol className="relative grid gap-8 md:grid-cols-3">
+                  {track.steps.map((step, i) => (
+                    <li key={step.title} className="group flex flex-col items-start gap-3">
+                      <span
+                        className={`flex h-12 w-12 items-center justify-center rounded-full font-display text-lg font-bold text-white ring-4 ring-brand-background transition-colors duration-200 ${track.numberClass}`}
+                      >
+                        {i + 1}
+                      </span>
+                      <p className="font-display text-lg font-semibold text-brand-primary">{step.title.replace(/^\d+\.\s*/, "")}</p>
+                      <p className="text-sm leading-relaxed text-brand-primary/70">{step.description}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -309,14 +344,19 @@ export default async function Home() {
       <section>
         <SectionHeading kicker="Por qué ScoutLink" title="Pensado para deportistas y entrenadores" />
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-3">
           {SPORTS.map((sport) => (
+            // Artwork inside the badge on a compact white tile (only behind the SVG) so its
+            // colors don't blend into the solid badge. Height stays 28px: py-1 (4px) + 20px
+            // tile + py-1, same as the previous py-1.5 + 16px text line; only the width grows.
             <Badge
               key={sport.name}
               variant="neutral"
-              className={`gap-1.5 px-3 py-1.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 motion-reduce:transform-none ${SPORT_BADGE_CLASS[SPORT_KEY_BY_NAME[sport.name]] ?? ""}`}
+              className={`gap-1.5 py-1 pl-1 pr-3 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 motion-reduce:transform-none ${SPORT_BADGE_CLASS[SPORT_KEY_BY_NAME[sport.name]] ?? ""}`}
             >
-              <Icon name={SPORT_ICON[sport.name] ?? "star"} size={16} />
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] bg-white">
+                <SportArtwork sport={SPORT_KEY_BY_NAME[sport.name]} size={14} />
+              </span>
               {sport.name}
             </Badge>
           ))}
@@ -326,7 +366,7 @@ export default async function Home() {
           {REQUIREMENTS.map((group) => (
             <Card key={group.role}>
               <CardHeader>
-                <CardTitle>Para {group.role.toLowerCase()}s</CardTitle>
+                <CardTitle>Para {group.role}</CardTitle>
                 <CardDescription>Documentación sugerida al registrarte.</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
@@ -338,16 +378,6 @@ export default async function Home() {
                     <div>
                       <p className="font-medium text-brand-primary">{item.label}</p>
                       <p className="text-sm leading-relaxed text-brand-primary/70">{item.description}</p>
-                      {item.link && (
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`mt-1 inline-flex items-center gap-1 rounded text-sm text-brand-secondary underline underline-offset-2 hover:text-brand-primary ${FOCUS_RING}`}
-                        >
-                          Por ejemplo, utiliza Google Drive
-                        </a>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -378,7 +408,8 @@ export default async function Home() {
                     aria-hidden="true"
                     className={`absolute inset-x-0 top-0 h-1.5 ${SPORT_ACCENT[event.sport] ?? "bg-brand-border"}`}
                   />
-                  <CardHeader>
+                  <SportCorner sport={event.sport} />
+                  <CardHeader className="pr-16">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       <Badge variant="info">{TYPE_LABELS[event.type] ?? event.type}</Badge>
                       <Badge variant="neutral" className={SPORT_BADGE_CLASS[event.sport]}>

@@ -69,6 +69,7 @@ export default function RegisterPage() {
 
   return (
     <AuthShell
+      surface="brand"
       back={{ href: "/", label: "Volver al inicio" }}
       title="Crear cuenta"
       description="Registra tu perfil para comenzar a explorar oportunidades."
@@ -127,7 +128,7 @@ export default function RegisterPage() {
             <p className="text-center text-xs text-brand-primary/70">
               Al crear tu cuenta aceptas nuestro{" "}
               <Link
-                href="/aviso-de-privacidad"
+                href="/aviso-de-privacidad?desde=registro"
                 className={`rounded font-medium text-brand-secondary underline underline-offset-2 transition-colors hover:text-brand-primary ${AUTH_FOCUS_RING}`}
               >
                 aviso de privacidad

@@ -80,6 +80,7 @@ export const FIELD_LABELS: Record<string, string> = {
 
   // ── flag football ─────────────────────────────────────────────────────────
   primaryRole: "Rol principal",
+  secondaryRole: "Rol secundario",
   throwingHand: "Mano dominante (lanzamiento)",
   styleSpeed: "Estilo: velocidad",
   styleRoutes: "Estilo: rutas / técnica",
@@ -124,6 +125,10 @@ export const VALUE_LABELS: Record<string, string> = {
   "3": "3 – Alero (SF)",
   "4": "4 – Ala-Pívot (PF)",
   "5": "5 – Pívot (C)",
+  // experience level (soccer / basketball "level" select)
+  beginner: "Principiante",
+  intermediate: "Intermedio",
+  experienced: "Experimentado",
   // basketball / volleyball level
   recreational: "Recreativo",
   competitive: "Competitivo",
@@ -156,4 +161,18 @@ export function labelValue(value: unknown): string {
   if (typeof value === "boolean") return value ? "Sí" : "No";
   const str = String(value);
   return VALUE_LABELS[str] ?? str;
+}
+
+// Only these fields store the numeric basketball position codes ("1"–"5").
+const POSITION_CODE_KEYS = new Set(["primaryPosition", "secondaryPosition"]);
+
+/**
+ * Like `labelValue`, but aware of the field: a purely numeric value (e.g. years
+ * of experience, centimetres) is only read as a basketball position code on the
+ * position fields, instead of every "1"–"5" becoming a position label.
+ */
+export function labelFieldValue(key: string, value: unknown): string {
+  const str = String(value);
+  if (/^\d+$/.test(str) && !POSITION_CODE_KEYS.has(key)) return str;
+  return labelValue(value);
 }

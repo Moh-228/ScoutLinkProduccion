@@ -37,6 +37,13 @@ export default async function DashboardLayout({
         select: { sport: true, status: true },
         orderBy: { sport: "asc" },
       },
+      // Read-only: at most one unread notification, only to know whether the
+      // menu should show the unread dot (no count needed).
+      notifications: {
+        where: { readAt: null },
+        select: { id: true },
+        take: 1,
+      },
     },
   });
 
@@ -86,7 +93,7 @@ export default async function DashboardLayout({
       </header>
       <div className="lg:grid lg:grid-cols-[100px_1fr]">
         <aside className="border-b border-brand-border/60 bg-white px-2 py-2 lg:border-b-0 lg:border-r lg:px-1.5 lg:py-4">
-          <SidebarNav role={user.role} />
+          <SidebarNav role={user.role} hasUnreadNotifications={user.notifications.length > 0} />
         </aside>
         <div className="flex min-h-screen flex-col">
           <Topbar userName={userName} />

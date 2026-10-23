@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
-import { labelField, labelValue } from "@/lib/ficha-labels";
+import { labelField, labelFieldValue } from "@/lib/ficha-labels";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 import { CardVisibilityToggle } from "./_components/CardVisibilityToggle";
@@ -336,7 +336,7 @@ export default async function ProfilePage() {
                         .map(([k, v]) => (
                           <div key={k} className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-[200px_1fr] sm:gap-2">
                             <span className="font-medium text-brand-primary/70">{labelField(k)}</span>
-                            <span className="text-brand-primary">{labelValue(v)}</span>
+                            <span className="text-brand-primary">{labelFieldValue(k, v)}</span>
                           </div>
                         ))}
                     </div>

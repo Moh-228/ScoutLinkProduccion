@@ -163,7 +163,7 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                           {event.type === "recruitment" && app.affinityPercent > 0 && (
                             <AffinityBadge pct={app.affinityPercent} />
                           )}
-                          <ApplicationStatusBadge status={app.status} />
+                          <ApplicationStatusBadge status={app.status} inLink />
                           <span className={buttonClassNames("secondary", "", "sm")}>Gestionar</span>
                         </div>
                       </Link>

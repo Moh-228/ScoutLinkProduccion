@@ -8,6 +8,7 @@ import { Button, buttonClassNames } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { Avatar } from "@/components/Avatar";
 import { Icon, type IconName } from "@/components/Icon";
+import { labelField, labelFieldValue } from "@/lib/ficha-labels";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
 
 // ─── Shared action button ─────────────────────────────────────────────────────
@@ -393,11 +394,11 @@ export function SpecializedCardRow({ card }: { card: SpecializedCard }) {
           {dataEntries.length === 0 ? (
             <p className="text-xs text-brand-primary/70">Sin datos registrados.</p>
           ) : (
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
               {dataEntries.map(([k, v]) => (
-                <div key={k} className="flex justify-between text-xs">
-                  <span className="text-brand-primary/70 capitalize">{k.replace(/_/g, " ")}</span>
-                  <span className="text-brand-primary font-medium">{String(v ?? "—")}</span>
+                <div key={k} className="flex justify-between gap-3 text-xs">
+                  <span className="text-brand-primary/70">{labelField(k)}</span>
+                  <span className="text-right font-medium text-brand-primary">{v == null ? "—" : labelFieldValue(k, v)}</span>
                 </div>
               ))}
             </div>
