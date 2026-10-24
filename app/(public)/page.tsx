@@ -133,10 +133,10 @@ const SPORT_KEY_BY_NAME: Record<string, SportArtworkKey> = {
 // Laid out around the logo in the same order as its quadrants.
 // The artwork carries its own colors and sits directly on the hero background.
 const DECOR_SPORTS: { sport: SportArtworkKey; className: string; size: number }[] = [
-  { sport: "basketball", className: "left-[8%] top-2 h-24 w-24", size: 92 },
-  { sport: "soccer", className: "right-[10%] top-6 h-20 w-20", size: 76 },
-  { sport: "volleyball", className: "left-[14%] bottom-4 h-20 w-20", size: 76 },
-  { sport: "flag_football", className: "right-[6%] bottom-0 h-24 w-24", size: 92 },
+  { sport: "basketball", className: "left-[6%] top-0 h-32 w-32", size: 124 },
+  { sport: "soccer", className: "right-[8%] top-4 h-28 w-28", size: 108 },
+  { sport: "volleyball", className: "left-[12%] bottom-4 h-28 w-28", size: 108 },
+  { sport: "flag_football", className: "right-[4%] bottom-0 h-32 w-32", size: 124 },
 ];
 
 const FEATURE_ICON_CLASS = ["bg-brand-secondary text-white", "bg-sport-volleyball text-brand-primary", "bg-brand-primary text-white"];
@@ -232,13 +232,10 @@ export default async function Home() {
         />
         <div className="relative grid items-center gap-10 lg:grid-cols-2">
           <div>
-            <Badge variant="info" className="border-white/30 bg-white/15 text-white">
-              Reclutamiento deportivo universitario
-            </Badge>
-            <h1 className="mt-6 max-w-xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-white sm:text-5xl">
+            <h1 className="max-w-2xl font-display text-5xl font-bold leading-[1.08] tracking-tight text-balance text-white sm:text-6xl">
               Conectando talento estudiantil con oportunidades de reclutamiento universitario.
             </h1>
-            <SportStripe className="mt-6 h-1.5 w-28 rounded-full" />
+            <SportStripe className="mt-8 h-2.5 w-48 rounded-full" />
             <div className="mt-6 max-w-lg space-y-3 text-base leading-relaxed text-white/80 sm:text-lg">
               <p>
                 Un espacio para que estudiantes deportistas muestren su perfil, postulen a eventos y reciban seguimiento de entrenadores.
@@ -264,9 +261,9 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative hidden h-80 lg:block" aria-hidden="true">
+          <div className="relative hidden h-[28rem] lg:block" aria-hidden="true">
             <span className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-              <Logo size={150} onDark />
+              <Logo size={200} onDark />
             </span>
             {DECOR_SPORTS.map((s) => (
               <span

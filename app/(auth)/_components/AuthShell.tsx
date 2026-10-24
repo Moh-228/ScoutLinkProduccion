@@ -82,6 +82,8 @@ type AuthShellProps = {
    * "light" (default) = single centered card on the page background.
    */
   surface?: AuthTone;
+  /** Brand panel only: drops the kicker and enlarges the logo, name, message and stripe. */
+  large?: boolean;
 };
 
 /** Extra classes for the full-width submit `Button` (only adds width + shadow; no conflict with its variant classes). */
@@ -122,7 +124,7 @@ const PANEL_SPORTS: { sport: "soccer" | "basketball" | "volleyball" | "flag_foot
 ];
 
 /** Shared presentation for auth forms. */
-export function AuthShell({ back, title, description, children, footer, surface = "light" }: AuthShellProps) {
+export function AuthShell({ back, title, description, children, footer, surface = "light", large = false }: AuthShellProps) {
   if (surface === "brand") {
     // Login/register as a continuation of the landing page: page background with a
     // rounded hero-style identity block (same gradient, kicker, logo + sports visual,
@@ -157,26 +159,31 @@ export function AuthShell({ back, title, description, children, footer, surface 
 
             {/* Desktop: kicker → logo + sports visual → name, message, stripe */}
             <div className="relative hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center">
-              <span className="inline-flex w-fit items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                Reclutamiento deportivo universitario
-              </span>
+              {large ? null : (
+                <span className="inline-flex w-fit items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                  Reclutamiento deportivo universitario
+                </span>
+              )}
 
-              <div className="relative mx-auto mt-8 h-64 w-full max-w-md" aria-hidden="true">
+              <div
+                className={`relative mx-auto w-full ${large ? "mt-6 h-96 max-w-lg" : "mt-8 h-64 max-w-md"}`}
+                aria-hidden="true"
+              >
                 <span className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-                  <Logo size={124} onDark />
+                  <Logo size={large ? 176 : 124} onDark />
                 </span>
                 {PANEL_DECOR.map((s) => (
                   <span key={s.sport} className={`absolute flex items-center justify-center drop-shadow-lg ${s.className}`}>
-                    <SportArtwork sport={s.sport} size={s.size} />
+                    <SportArtwork sport={s.sport} size={large ? Math.round(s.size * 1.4) : s.size} />
                   </span>
                 ))}
               </div>
 
-              <Link href="/" className={`mt-8 w-fit rounded-xl ${AUTH_FOCUS_RING_ON_BRAND}`}>
-                <span className="font-display text-5xl font-bold tracking-tight text-white">ScoutLink</span>
+              <Link href="/" className={`${large ? "mt-6" : "mt-8"} w-fit rounded-xl ${AUTH_FOCUS_RING_ON_BRAND}`}>
+                <span className={`font-display font-bold tracking-tight text-white ${large ? "text-6xl" : "text-5xl"}`}>ScoutLink</span>
               </Link>
-              <p className="mt-3 max-w-md text-lg leading-relaxed text-white/80">{BRAND_MESSAGE}</p>
-              <SportStripe className="mt-6 h-1.5 w-28 rounded-full" />
+              <p className={`mt-3 max-w-md leading-relaxed text-white/80 ${large ? "text-2xl" : "text-lg"}`}>{BRAND_MESSAGE}</p>
+              <SportStripe className={`mt-6 rounded-full ${large ? "h-2.5 w-48" : "h-1.5 w-28"}`} />
             </div>
           </aside>
 

@@ -94,6 +94,7 @@ export default function LoginPage() {
   return (
     <AuthShell
       surface="brand"
+      large
       back={{ href: "/", label: "Volver al inicio" }}
       title="Iniciar sesión"
       description="Accede a tu panel de reclutamiento deportivo."

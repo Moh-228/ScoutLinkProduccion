@@ -70,6 +70,7 @@ export default function RegisterPage() {
   return (
     <AuthShell
       surface="brand"
+      large
       back={{ href: "/", label: "Volver al inicio" }}
       title="Crear cuenta"
       description="Registra tu perfil para comenzar a explorar oportunidades."
