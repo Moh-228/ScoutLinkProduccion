@@ -9,40 +9,28 @@ import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { AffinitySortToggle } from "./_components/AffinitySortToggle";
+import { findEventIds, findUserIds } from "@/lib/search";
 
 function fmt(d: Date | null | undefined) {
   if (!d) return "—";
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" }).format(new Date(d));
 }
 
-function AffinityBadge({ pct }: { pct: number }) {
-  const color =
-    pct >= 70 ? "text-emerald-800 border-emerald-300 bg-emerald-100"
-    : pct >= 40 ? "text-amber-800 border-amber-300 bg-amber-100"
-    : "text-brand-primary/70 border-brand-border bg-brand-background";
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full border-2 px-3 py-1 font-display text-base font-extrabold ${color}`}>
-      {pct}%
-    </span>
-  );
-}
-
-type Props = { searchParams: Promise<{ sort?: string; q?: string }> };
+type Props = { searchParams: Promise<{ q?: string }> };
 
 export default async function ApplicationsPage({ searchParams }: Props) {
   const session = await verifySession();
   if (!session) redirect("/auth/login");
 
-  const { sort, q } = await searchParams;
-  const sortByAffinity = sort === "affinity";
+  const { q } = await searchParams;
 
   // Students see their own applications; coaches see applications to their events
   if (session.role === "student") {
+    const titleIds = q ? await findEventIds(q, ["title"]) : null;
     const applications = await prisma.eventApplication.findMany({
       where: {
         studentId: session.userId,
-        ...(q ? { event: { title: { contains: q, mode: "insensitive" } } } : {}),
+        ...(titleIds ? { eventId: { in: titleIds } } : {}),
       },
       orderBy: { createdAt: "desc" },
       include: { event: { select: { id: true, title: true, type: true, startAt: true } } },
@@ -83,43 +71,39 @@ export default async function ApplicationsPage({ searchParams }: Props) {
   }
 
   // Coach: see applicants per event
+  const titleIds = q ? await findEventIds(q, ["title"]) : [];
+  const applicantIds = q ? await findUserIds(q, ["fullName"]) : [];
   const events = await prisma.event.findMany({
     where: {
       coachId: session.userId,
       ...(q
         ? {
             OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              {
-                applications: {
-                  some: { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" } } } },
-                },
-              },
+              { id: { in: titleIds } },
+              { applications: { some: { studentId: { in: applicantIds } } } },
             ],
           }
         : {}),
     },
     orderBy: { createdAt: "desc" },
     include: {
-      applications: {
-        include: {
-          student: { select: { studentProfile: { select: { fullName: true } } } },
-        },
-        orderBy: sortByAffinity
-          ? { affinityPercent: "desc" }
-          : { createdAt: "desc" },
-      },
+      applications: { select: { status: true } },
     },
   });
-
-  const hasRecruitmentEvents = events.some((e) => e.type === "recruitment");
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Postulaciones a mis eventos"
         description="Gestiona los candidatos de cada evento."
-        actions={hasRecruitmentEvents && <AffinitySortToggle active={sortByAffinity} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <a href="/api/coach/applications/csv" className={buttonClassNames("secondary", "gap-2", "sm")}>
+              <Icon name="add_link" size={14} />
+              Descargar CSV de todos
+            </a>
+          </div>
+        }
       />
       {events.length === 0 ? (
         <EmptyState title="No has creado eventos aún." icon="calendar" />
@@ -128,14 +112,23 @@ export default async function ApplicationsPage({ searchParams }: Props) {
           {events.map((event) => (
             <Card key={event.id} className="mx-auto w-full max-w-2xl">
               <CardHeader>
-                <CardTitle>
-                  <Link
-                    href={`/dashboard/events/${event.id}`}
-                    className="rounded hover:text-brand-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <CardTitle>
+                    <Link
+                      href={`/dashboard/events/${event.id}`}
+                      className="rounded hover:text-brand-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
+                    >
+                      {event.title}
+                    </Link>
+                  </CardTitle>
+                  <a
+                    href={`/api/coach/applications/csv?eventId=${event.id}`}
+                    className={buttonClassNames("secondary", "gap-2", "sm")}
                   >
-                    {event.title}
-                  </Link>
-                </CardTitle>
+                    <Icon name="add_link" size={14} />
+                    Descargar CSV
+                  </a>
+                </div>
               </CardHeader>
               {event.applications.length > 0 && (
                 <div className="-mt-2 flex flex-wrap gap-3 text-xs text-brand-primary/70">
@@ -145,31 +138,15 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                   <span>Descartado: <strong className="text-brand-primary">{event.applications.filter((a) => a.status === "rechazado").length}</strong></span>
                 </div>
               )}
-              <CardContent>
-                {event.applications.length === 0 ? (
-                  <EmptyState size="compact" icon="person_check" title="Sin postulaciones." />
-                ) : (
-                  <div className="space-y-2">
-                    {event.applications.map((app) => (
-                      <Link
-                        key={app.id}
-                        href={`/dashboard/applications/${app.id}`}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
-                      >
-                        <span className="text-brand-primary">
-                          {app.student.studentProfile?.fullName ?? "Estudiante"}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {event.type === "recruitment" && app.affinityPercent > 0 && (
-                            <AffinityBadge pct={app.affinityPercent} />
-                          )}
-                          <ApplicationStatusBadge status={app.status} inLink />
-                          <span className={buttonClassNames("secondary", "", "sm")}>Gestionar</span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+              <CardContent className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-brand-primary/70">
+                  {event.applications.length === 0
+                    ? "Sin postulaciones."
+                    : `${event.applications.length} ${event.applications.length === 1 ? "postulación" : "postulaciones"}`}
+                </p>
+                <Link href={`/dashboard/applications/event/${event.id}`} className={buttonClassNames("secondary", "", "sm")}>
+                  Ver detalles
+                </Link>
               </CardContent>
             </Card>
           ))}

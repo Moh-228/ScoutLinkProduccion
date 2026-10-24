@@ -40,13 +40,15 @@ const SEARCH_PLACEHOLDERS: Record<string, string> = {
   "/dashboard": "Buscar por título, ubicación o entrenador",
   "/dashboard/events": "Buscar por título, ubicación o entrenador",
   "/dashboard/applications": "Buscar por evento o nombre",
-  "/dashboard/fichas": "Buscar por deporte o posición",
-  "/dashboard/favorites": "Buscar en tus favoritos",
+  "/dashboard/fichas": "Buscar por nombre, deporte o posición",
+  "/dashboard/favorites": "Buscar por título, ubicación, nombre o deporte",
   "/dashboard/admin": "Buscar por entrenador o correo",
   "/dashboard/admin/usuarios": "Buscar por nombre o correo",
   "/dashboard/admin/fichas": "Buscar por nombre, correo o evento",
   "/dashboard/admin/eventos": "Buscar por título o entrenador",
 };
+
+const NO_SEARCH_PATHS = ["/dashboard/profile", "/dashboard/notifications"];
 
 export function Topbar({ userName }: TopbarProps) {
   const [open, setOpen] = useState(false);
@@ -85,6 +87,9 @@ export function Topbar({ userName }: TopbarProps) {
   // associated to that same form via the `form` attribute (below) so one
   // submit carries q + sport/type together — it stays physically in its
   // current spot on the left, not nested inside the filters form on the right.
+  // Pages with nothing to search have no search box at all.
+  const hasSearchBox = !NO_SEARCH_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
   const searchInput = (
     <>
       <Icon
@@ -115,7 +120,9 @@ export function Topbar({ userName }: TopbarProps) {
 
   return (
     <header className="flex flex-col gap-3 border-b border-brand-border/60 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-      {isSearchable && !hasSportTypeFilters ? (
+      {!hasSearchBox ? (
+        <div aria-hidden="true" className="hidden sm:block" />
+      ) : isSearchable && !hasSportTypeFilters ? (
         <form key={pathname} method="GET" action={pathname} className="relative w-full sm:max-w-sm">
           {searchInput}
         </form>

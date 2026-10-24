@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { Badge } from "@/components/Badge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
@@ -9,6 +8,7 @@ import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
+import { findEventIds } from "@/lib/search";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS } from "@/lib/sport-colors";
 import { ReopenEventButton } from "./_components/ReopenEventButton";
@@ -45,14 +45,8 @@ export default async function AdminEventsPage({ searchParams }: Props) {
   const { q, page: pageRaw } = await searchParams;
   const page = parsePage(pageRaw);
 
-  const where = q
-    ? {
-        OR: [
-          { title: { contains: q, mode: "insensitive" as const } },
-          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
-        ],
-      }
-    : {};
+  const matchingIds = q ? await findEventIds(q, ["title", "coachName"]) : null;
+  const where = matchingIds ? { id: { in: matchingIds } } : {};
 
   const [totalEvents, events] = await Promise.all([
     prisma.event.count({ where }),
@@ -62,12 +56,7 @@ export default async function AdminEventsPage({ searchParams }: Props) {
       include: {
         coach: { select: { coachProfile: { select: { displayName: true } } } },
         applications: {
-          select: {
-            id: true,
-            status: true,
-            student: { select: { studentProfile: { select: { fullName: true } } } },
-          },
-          orderBy: { createdAt: "desc" },
+          select: { status: true },
         },
       },
       ...getPagination(page),
@@ -79,6 +68,12 @@ export default async function AdminEventsPage({ searchParams }: Props) {
       <PageHeader
         title="Convocatorias"
         description="Eventos registrados por todos los entrenadores, con estado y postulantes por categoría."
+        actions={
+          <a href="/api/admin/events/csv" className={buttonClassNames("secondary", "gap-2", "sm")}>
+            <Icon name="add_link" size={14} />
+            Descargar CSV de eventos
+          </a>
+        }
       />
 
       {events.length === 0 ? (
@@ -139,21 +134,11 @@ export default async function AdminEventsPage({ searchParams }: Props) {
                     ))}
                   </div>
 
-                  {event.applications.length > 0 && (
-                    <div className="space-y-1.5 border-t border-brand-border/50 pt-3">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-brand-primary/70">Postulantes</p>
-                      {event.applications.map((app) => (
-                        <Link
-                          key={app.id}
-                          href={`/dashboard/applications/${app.id}`}
-                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-brand-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction"
-                        >
-                          <span className="text-brand-primary">{app.student.studentProfile?.fullName ?? "Estudiante"}</span>
-                          <ApplicationStatusBadge status={app.status} inLink />
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex justify-end">
+                    <Link href={`/dashboard/applications/event/${event.id}`} className={buttonClassNames("secondary", "", "sm")}>
+                      Ver detalles
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             );

@@ -11,8 +11,9 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
-import { studentMatchesSportOrPosition } from "@/lib/ficha-search";
+import { studentMatchesSportOrPosition, textMatches } from "@/lib/ficha-search";
 import { prisma } from "@/lib/prisma";
+import { findEventIds } from "@/lib/search";
 import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS, SPORT_SOFT_BUTTON_CLASS } from "@/lib/sport-colors";
 
 const SPORT_LABELS: Record<string, string> = {
@@ -51,20 +52,13 @@ export default async function FavoritesPage({ searchParams }: Props) {
   const eventIds = allFavorites.filter((f) => f.targetType === "event").map((f) => f.targetId);
   const fichaIds = allFavorites.filter((f) => f.targetType === "ficha").map((f) => f.targetId);
 
+  const matchingEventIds = q ? await findEventIds(q, ["title", "locationText"]) : null;
+  const visibleEventIds = matchingEventIds ? eventIds.filter((id) => matchingEventIds.includes(id)) : eventIds;
+
   const [events, fichasRaw] = await Promise.all([
-    eventIds.length > 0
+    visibleEventIds.length > 0
       ? prisma.event.findMany({
-          where: {
-            id: { in: eventIds },
-            ...(q
-              ? {
-                  OR: [
-                    { title: { contains: q, mode: "insensitive" } },
-                    { locationText: { contains: q, mode: "insensitive" } },
-                  ],
-                }
-              : {}),
-          },
+          where: { id: { in: visibleEventIds } },
           include: {
             coach: { select: { coachProfile: { select: { displayName: true } } } },
           },
@@ -88,10 +82,11 @@ export default async function FavoritesPage({ searchParams }: Props) {
       : Promise.resolve([]),
   ]);
 
-  // Favorite athlete cards search by sport/position, same as the Fichas page
-  // — not by name.
+  // Favorite athlete cards search by name, school, sport or position, same as
+  // the Fichas page.
   const fichas = q
     ? fichasRaw.filter((card) =>
+        textMatches(q, [card.student.studentProfile?.fullName, card.student.studentProfile?.school]) ||
         studentMatchesSportOrPosition(
           q,
           card.student.studentProfile?.favoriteSport,
@@ -107,7 +102,7 @@ export default async function FavoritesPage({ searchParams }: Props) {
       <PageHeader title="Favoritos" description="Eventos y fichas que marcaste como favoritos." />
 
       {!hasAny ? (
-        <EmptyState title="No tienes favoritos aún." icon="star" />
+        <EmptyState title={q ? "No hay favoritos que coincidan con tu búsqueda." : "No tienes favoritos aún."} icon="star" />
       ) : (
         <>
           {events.length > 0 && (

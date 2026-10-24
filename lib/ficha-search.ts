@@ -11,8 +11,9 @@ const SPORT_SEARCH_ALIASES: Record<Sport, string[]> = {
   flag_football: ["flag_football", "flag football", "tocho", "tocho bandera"],
 };
 
-function normalize(value: string): string {
-  return value.trim().toLowerCase();
+/** Lowercase without accents, so "Fútbol" and "futbol" compare equal. */
+export function normalize(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
 }
 
 /** Sport enum values whose key or Spanish alias matches the query. */
@@ -20,7 +21,10 @@ export function matchSports(q: string): Sport[] {
   const needle = normalize(q);
   if (!needle) return [];
   return (Object.keys(SPORT_SEARCH_ALIASES) as Sport[]).filter((sport) =>
-    SPORT_SEARCH_ALIASES[sport].some((alias) => alias.includes(needle) || needle.includes(alias)),
+    SPORT_SEARCH_ALIASES[sport].some((alias) => {
+      const normalized = normalize(alias);
+      return normalized.includes(needle) || needle.includes(normalized);
+    }),
   );
 }
 
@@ -40,7 +44,7 @@ function matchPositionCodes(q: string): Partial<Record<Sport, string[]>> {
     const field = SPORT_CHARACTERISTICS[sport][0];
     if (!field || field.type !== "select") continue;
     const codes = field.options
-      .filter((o) => o.value && (o.value.toLowerCase() === needle || o.label.toLowerCase().includes(needle)))
+      .filter((o) => o.value && (normalize(o.value) === needle || normalize(o.label).includes(needle)))
       .map((o) => o.value);
     if (codes.length > 0) result[sport] = codes;
   }
@@ -48,6 +52,12 @@ function matchPositionCodes(q: string): Partial<Record<Sport, string[]>> {
 }
 
 type SpecializedCardLike = { sport: Sport; data: unknown };
+
+/** Whether any of `texts` contains the query, ignoring case and accents. */
+export function textMatches(q: string, texts: (string | null | undefined)[]): boolean {
+  const needle = normalize(q);
+  return !needle || texts.some((t) => t && normalize(t).includes(needle));
+}
 
 /**
  * Whether a student matches a "sport or playing position" search query,

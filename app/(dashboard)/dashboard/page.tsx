@@ -6,6 +6,7 @@ import { Icon, type IconName } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { EVENT_TEXT_FIELDS, findEventIds } from "@/lib/search";
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
@@ -13,22 +14,14 @@ export default async function Dashboard({ searchParams }: Props) {
   const session = await verifySession();
   const { q } = await searchParams;
 
+  const matchingIds = q ? await findEventIds(q, EVENT_TEXT_FIELDS) : null;
+
   const [openEvents, recentEvents] = await Promise.all([
     prisma.event.count({ where: { status: "open" } }),
     prisma.event.findMany({
       where: {
         status: "open",
-        ...(q
-          ? {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { shortDescription: { contains: q, mode: "insensitive" } },
-                { longDescription: { contains: q, mode: "insensitive" } },
-                { locationText: { contains: q, mode: "insensitive" } },
-                { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" } } } },
-              ],
-            }
-          : {}),
+        ...(matchingIds ? { id: { in: matchingIds } } : {}),
       },
       orderBy: { createdAt: "desc" },
       take: 4,

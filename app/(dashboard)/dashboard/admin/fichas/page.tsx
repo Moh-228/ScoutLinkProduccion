@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { matchSports } from "@/lib/ficha-search";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
+import { findEventIds, findUserIds } from "@/lib/search";
 import { GeneralCardRow, SpecializedCardRow, EventRow, CoachProfileRow } from "../_components/FichaRows";
 
 type Props = {
@@ -31,30 +32,23 @@ export default async function AdminFichasPage({ searchParams }: Props) {
   const pageEvents = parsePage(pageEventsRaw);
   const pageCoaches = parsePage(pageCoachesRaw);
 
-  const generalWhere = q
+  const [studentIdsByName, studentIdsByNameOrEmail, eventIds] = q
+    ? await Promise.all([
+        findUserIds(q, ["fullName"]),
+        findUserIds(q, ["fullName", "email"]),
+        findEventIds(q, ["title", "coachName"]),
+      ])
+    : [null, null, null];
+  const generalWhere = studentIdsByNameOrEmail ? { studentId: { in: studentIdsByNameOrEmail } } : {};
+  const specializedWhere = studentIdsByName
     ? {
         OR: [
-          { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" as const } } } },
-          { student: { email: { contains: q, mode: "insensitive" as const } } },
-        ],
-      }
-    : {};
-  const specializedWhere = q
-    ? {
-        OR: [
-          { student: { studentProfile: { fullName: { contains: q, mode: "insensitive" as const } } } },
+          { studentId: { in: studentIdsByName } },
           ...(matchedSports.length > 0 ? [{ sport: { in: matchedSports } }] : []),
         ],
       }
     : {};
-  const eventsWhere = q
-    ? {
-        OR: [
-          { title: { contains: q, mode: "insensitive" as const } },
-          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
-        ],
-      }
-    : {};
+  const eventsWhere = eventIds ? { id: { in: eventIds } } : {};
 
   const [
     generalCount,

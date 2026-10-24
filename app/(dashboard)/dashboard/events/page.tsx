@@ -9,6 +9,7 @@ import { Pagination } from "@/components/Pagination";
 import { verifySession } from "@/lib/auth";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
+import { EVENT_TEXT_FIELDS, findEventIds } from "@/lib/search";
 
 type Props = { searchParams: Promise<{ sport?: string; type?: string; q?: string; page?: string }> };
 
@@ -18,20 +19,12 @@ export default async function EventsPage({ searchParams }: Props) {
   const { sport, type, q, page: pageRaw } = await searchParams;
   const page = parsePage(pageRaw);
 
+  const matchingIds = q ? await findEventIds(q, EVENT_TEXT_FIELDS) : null;
+
   const where = {
     ...(sport && sport !== "all" ? { sport: sport as never } : {}),
     ...(type && type !== "all" ? { type: type as never } : {}),
-    ...(q
-      ? {
-          OR: [
-            { title: { contains: q, mode: "insensitive" as const } },
-            { shortDescription: { contains: q, mode: "insensitive" as const } },
-            { longDescription: { contains: q, mode: "insensitive" as const } },
-            { locationText: { contains: q, mode: "insensitive" as const } },
-            { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
-          ],
-        }
-      : {}),
+    ...(matchingIds ? { id: { in: matchingIds } } : {}),
   };
 
   const [totalEvents, events] = await Promise.all([

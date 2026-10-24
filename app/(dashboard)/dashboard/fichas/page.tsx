@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHeader } from "@/components/PageHeader";
 import { verifySession } from "@/lib/auth";
-import { studentMatchesSportOrPosition } from "@/lib/ficha-search";
+import { studentMatchesSportOrPosition, textMatches } from "@/lib/ficha-search";
 import { prisma } from "@/lib/prisma";
 import { SPORT_BADGE_CLASS, SPORT_DOT_CLASS, SPORT_SOFT_BUTTON_CLASS } from "@/lib/sport-colors";
 
@@ -63,10 +63,10 @@ export default async function FichasPage({ searchParams }: Props) {
     },
   });
 
-  // Search box intentionally searches sport + playing position, not the
-  // athlete's name (see Topbar placeholder for this page).
+  // Search box matches the athlete's name or school, or their sport / playing position.
   const visibleCards = q
     ? cards.filter((card) =>
+        textMatches(q, [card.student.studentProfile?.fullName, card.student.studentProfile?.school]) ||
         studentMatchesSportOrPosition(
           q,
           card.student.studentProfile?.favoriteSport,

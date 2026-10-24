@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { findUserIds } from "@/lib/search";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
@@ -10,14 +11,8 @@ type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 export default async function AdminPage({ searchParams }: Props) {
   const { q, page: pageRaw } = await searchParams;
   const page = parsePage(pageRaw);
-  const where = q
-    ? {
-        OR: [
-          { coach: { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } } },
-          { coach: { email: { contains: q, mode: "insensitive" as const } } },
-        ],
-      }
-    : {};
+  const coachIds = q ? await findUserIds(q, ["displayName", "email"]) : null;
+  const where = coachIds ? { coachId: { in: coachIds } } : {};
 
   const [userCount, activeEvents, closedEvents, pendingVerifCount, totalVerifications, verifications] = await Promise.all([
     prisma.user.count(),

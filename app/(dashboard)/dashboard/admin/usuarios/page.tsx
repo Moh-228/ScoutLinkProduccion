@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { Pagination } from "@/components/Pagination";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
+import { findUserIds } from "@/lib/search";
 import { UserRow } from "../_components/UserRow";
 
 type Props = { searchParams: Promise<{ q?: string; pageCoaches?: string; pageStudents?: string }> };
@@ -24,15 +25,8 @@ export default async function AdminUsuariosPage({ searchParams }: Props) {
   const pageCoaches = parsePage(pageCoachesRaw);
   const pageStudents = parsePage(pageStudentsRaw);
 
-  const searchWhere = q
-    ? {
-        OR: [
-          { email: { contains: q, mode: "insensitive" as const } },
-          { studentProfile: { fullName: { contains: q, mode: "insensitive" as const } } },
-          { coachProfile: { displayName: { contains: q, mode: "insensitive" as const } } },
-        ],
-      }
-    : {};
+  const matchingUserIds = q ? await findUserIds(q, ["email", "fullName", "displayName"]) : null;
+  const searchWhere = matchingUserIds ? { id: { in: matchingUserIds } } : {};
 
   const [coachCount, studentCount, coaches, students] = await Promise.all([
     prisma.user.count({ where: { role: "coach", ...searchWhere } }),
