@@ -96,9 +96,47 @@ export const studentGeneralCardSchema = z.object({
 		.optional(),
 });
 
+// Límites de caracteres por campo de texto de las fichas deportivas.
+export const SPECIALIZED_TEXT_LIMITS: Record<string, number> = {
+	teamworkPressure: 300,
+	expectations: 300,
+	previousClubs: 300,
+	scouting: 300,
+	teamsLeagues: 300,
+	achievements: 500,
+	currentClubName: 120,
+	currentClubCity: 120,
+	currentClubCoach: 120,
+	categories: 120,
+	role: 120,
+	primarySubrole: 120,
+	secondarySubrole: 120,
+	tackleExp: 120,
+};
+export const SPECIALIZED_DEFAULT_TEXT_LIMIT = 500;
+
+export function specializedTextLimit(field: string): number {
+	return SPECIALIZED_TEXT_LIMITS[field] ?? SPECIALIZED_DEFAULT_TEXT_LIMIT;
+}
+
 export const studentSpecializedCardSchema = z.object({
 	sport: sportEnum,
-	data: z.record(z.string(), z.unknown()).default({}),
+	data: z
+		.record(z.string(), z.unknown())
+		.default({})
+		.superRefine((data, ctx) => {
+			for (const [key, value] of Object.entries(data)) {
+				if (typeof value !== "string") continue;
+				const max = specializedTextLimit(key);
+				if (value.length > max) {
+					ctx.addIssue({
+						code: "custom",
+						message: `Máximo ${max} caracteres.`,
+						path: [key],
+					});
+				}
+			}
+		}),
 });
 
 export const coachProfileSchema = z.object({

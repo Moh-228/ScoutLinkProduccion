@@ -9,6 +9,7 @@ import { Alert } from "@/components/Alert";
 import { Card, CardContent } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
+import { specializedTextLimit } from "@/lib/validations";
 
 const SPORT_OPTIONS = [
   { label: "Selecciona un deporte", value: "" },
@@ -76,6 +77,8 @@ function TextArea({
   rows?: number;
   defaultValue?: string;
 }) {
+  const max = specializedTextLimit(name);
+  const [count, setCount] = useState((defaultValue ?? "").length);
   return (
     <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-primary">
       <span>{label}</span>
@@ -84,8 +87,13 @@ function TextArea({
         rows={rows}
         placeholder={placeholder}
         defaultValue={defaultValue}
+        maxLength={max}
+        onChange={(e) => setCount(e.target.value.length)}
         className={TA_CLASS}
       />
+      <span className="self-end text-xs font-normal text-brand-primary/70">
+        {count}/{max}
+      </span>
     </label>
   );
 }
@@ -148,11 +156,11 @@ function SoccerForm({ defaults }: { defaults: Defaults }) {
       <SectionTitle>Perfil técnico</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
         <Select id="sp-prim-pos" name="primaryPosition" label="Posición principal" options={SOCCER_POS} defaultValue={dv(defaults, "primaryPosition")} />
-        <Input id="sp-prim-sub" name="primarySubrole" label="Subrol prim." placeholder="Ej: Pivote, Extremo..." defaultValue={dv(defaults, "primarySubrole")} />
+        <Input id="sp-prim-sub" name="primarySubrole" maxLength={specializedTextLimit("primarySubrole")} label="Subrol prim." placeholder="Ej: Pivote, Extremo..." defaultValue={dv(defaults, "primarySubrole")} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Select id="sp-sec-pos" name="secondaryPosition" label="Posición secundaria" options={SOCCER_POS} defaultValue={dv(defaults, "secondaryPosition")} />
-        <Input id="sp-sec-sub" name="secondarySubrole" label="Subrol sec." placeholder="Ej: Pivote, Extremo..." defaultValue={dv(defaults, "secondarySubrole")} />
+        <Input id="sp-sec-sub" name="secondarySubrole" maxLength={specializedTextLimit("secondarySubrole")} label="Subrol sec." placeholder="Ej: Pivote, Extremo..." defaultValue={dv(defaults, "secondarySubrole")} />
       </div>
       <Select id="sp-foot" name="dominantFoot" label="Pierna dominante" options={FOOT_OPTIONS} defaultValue={dv(defaults, "dominantFoot")} />
       <div className="space-y-2">
@@ -173,10 +181,10 @@ function SoccerForm({ defaults }: { defaults: Defaults }) {
 
       <SectionTitle>Experiencia</SectionTitle>
       <Input id="sp-soc-years" name="yearsExp" type="number" min={0} max={30} label="Años de experiencia" placeholder="3" defaultValue={dv(defaults, "yearsExp")} />
-      <Input id="sp-club" name="currentClubName" label="Club actual" placeholder="Nombre del club..." defaultValue={dv(defaults, "currentClubName")} />
+      <Input id="sp-club" name="currentClubName" maxLength={specializedTextLimit("currentClubName")} label="Club actual" placeholder="Nombre del club..." defaultValue={dv(defaults, "currentClubName")} />
       <div className="grid grid-cols-2 gap-3">
-        <Input id="sp-club-city" name="currentClubCity" label="Ciudad" placeholder="Ciudad..." defaultValue={dv(defaults, "currentClubCity")} />
-        <Input id="sp-club-coach" name="currentClubCoach" label="Entrenador" placeholder="Nombre..." defaultValue={dv(defaults, "currentClubCoach")} />
+        <Input id="sp-club-city" name="currentClubCity" maxLength={specializedTextLimit("currentClubCity")} label="Ciudad" placeholder="Ciudad..." defaultValue={dv(defaults, "currentClubCity")} />
+        <Input id="sp-club-coach" name="currentClubCoach" maxLength={specializedTextLimit("currentClubCoach")} label="Entrenador" placeholder="Nombre..." defaultValue={dv(defaults, "currentClubCoach")} />
       </div>
       <TextArea
         name="previousClubs"
@@ -186,7 +194,7 @@ function SoccerForm({ defaults }: { defaults: Defaults }) {
         defaultValue={dv(defaults, "previousClubs")}
       />
       <Select id="sp-soc-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} defaultValue={dv(defaults, "level")} />
-      <Input id="sp-cats" name="categories" label="Categorias / ligas" placeholder="Sub-20, liga municipal..." defaultValue={dv(defaults, "categories")} />
+      <Input id="sp-cats" name="categories" maxLength={specializedTextLimit("categories")} label="Categorias / ligas" placeholder="Sub-20, liga municipal..." defaultValue={dv(defaults, "categories")} />
       <TextArea name="achievements" label="Logros" placeholder="Títulos, reconocimientos..." defaultValue={dv(defaults, "achievements")} />
       <TextArea name="scouting" label="Visorías" placeholder="Dónde y cuándo fuiste visto por cazatalentos..." defaultValue={dv(defaults, "scouting")} />
     </>
@@ -285,7 +293,7 @@ function VolleyballForm({ defaults }: { defaults: Defaults }) {
         <Select id="sp-vb-hand-atk" name="dominantHandAttack" label="Mano dom. (ataque)" options={HAND_OPTS} defaultValue={dv(defaults, "dominantHandAttack")} />
         <Select id="sp-vb-hand-srv" name="dominantHandServe" label="Mano dom. (saque)" options={HAND_OPTS} defaultValue={dv(defaults, "dominantHandServe")} />
       </div>
-      <Input id="sp-vb-role" name="role" label="Rol en el equipo" placeholder="Titular, suplente, capitán..." defaultValue={dv(defaults, "role")} />
+      <Input id="sp-vb-role" name="role" maxLength={specializedTextLimit("role")} label="Rol en el equipo" placeholder="Titular, suplente, capitán..." defaultValue={dv(defaults, "role")} />
 
       <SectionTitle>Físico</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
@@ -377,7 +385,7 @@ function FlagFootballForm({ defaults }: { defaults: Defaults }) {
       <Select id="sp-ff-level" name="level" label="Nivel de experiencia" options={LEVEL_OPTIONS} defaultValue={dv(defaults, "level")} />
       <TextArea name="teamsLeagues" label="Ligas y equipos" placeholder="Liga, equipo, temporada (uno por línea)..." defaultValue={dv(defaults, "teamsLeagues")} />
       <TextArea name="achievements" label="Logros y nivel" placeholder="Campeonatos, MVP, selección..." defaultValue={dv(defaults, "achievements")} />
-      <Input id="sp-ff-tackle" name="tackleExp" label="Exp. en tackle u otros deportes" placeholder="Americano, rugby, etc." defaultValue={dv(defaults, "tackleExp")} />
+      <Input id="sp-ff-tackle" name="tackleExp" maxLength={specializedTextLimit("tackleExp")} label="Exp. en tackle u otros deportes" placeholder="Americano, rugby, etc." defaultValue={dv(defaults, "tackleExp")} />
 
       <SectionTitle>Habilidades — QB</SectionTitle>
       <div className="space-y-2">
