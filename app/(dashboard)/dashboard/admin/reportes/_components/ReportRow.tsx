@@ -87,6 +87,7 @@ export function ReportRow({
 	eventId,
 	eventTitle,
 	commentContent,
+	commentRemoved,
 	commentAuthorName,
 	reporterName,
 	reason,
@@ -97,10 +98,11 @@ export function ReportRow({
 	resolvedAt,
 }: {
 	reportId: string;
-	commentId: string;
-	eventId: string;
+	commentId: string | null;
+	eventId: string | null;
 	eventTitle: string;
 	commentContent: string;
+	commentRemoved: boolean;
 	commentAuthorName: string;
 	reporterName: string;
 	reason: string;
@@ -116,6 +118,7 @@ export function ReportRow({
 	const [error, setError] = useState<string | null>(null);
 
 	async function handleDelete(deleteReason: string) {
+		if (!commentId) return;
 		setLoading(true);
 		setError(null);
 		try {
@@ -161,9 +164,13 @@ export function ReportRow({
 		<div className="rounded-lg border border-brand-border bg-brand-background p-3">
 			<div className="flex flex-wrap items-start justify-between gap-2">
 				<div className="min-w-0">
-					<Link href={`/dashboard/events/${eventId}`} className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction">
-						{eventTitle}
-					</Link>
+					{eventId ? (
+						<Link href={`/dashboard/events/${eventId}`} className="rounded text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-interaction">
+							{eventTitle}
+						</Link>
+					) : (
+						<span className="text-sm font-semibold text-brand-primary">{eventTitle}</span>
+					)}
 					<p className="mt-1 text-sm text-brand-primary">
 						<span className="font-semibold">{commentAuthorName}:</span> {commentContent}
 					</p>
@@ -182,20 +189,25 @@ export function ReportRow({
 						</p>
 					)}
 				</div>
-				<Badge variant={STATUS_BADGE[status].variant}>{STATUS_BADGE[status].label}</Badge>
+				<div className="flex flex-wrap items-center gap-1.5">
+					{commentRemoved && <Badge variant="danger">Comentario eliminado</Badge>}
+					<Badge variant={STATUS_BADGE[status].variant}>{STATUS_BADGE[status].label}</Badge>
+				</div>
 			</div>
 
 			{error && <p className="mt-2 text-xs text-red-600">{error}</p>}
 
 			{status === "pending" && (
 				<div className="mt-3 flex flex-wrap gap-2">
-					<button
-						type="button"
-						onClick={() => setDialog("delete")}
-						className={buttonClassNames("danger", "", "sm")}
-					>
-						Eliminar comentario
-					</button>
+					{!commentRemoved && (
+						<button
+							type="button"
+							onClick={() => setDialog("delete")}
+							className={buttonClassNames("danger", "", "sm")}
+						>
+							Eliminar comentario
+						</button>
+					)}
 					<button
 						type="button"
 						onClick={() => setDialog("resolve")}

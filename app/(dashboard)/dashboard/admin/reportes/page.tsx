@@ -19,7 +19,7 @@ const TABS = [
 
 export default async function AdminReportsPage({ searchParams }: Props) {
   const { status, page: pageRaw } = await searchParams;
-  const activeStatus = status && ["pending", "resolved", "dismissed"].includes(status) ? status : "pending";
+  const activeStatus = status && ["pending", "resolved", "dismissed", "all"].includes(status) ? status : "pending";
   const page = parsePage(pageRaw);
   const where = activeStatus === "all" ? {} : { status: activeStatus as never };
 
@@ -96,20 +96,28 @@ export default async function AdminReportsPage({ searchParams }: Props) {
             <EmptyState size="compact" icon="error" title="No hay reportes en esta categoría." />
           ) : (
             reports.map((r) => {
+              const snapshot = (r.commentSnapshot ?? null) as {
+                content?: string;
+                authorName?: string;
+                eventId?: string;
+                eventTitle?: string;
+              } | null;
               const reporterName =
                 r.reporter.studentProfile?.fullName ?? r.reporter.coachProfile?.displayName ?? "Usuario";
-              const commentAuthorName =
-                r.comment.author.studentProfile?.fullName ?? r.comment.author.coachProfile?.displayName ?? "Usuario";
+              const commentAuthorName = r.comment
+                ? (r.comment.author.studentProfile?.fullName ?? r.comment.author.coachProfile?.displayName ?? "Usuario")
+                : (snapshot?.authorName ?? "Usuario");
               const resolverName =
                 r.resolvedBy?.studentProfile?.fullName ?? r.resolvedBy?.coachProfile?.displayName ?? null;
               return (
                 <ReportRow
                   key={r.id}
                   reportId={r.id}
-                  commentId={r.comment.id}
-                  eventId={r.comment.eventId}
-                  eventTitle={r.comment.event.title}
-                  commentContent={r.comment.content}
+                  commentId={r.comment?.id ?? null}
+                  eventId={r.comment?.eventId ?? snapshot?.eventId ?? null}
+                  eventTitle={r.comment?.event.title ?? snapshot?.eventTitle ?? "Evento no disponible"}
+                  commentContent={r.comment?.content ?? snapshot?.content ?? "Comentario eliminado."}
+                  commentRemoved={!r.comment}
                   commentAuthorName={commentAuthorName}
                   reporterName={reporterName}
                   reason={r.reason}

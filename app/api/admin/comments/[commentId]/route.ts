@@ -22,6 +22,12 @@ export async function DELETE(request: Request, { params }: Props) {
 			eventId: true,
 			authorId: true,
 			event: { select: { title: true } },
+			author: {
+				select: {
+					studentProfile: { select: { fullName: true } },
+					coachProfile: { select: { displayName: true } },
+				},
+			},
 		},
 	});
 	if (!comment) {
@@ -43,7 +49,33 @@ export async function DELETE(request: Request, { params }: Props) {
 		);
 	}
 
-	await prisma.comment.delete({ where: { id: commentId } });
+	// Keep the reports in the moderation history: store a copy of the comment on each
+	// report, close the pending ones as resolved, then remove the comment (the reports'
+	// commentId becomes null instead of the reports being deleted with it).
+	await prisma.$transaction([
+		prisma.commentReport.updateMany({
+			where: { commentId },
+			data: {
+				commentSnapshot: {
+					content: comment.content,
+					authorName:
+						comment.author.studentProfile?.fullName ?? comment.author.coachProfile?.displayName ?? "Usuario",
+					eventId: comment.eventId,
+					eventTitle: comment.event.title,
+				},
+			},
+		}),
+		prisma.commentReport.updateMany({
+			where: { commentId, status: "pending" },
+			data: {
+				status: "resolved",
+				resolutionReason: `Comentario eliminado. ${parsed.data.reason}`,
+				resolvedAt: new Date(),
+				resolvedById: session.userId,
+			},
+		}),
+		prisma.comment.delete({ where: { id: commentId } }),
+	]);
 
 	await logAdminAction({
 		adminId: session.userId,

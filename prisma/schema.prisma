@@ -366,8 +366,12 @@ model Comment {
 
 model CommentReport {
   id        String  @id @default(uuid()) @db.Uuid
-  commentId String  @db.Uuid
-  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  // Null once the reported comment is removed; the report is kept for the moderation history.
+  commentId String?  @db.Uuid
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  // Copy of the comment taken right before it is removed: { content, authorName, eventId, eventTitle }.
+  commentSnapshot Json?
 
   reporterId String @db.Uuid
   reporter   User   @relation("CommentReporter", fields: [reporterId], references: [id], onDelete: Cascade)
