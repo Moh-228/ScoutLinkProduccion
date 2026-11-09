@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AffinityBadge } from "@/components/AffinityBadge";
 import { Badge } from "@/components/Badge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
@@ -11,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { SPORT_CHARACTERISTICS } from "@/lib/sport-characteristics";
 import { SPORT_BADGE_CLASS } from "@/lib/sport-colors";
+import { getStudentAffinityBreakdown } from "@/lib/student-affinity";
 import { ApplyButton } from "./_components/ApplyButton";
 import { EventStatusToggle } from "./_components/EventStatusToggle";
 import { CommentsSection } from "./_components/CommentsSection";
@@ -163,6 +165,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     });
     hasSpecializedCard = card !== null;
   }
+
+  // Student's live affinity breakdown (open recruitment events with a matching card)
+  const affinityBreakdown =
+    isStudent && session
+      ? await getStudentAffinityBreakdown(session.userId, event)
+      : null;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
@@ -488,6 +496,43 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 </p>
                 <p className="text-sm text-brand-primary/70 whitespace-pre-line">{String(req.evaluationFormat)}</p>
               </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Afinidad del alumno (reclutamiento abierto) ── */}
+      {affinityBreakdown && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tu afinidad con este evento</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <AffinityBadge pct={affinityBreakdown.percent} label="Afinidad" />
+              {!affinityBreakdown.genderCompatible && (
+                <p className="text-sm text-brand-primary/70">
+                  La categoría de este evento no coincide con tu perfil.
+                </p>
+              )}
+            </div>
+            {affinityBreakdown.criteria.length > 0 && (
+              <ul className="space-y-1.5 text-sm">
+                {affinityBreakdown.criteria.map((c) => (
+                  <li key={c.key} className="flex items-start gap-2 text-brand-primary">
+                    <span
+                      aria-hidden="true"
+                      className={`mt-0.5 font-bold ${c.met ? "text-emerald-800" : "text-brand-primary/50"}`}
+                    >
+                      {c.met ? "✓" : "✗"}
+                    </span>
+                    <span>
+                      {c.label}
+                      <span className="sr-only">{c.met ? " (cumple)" : " (no cumple)"}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
           </CardContent>
         </Card>

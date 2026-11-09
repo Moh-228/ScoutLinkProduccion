@@ -9,6 +9,7 @@ import { Pagination } from "@/components/Pagination";
 import { verifySession } from "@/lib/auth";
 import { getPagination, getTotalPages, parsePage } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
+import { getStudentAffinityByEvent } from "@/lib/student-affinity";
 import { EVENT_TEXT_FIELDS, findEventIds } from "@/lib/search";
 
 type Props = { searchParams: Promise<{ sport?: string; type?: string; q?: string; page?: string }> };
@@ -38,6 +39,12 @@ export default async function EventsPage({ searchParams }: Props) {
       ...getPagination(page),
     }),
   ]);
+
+  // Students see their live affinity on the recruitment events they can apply to
+  const affinityByEvent =
+    session?.role === "student"
+      ? await getStudentAffinityByEvent(session.userId, events)
+      : new Map<string, number>();
 
   // Build a set of favorited event IDs for the current user
   const favoritedIds = new Set<string>();
@@ -71,6 +78,7 @@ export default async function EventsPage({ searchParams }: Props) {
             <EventCard
               key={event.id}
               event={event}
+              affinityPercent={affinityByEvent.get(event.id)}
               action={
                 session && (
                   <FavoriteButton

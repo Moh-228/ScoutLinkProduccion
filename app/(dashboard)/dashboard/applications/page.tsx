@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AffinityBadge } from "@/components/AffinityBadge";
 import { ApplicationStatusBadge } from "@/components/ApplicationStatusBadge";
 import { buttonClassNames } from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
@@ -60,7 +61,10 @@ export default async function ApplicationsPage({ searchParams }: Props) {
                     <Icon name="calendar" size={16} className="shrink-0 text-brand-primary/40" />
                     Inicio: {fmt(app.event.startAt)}
                   </p>
-                  <ApplicationStatusBadge status={app.status} />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {app.event.type === "recruitment" && <AffinityBadge pct={app.affinityPercent} />}
+                    <ApplicationStatusBadge status={app.status} />
+                  </div>
                 </CardContent>
               </Card>
             ))}

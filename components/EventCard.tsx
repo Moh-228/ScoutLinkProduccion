@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 
 import { Badge } from "@/components/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card";
+import { AffinityBadge } from "@/components/AffinityBadge";
 import { Icon } from "@/components/Icon";
 import { SportArtwork, type SportArtworkKey } from "@/components/SportArtwork";
 import { SPORT_BADGE_CLASS, SPORT_CTA_CLASS, SPORT_DOT_CLASS } from "@/lib/sport-colors";
@@ -89,13 +90,15 @@ type EventCardProps = {
   event: EventCardData;
   /** Context-specific action next to "Ver detalles" (e.g. the page's FavoriteButton). */
   action?: ReactNode;
+  /** Student's affinity (0-100) for this event. Omit when it should not be shown. */
+  affinityPercent?: number;
 };
 
 /**
  * Event summary card shared by the dashboard, the events list and favorites.
  * Purely presentational: each page keeps its own data and decides the `action`.
  */
-export function EventCard({ event, action }: EventCardProps) {
+export function EventCard({ event, action, affinityPercent }: EventCardProps) {
   const req = (event.requirements ?? {}) as Record<string, unknown>;
   const scheduleDays = Array.isArray(req.scheduleDays) ? (req.scheduleDays as string[]) : [];
   const isTraining = event.type === "training";
@@ -117,6 +120,7 @@ export function EventCard({ event, action }: EventCardProps) {
               {event.status === "open" ? "Abierto" : "Cerrado"}
             </Badge>
           )}
+          {affinityPercent !== undefined && <AffinityBadge pct={affinityPercent} />}
         </div>
         <CardTitle>{event.title}</CardTitle>
         <CardDescription>{event.coach.coachProfile?.displayName ?? "—"}</CardDescription>
