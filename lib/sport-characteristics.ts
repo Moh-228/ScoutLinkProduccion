@@ -23,7 +23,19 @@ export type CharNumber = {
 };
 export type CharField = CharSelect | CharSkills | CharNumber;
 
-export const SPORT_CHARACTERISTICS: Record<string, CharField[]> = {
+// Physical requirements, matched against the student's general card (height/weight)
+// and specialized card (vertical jump).
+const PHYSICAL_FIELDS: CharNumber[] = [
+  { type: "number", key: "minHeightCm", label: "Estatura mínima (cm)", min: 100, max: 250, placeholder: "170" },
+  { type: "number", key: "maxHeightCm", label: "Estatura máxima (cm)", min: 100, max: 250, placeholder: "200" },
+  { type: "number", key: "minWeightKg", label: "Peso mínimo (kg)", min: 30, max: 200, placeholder: "60" },
+  { type: "number", key: "maxWeightKg", label: "Peso máximo (kg)", min: 30, max: 200, placeholder: "100" },
+];
+const VERTICAL_JUMP_FIELD: CharNumber = {
+  type: "number", key: "minVerticalJump", label: "Salto vertical mínimo (cm)", min: 10, max: 150, placeholder: "50",
+};
+
+const BASE_CHARACTERISTICS: Record<string, CharField[]> = {
   soccer: [
     {
       type: "select",
@@ -233,3 +245,14 @@ export const SPORT_CHARACTERISTICS: Record<string, CharField[]> = {
     },
   ],
 };
+
+export const SPORT_CHARACTERISTICS: Record<string, CharField[]> = Object.fromEntries(
+  Object.entries(BASE_CHARACTERISTICS).map(([sport, fields]) => {
+    const extra: CharField[] = [...PHYSICAL_FIELDS];
+    if (sport === "basketball" || sport === "volleyball") extra.push(VERTICAL_JUMP_FIELD);
+    // Keep the skills checklist last.
+    const skills = fields.filter((f) => f.type === "skills");
+    const rest = fields.filter((f) => f.type !== "skills");
+    return [sport, [...rest, ...extra, ...skills]];
+  }),
+);

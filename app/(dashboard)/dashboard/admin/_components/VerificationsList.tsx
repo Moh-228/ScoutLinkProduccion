@@ -30,7 +30,9 @@ export function VerificationsList({ verifications }: { verifications: Verificati
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleAction(id: string, action: "verify" | "reject") {
+  const [editing, setEditing] = useState<string | null>(null);
+
+  async function handleAction(id: string, action: "verify" | "reject" | "pending") {
     setLoading(id + action);
     setError(null);
     const res = await fetch(`/api/admin/verifications/${id}`, {
@@ -44,6 +46,7 @@ export function VerificationsList({ verifications }: { verifications: Verificati
       setError(data.message ?? "Error al procesar.");
       return;
     }
+    setEditing(null);
     startTransition(() => router.refresh());
   }
 
@@ -93,6 +96,31 @@ export function VerificationsList({ verifications }: { verifications: Verificati
                   size="sm"
                 >
                   {loading === v.id + "reject" ? "..." : "Rechazar"}
+                </Button>
+              </>
+            )}
+            {v.status !== "pending" && editing !== v.id && (
+              <Button variant="secondary" size="sm" disabled={!!loading || pending} onClick={() => setEditing(v.id)}>
+                Modificar
+              </Button>
+            )}
+            {v.status !== "pending" && editing === v.id && (
+              <>
+                {v.status !== "verified" && (
+                  <Button size="sm" disabled={!!loading || pending} onClick={() => handleAction(v.id, "verify")}>
+                    {loading === v.id + "verify" ? "..." : "Verificar"}
+                  </Button>
+                )}
+                {v.status !== "rejected" && (
+                  <Button variant="secondary" size="sm" disabled={!!loading || pending} onClick={() => handleAction(v.id, "reject")}>
+                    {loading === v.id + "reject" ? "..." : "Rechazar"}
+                  </Button>
+                )}
+                <Button variant="secondary" size="sm" disabled={!!loading || pending} onClick={() => handleAction(v.id, "pending")}>
+                  {loading === v.id + "pending" ? "..." : "Marcar pendiente"}
+                </Button>
+                <Button variant="secondary" size="sm" disabled={!!loading || pending} onClick={() => setEditing(null)}>
+                  Cancelar
                 </Button>
               </>
             )}

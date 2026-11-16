@@ -74,7 +74,7 @@ export async function POST(_request: Request, { params }: RouteProps) {
 				where: { id: session.userId },
 				select: {
 					studentProfile: { select: { gender: true } },
-					generalCard: { select: { experienceLevel: true } },
+					generalCard: { select: { experienceLevel: true, heightCm: true, weightKg: true } },
 				},
 			}),
 			prisma.studentSpecializedCard.findFirst({

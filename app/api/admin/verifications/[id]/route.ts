@@ -11,9 +11,9 @@ export async function PATCH(request: Request, { params }: Props) {
 	}
 
 	const { id } = await params;
-	const body = await request.json() as { action: "verify" | "reject"; rejectionReason?: string };
+	const body = await request.json() as { action: "verify" | "reject" | "pending"; rejectionReason?: string };
 
-	if (body.action !== "verify" && body.action !== "reject") {
+	if (body.action !== "verify" && body.action !== "reject" && body.action !== "pending") {
 		return Response.json({ ok: false, message: "Acción inválida." }, { status: 400 });
 	}
 
@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: Props) {
 	const updated = await prisma.coachVerification.update({
 		where: { id },
 		data: {
-			status: body.action === "verify" ? "verified" : "rejected",
+			status: body.action === "verify" ? "verified" : body.action === "reject" ? "rejected" : "pending",
 			rejectionReason: body.action === "reject" ? (body.rejectionReason ?? null) : null,
 			reviewedBy: session.userId,
 			reviewedAt: new Date(),

@@ -33,7 +33,7 @@ export async function getStudentAffinityByEvent(
       where: { id: studentId },
       select: {
         studentProfile: { select: { gender: true } },
-        generalCard: { select: { experienceLevel: true } },
+        generalCard: { select: { experienceLevel: true, heightCm: true, weightKg: true } },
       },
     }),
     prisma.studentSpecializedCard.findMany({
@@ -81,7 +81,7 @@ export async function getStudentAffinityBreakdown(
       where: { id: studentId },
       select: {
         studentProfile: { select: { gender: true } },
-        generalCard: { select: { experienceLevel: true } },
+        generalCard: { select: { experienceLevel: true, heightCm: true, weightKg: true } },
       },
     }),
     prisma.studentSpecializedCard.findFirst({

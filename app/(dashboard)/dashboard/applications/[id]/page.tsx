@@ -109,7 +109,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
 			sport: application.event.sport,
 			requirements: (application.event.requirements ?? {}) as AffinityEventRequirements,
 			studentProfile: profile ? { gender: profile.gender } : null,
-			generalCard: card ? { experienceLevel: card.experienceLevel } : null,
+			generalCard: card ? { experienceLevel: card.experienceLevel, heightCm: card.heightCm, weightKg: card.weightKg } : null,
 			specializedData: (specializedCard?.data ?? null) as Record<string, unknown> | null,
 		});
 		affinityCriteria = breakdown.criteria;

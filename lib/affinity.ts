@@ -8,6 +8,8 @@
  *   Skills           → 35 pts
  *   Years experience → 15 pts
  *   Level            → 10 pts
+ *   Physical (height, weight, vertical jump) — only when the coach sets any of
+ *   them: worth 15 pts and the four categories above are scaled to 85 pts.
  *
  * Hard filter: gender vs event category. Incompatible → 0.
  */
@@ -22,6 +24,8 @@ export type AffinityStudentProfile = {
 
 export type AffinityGeneralCard = {
   experienceLevel?: string | null;
+  heightCm?: number | null;
+  weightKg?: number | null;
 };
 
 // All fields from the specialized card's JSON data column.
@@ -40,6 +44,11 @@ export type AffinityEventRequirements = {
     throwingHand?: string;
     minYearsExp?: string | number;
     skills?: string[];          // array of required skill keys
+    minHeightCm?: string | number;
+    maxHeightCm?: string | number;
+    minWeightKg?: string | number;
+    maxWeightKg?: string | number;
+    minVerticalJump?: string | number;
   };
 };
 
@@ -49,6 +58,37 @@ const W_POSITION = 40;
 const W_SKILLS   = 35;
 const W_YEARS    = 15;
 const W_LEVEL    = 10;
+const W_PHYSICAL = 15;
+
+type PhysicalCheck = { key: string; label: string; met: boolean | null }; // null = student data missing
+
+function hasValue(v: unknown): boolean {
+  return v !== undefined && v !== null && v !== "" && !Number.isNaN(Number(v));
+}
+
+function physicalChecks(
+  sport: string,
+  sc: AffinityEventRequirements["sportsCharacteristics"],
+  generalCard: AffinityGeneralCard | null,
+  data: AffinitySpecializedData,
+): PhysicalCheck[] {
+  if (!sc) return [];
+  const checks: PhysicalCheck[] = [];
+  const num = (v: unknown): number | null => (hasValue(v) ? Number(v) : null);
+  const height = num(generalCard?.heightCm);
+  const weight = num(generalCard?.weightKg);
+  const jump = num(sport === "volleyball" ? data.jump : data.verticalJump);
+
+  const add = (key: string, label: string, value: number | null, ok: (v: number) => boolean) =>
+    checks.push({ key, label, met: value === null ? null : ok(value) });
+
+  if (hasValue(sc.minHeightCm)) add("minHeight", `Estatura mínima: ${Number(sc.minHeightCm)} cm`, height, (v) => v >= Number(sc.minHeightCm));
+  if (hasValue(sc.maxHeightCm)) add("maxHeight", `Estatura máxima: ${Number(sc.maxHeightCm)} cm`, height, (v) => v <= Number(sc.maxHeightCm));
+  if (hasValue(sc.minWeightKg)) add("minWeight", `Peso mínimo: ${Number(sc.minWeightKg)} kg`, weight, (v) => v >= Number(sc.minWeightKg));
+  if (hasValue(sc.maxWeightKg)) add("maxWeight", `Peso máximo: ${Number(sc.maxWeightKg)} kg`, weight, (v) => v <= Number(sc.maxWeightKg));
+  if (hasValue(sc.minVerticalJump)) add("jump", `Salto vertical mínimo: ${Number(sc.minVerticalJump)} cm`, jump, (v) => v >= Number(sc.minVerticalJump));
+  return checks;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -179,13 +219,20 @@ export function computeAffinity({
   const data: AffinitySpecializedData = specializedData ?? {};
   const sc = requirements.sportsCharacteristics;
 
-  const pts =
+  const base =
     scorePosition(sport, sc, data) +
     scoreSkills(sc, data)          +
     scoreYears(sc, data)           +
     scoreLevel(requirements.level, data.level, generalCard?.experienceLevel);
 
-  return Math.min(100, Math.max(0, pts));
+  const physical = physicalChecks(sport, sc, generalCard, data);
+  let pts = base;
+  if (physical.length > 0) {
+    const score = physical.reduce((acc, c) => acc + (c.met === true ? 1 : c.met === null ? 0.5 : 0), 0);
+    pts = base * (1 - W_PHYSICAL / 100) + (score / physical.length) * W_PHYSICAL;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(pts)));
 }
 
 // ─── Detailed breakdown (for UI) ───────────────────────────────────────────────
@@ -323,6 +370,11 @@ export function computeAffinityBreakdown({
       label: `Nivel requerido: ${LEVEL_LABELS[requirements.level] ?? requirements.level}`,
       met: studentLvl === requirements.level,
     });
+  }
+
+  // Physical requirements (height / weight / vertical jump)
+  for (const c of physicalChecks(sport, sc, generalCard, data)) {
+    criteria.push({ key: c.key, label: c.label, met: c.met === true });
   }
 
   return { percent, genderCompatible: true, criteria };
